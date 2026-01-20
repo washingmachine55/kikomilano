@@ -1,0 +1,7 @@
+node_modules
+venv
+.env
+./backend/security/*
+backend/security/localhost+2-key.pem
+backend/security/localhost+2.pem
+src/config/swagger_output.json
