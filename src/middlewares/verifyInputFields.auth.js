@@ -1,9 +1,14 @@
 import z from "zod";
-import {authRegisterSchema} from "../utils/schema.validations.js";
+import { authLoginSchema, authRegisterSchema } from "../utils/schema.validations.js";
 
 export async function verifyInputFields(req, res, next) {
 
-	const reqData = await authRegisterSchema.safeParseAsync(req.body.data);
+	let reqData;
+	if (req.path == '/register') {
+		reqData = await authRegisterSchema.safeParseAsync(req.body.data);
+	} else {
+		reqData = await authLoginSchema.safeParseAsync(req.body.data);
+	}
 
 	if (!reqData.success) {
 		return res.status(200).json([

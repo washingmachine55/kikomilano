@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
-import env from 'node:process'
+import { env, loadEnvFile } from 'node:process'
+loadEnvFile
 const JWT_SECRET_KEY = env.JWT_SECRET_KEY
 
 const verifyToken = (req, res, next) => {
-	const token = req.header('Authorization');
+	const token = req.header('Authorization').split(" ")[1]
 
 	if (!token) return res.status(401).send('Access Denied');
 

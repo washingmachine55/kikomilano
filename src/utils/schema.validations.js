@@ -9,3 +9,8 @@ export const authRegisterSchema = z.object({
 	message: "Passwords do not match",
 	path: ["confirmed_password"],
 });
+
+export const authLoginSchema = z.object({
+	email: z.email(),
+	password: z.string().min(8).max(64),
+});

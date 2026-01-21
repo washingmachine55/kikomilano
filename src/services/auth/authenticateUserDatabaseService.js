@@ -46,15 +46,12 @@ export async function getUserId(userEmail, userPassword) {
 		try {
 			if (result == 1) {
 				const getHashedPasswordFromDB = await conn.query("SELECT password_hash FROM tbl_users WHERE email = $1;", [userEmail]);
-
 				const hashedPasswordFromDB = Object.values(getHashedPasswordFromDB.rows[0])[0];
-
 				const bcryptResult = await bcrypt.compare(userPassword, hashedPasswordFromDB);
 
 				if (bcryptResult == true) {
 					const credentialsCheck = await conn.query("SELECT id FROM tbl_users WHERE email = $1;", [userEmail]);
-
-					let result = Object.values(credentialsCheck.rows[0].id).toString()
+					let result = credentialsCheck.rows[0].id
 					return result;
 				} else {
 					return false;
