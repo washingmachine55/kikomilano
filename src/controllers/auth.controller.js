@@ -7,12 +7,35 @@ import jwt from 'jsonwebtoken';
 // import verifyUserAccessFromDatabase from '../services/verifyUserAccessDatabaseService.js';
 // import { formatDate, formatDistance } from 'date-fns';
 // import { TZDate } from '@date-fns/tz';
-// import transporter from '../config/mailTransporter.js';
 import { env, loadEnvFile } from 'node:process';
 loadEnvFile()
 import { responseWithStatus } from '../utils/RESPONSES.js';
 import { EMAIL_EXISTS_ALREADY, MISSING_INPUT_FIELDS, PASSWORDS_DONT_MATCH } from '../utils/CONSTANTS.js';
 
+// import { OAuth2Client } from 'google-auth-library';
+// export async function googleAuth(req, res) {
+// 	try {
+// 		const client = new OAuth2Client();
+// 		const ticket = await client.verifyIdToken({
+// 			idToken: token,
+// 			audience: WEB_CLIENT_ID,  // Specify the WEB_CLIENT_ID of the app that accesses the backend
+// 			// Or, if multiple clients access the backend:
+// 			//[WEB_CLIENT_ID_1, WEB_CLIENT_ID_2, WEB_CLIENT_ID_3]
+// 		});
+// 		const payload = ticket.getPayload();
+// 		// This ID is unique to each Google Account, making it suitable for use as a primary key
+// 		// during account lookup. Email is not a good choice because it can be changed by the user.
+// 		const userid = payload['sub'];
+// 		// If the request specified a Google Workspace domain:
+// 		// const domain = payload['hd'];
+
+// 		console.log(userid);
+// 		console.log(payload)
+
+// 	} catch (error) {
+// 		console.log(error);
+// 	}
+// }
 
 export async function registerUser(req, res) {
 	// #swagger.tags = ['Authentication']
@@ -63,7 +86,7 @@ export async function registerUser(req, res) {
 	let userConfirmedPassword = request[3];
 
 	if (userName == null || userEmail == null || userPassword == null || userConfirmedPassword == null) {
-		return responseWithStatus(res, 1, 400, MISSING_INPUT_FIELDS)
+		return responseWithStatus(res, 0, 400, MISSING_INPUT_FIELDS)
 	} else {
 
 		// --------------------------------------------------------------------------- //
@@ -207,14 +230,16 @@ export async function verifyUserToken(req, res) {
 }
 
 export async function refreshToken(req, res) {
+	// #swagger.tags = ['Authentication']
+	// #swagger.summary = 'Endpoint to allow the user to renew access and refresh tokens.'
+	// #swagger.description = 'Use this in automation as once you detect a status code in the 400 range, you'll need to automatically hit this API'
+
 	if (req.header('Authorization')) {
 		const refreshToken = req.header('Authorization').split(" ")[1]
-
-		// Verifying refresh token
 		jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET_KEY,
 			(err, decoded) => {
 				if (err) {
-					return responseWithStatus(res, 0, 406, "Unauthorized. Invalid refresh token.", { "error": err })
+					return responseWithStatus(res, 0, 401, "Unauthorized. Invalid refresh token.", { "error": err })
 				}
 				else {
 					const accessToken = jwt.sign({
@@ -227,14 +252,14 @@ export async function refreshToken(req, res) {
 					}, env.REFRESH_TOKEN_SECRET_KEY, {
 						expiresIn: `${env.REFRESH_TOKEN_EXPIRATION_TIME}MINS`
 					});
-					return responseWithStatus(res, 1, 200, "Tokens refreshed successfully", {
+					return responseWithStatus(res, 1, 201, "Tokens refreshed successfully", {
 						access_token: accessToken,
 						refresh_token: refreshToken
 					})
 				}
 			})
 	} else {
-		return res.status(406).json({ message: 'Unauthorized' });
+		return responseWithStatus(res, 0, 401, "Unauthorized. Invalid token.")
 	}
 }
 

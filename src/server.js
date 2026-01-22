@@ -30,9 +30,12 @@ app.use("/users", usersRoutes)
 import { responseWithStatus } from './utils/RESPONSES.js';
 app.use((err, req, res, next) => {
 	if (err instanceof multer.MulterError) {
-		return responseWithStatus(res, 0, 415, err.message)
+		if (err.code === 'LIMIT_FILE_SIZE') {
+			return responseWithStatus(res, 0, 413, `File is too large. Maximum size is ${Number(env.UPLOAD_FILE_MAX_SIZE) / (1000 * 1000)} MB.`, err.message)
+		}
+		return responseWithStatus(res, 0, 400, err.message)
 	} else if (err) {
-		return responseWithStatus(res, 0, 400, err.message, { "error_details": "Form field does not satisfy requirement. Please enter the correct field name for uploading the file." })
+		return responseWithStatus(res, 0, 415, "Form field does not satisfy requirement. Please enter the correct field name for uploading the file.", { "error_details": err.message })
 	}
 	next(err);
 });

@@ -1,6 +1,8 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { env, loadEnvFile } from 'process';
+loadEnvFile()
 
 const imagesPath = path.dirname("./public/images/uploads")
 
@@ -25,7 +27,7 @@ const storage = multer.diskStorage({
 // Initialize upload middleware with configuration
 export const uploadImages = multer({
 	storage: storage,
-	limits: { fileSize: 2000000 }, // Optional: limit file size to 1MB
+	limits: { fileSize: Number(env.UPLOAD_FILE_MAX_SIZE) }, // Optional: limit file size to 1MB
 	fileFilter: function (req, file, cb) {
 		// Optional: Filter file types
 		const filetypes = /jpeg|jpg|png|gif/;
