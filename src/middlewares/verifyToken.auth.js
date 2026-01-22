@@ -11,7 +11,7 @@ const verifyToken = (req, res, next) => {
 		const token = req.header('Authorization').split(" ")[1]
 
 		try {
-			const verified = jwt.verify(token, env.JWT_SECRET_KEY);
+			const verified = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
 			req.user = verified;
 			next();
 		} catch (err) {

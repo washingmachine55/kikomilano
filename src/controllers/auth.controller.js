@@ -8,10 +8,11 @@ import jwt from 'jsonwebtoken';
 // import { formatDate, formatDistance } from 'date-fns';
 // import { TZDate } from '@date-fns/tz';
 // import transporter from '../config/mailTransporter.js';
-import { env } from 'node:process';
+import { env, loadEnvFile } from 'node:process';
+loadEnvFile()
 import { responseWithStatus } from '../utils/RESPONSES.js';
 import { EMAIL_EXISTS_ALREADY, MISSING_INPUT_FIELDS, PASSWORDS_DONT_MATCH } from '../utils/CONSTANTS.js';
-const JWT_SECRET_KEY = env.JWT_SECRET_KEY;
+
 
 export async function registerUser(req, res) {
 	// #swagger.tags = ['Authentication']
@@ -88,11 +89,17 @@ export async function registerUser(req, res) {
 		const entryArray = [userName, userEmail, userPassword];
 		try {
 			const userRegistrationResult = await registerUserToDatabase(entryArray);
-			const token = jwt.sign({ id: userRegistrationResult.id }, JWT_SECRET_KEY, { expiresIn: '1h' });
+			const accessToken = jwt.sign({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
+				expiresIn: `${env.ACCESS_TOKEN_EXPIRATION_TIME}MINS`
+			});
+			const refreshToken = jwt.sign({ id: userRegistrationResult.id }, env.REFRESH_TOKEN_SECRET_KEY, {
+				expiresIn: `${env.REFRESH_TOKEN_EXPIRATION_TIME}MINS`
+			});
 
 			return await responseWithStatus(res, 1, 201, "Sign Up successful!", {
 				"user_details": userRegistrationResult,
-				"token": token,
+				"access_token": accessToken,
+				"refresh_token": refreshToken,
 			})
 
 		} catch (error) {
@@ -142,10 +149,17 @@ export async function loginUser(req, res) {
 			let credentialMatchingResult = await isCredentialsMatching(userEmail, userPassword);
 			if (credentialMatchingResult == true) {
 				let userDetails = await getUserIdAndAllDetails(userEmail, userPassword);
-				const token = jwt.sign({ id: userDetails.id }, JWT_SECRET_KEY, { expiresIn: '1h' });
+				const accessToken = jwt.sign({ id: userDetails.id }, env.ACCESS_TOKEN_SECRET_KEY, {
+					expiresIn: `${env.ACCESS_TOKEN_EXPIRATION_TIME}MINS`
+				});
+				const refreshToken = jwt.sign({ id: userDetails.id }, env.REFRESH_TOKEN_SECRET_KEY, {
+					expiresIn: `${env.REFRESH_TOKEN_EXPIRATION_TIME}MINS`
+				});
+
 				return await responseWithStatus(res, 1, 202, "Sign in successful!", {
 					"user_details": userDetails,
-					"token": `${token}`
+					"access_token": `${accessToken}`,
+					"refresh_token": `${refreshToken}`
 				})
 			} else {
 				return await responseWithStatus(res, 0, 400, "Credentials Don't match. Please try again.", null)
@@ -159,7 +173,7 @@ export async function loginUser(req, res) {
 // async function logoutUser(req, res) {
 // 	const token = req.header('authorization');
 // 	try {
-// 		const decoded = jwt.verify(token, JWT_SECRET_KEY);
+// 		const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
 // 		const userId = decoded.id;
 // 		res.status(200).json({
 // 			type: 'success',
@@ -183,7 +197,7 @@ export async function verifyUserToken(req, res) {
 		// if (!token) return res.status(401).send('Access Denied');
 
 		try {
-			const verified = jwt.decode(token, JWT_SECRET_KEY);
+			const verified = jwt.decode(token, env.ACCESS_TOKEN_SECRET_KEY);
 			const userId = verified.id;
 			return await responseWithStatus(res, 1, 200, "Token Verified Successfully", { "user_id": `${userId}` })
 		} catch (err) {
@@ -192,12 +206,44 @@ export async function verifyUserToken(req, res) {
 	}
 }
 
+export async function refreshToken(req, res) {
+	if (req.header('Authorization')) {
+		const refreshToken = req.header('Authorization').split(" ")[1]
+
+		// Verifying refresh token
+		jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET_KEY,
+			(err, decoded) => {
+				if (err) {
+					return responseWithStatus(res, 0, 406, "Unauthorized. Invalid refresh token.", { "error": err })
+				}
+				else {
+					const accessToken = jwt.sign({
+						id: decoded.id,
+					}, env.ACCESS_TOKEN_SECRET_KEY, {
+						expiresIn: `${env.ACCESS_TOKEN_EXPIRATION_TIME}MINS`
+					});
+					const refreshToken = jwt.sign({
+						id: decoded.id,
+					}, env.REFRESH_TOKEN_SECRET_KEY, {
+						expiresIn: `${env.REFRESH_TOKEN_EXPIRATION_TIME}MINS`
+					});
+					return responseWithStatus(res, 1, 200, "Tokens refreshed successfully", {
+						access_token: accessToken,
+						refresh_token: refreshToken
+					})
+				}
+			})
+	} else {
+		return res.status(406).json({ message: 'Unauthorized' });
+	}
+}
+
 // async function verifyUserAccess(req, res) {
 // 	const token = req.header('Authorization');
 // 	if (!token) return res.status(401).send('Access Denied');
 
 // 	try {
-// 		const verified = jwt.verify(token, JWT_SECRET_KEY);
+// 		const verified = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
 // 		const userId = verified.id;
 
 // 		const isVerified = await verifyUserAccessFromDatabase(userId)
@@ -263,7 +309,7 @@ export async function verifyUserToken(req, res) {
 // 			const formattedExpirationTimestamp = formatDate(ConvertExpirationTimestampToLocal, 'PPPPpp').concat(" PKT")
 // 			const userID = await getUserIdFromExistingEmail(emailToCheck);
 
-// 			const token = jwt.sign({ id: userID }, JWT_SECRET_KEY, { expiresIn: '1h' });
+// 			const token = jwt.sign({ id: userID }, env.ACCESS_TOKEN_SECRET_KEY, { expiresIn: '1h' });
 
 // 			const encryptedToken = await bcrypt.hash(token, 10);
 // 			console.log((encryptedToken).toString());

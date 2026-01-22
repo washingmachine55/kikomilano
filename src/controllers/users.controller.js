@@ -16,7 +16,7 @@ export async function getSingleUser(req, res) {
 
 		// if (!token) return res.status(401).send('Access Denied');
 
-		const verified = jwt.decode(token, env.JWT_SECRET_KEY);
+		const verified = jwt.decode(token, env.ACCESS_TOKEN_SECRET_KEY);
 		const userId = verified.id;
 
 		const result = await getSingleUserDetails(userId)
