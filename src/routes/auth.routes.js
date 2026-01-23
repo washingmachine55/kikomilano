@@ -9,7 +9,7 @@ const router = express.Router();
 // router.patch('/:id', validateUuidUrlParam, update)
 // router.delete('/:id', validateUuidUrlParam, remove)
 // router.post('/register', verifyInputFields, registerUser)
-router.post('/register', registerUser)
+router.post('/register', verifyInputFields, registerUser)
 router.post('/login', verifyInputFields, loginUser)
 router.post('/refresh', refreshToken)
 // router.post('/google-sign-in', verifyGoogleAuth)

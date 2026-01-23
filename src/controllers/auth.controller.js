@@ -179,13 +179,13 @@ export async function loginUser(req, res) {
 					expiresIn: `${env.REFRESH_TOKEN_EXPIRATION_TIME}MINS`
 				});
 
-				return await responseWithStatus(res, 1, 202, "Sign in successful!", {
+				return await responseWithStatus(res, 1, 200, "Sign in successful!", {
 					"user_details": userDetails,
 					"access_token": `${accessToken}`,
 					"refresh_token": `${refreshToken}`
 				})
 			} else {
-				return await responseWithStatus(res, 0, 400, "Credentials Don't match. Please try again.", null)
+				return await responseWithStatus(res, 0, 401, "Credentials Don't match. Please try again.", null)
 			}
 		}
 	} catch (error) {
@@ -224,7 +224,7 @@ export async function verifyUserToken(req, res) {
 			const userId = verified.id;
 			return await responseWithStatus(res, 1, 200, "Token Verified Successfully", { "user_id": `${userId}` })
 		} catch (err) {
-			return await responseWithStatus(res, 0, 400, "Invalid Token. Please login.", { "error_info": `${err}` })
+			return await responseWithStatus(res, 0, 401, "Invalid Token. Please login.", { "error_info": `${err}` })
 		}
 	}
 }
