@@ -35,3 +35,7 @@ export const authLoginSchema = z.object({
 	email: z.email(),
 	password: z.string().min(8).max(36),
 });
+
+export const authForgotPasswordSchema = z.object({
+	email: z.email(),
+});

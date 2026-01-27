@@ -14,7 +14,10 @@ import { env, loadEnvFile } from 'node:process';
 loadEnvFile();
 import { responseWithStatus } from '../utils/RESPONSES.js';
 import { EMAIL_EXISTS_ALREADY, MISSING_INPUT_FIELDS, PASSWORDS_DONT_MATCH } from '../utils/CONSTANTS.js';
-// import console.debug from '../utils/customLogger.js';
+import envLogger from '../utils/customLogger.js';
+import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service.js';
+import { verifyOTPFromDB } from '../services/auth/verifyOTP.auth.service.js';
+import saveNewUserPasswordToDB from '../services/auth/saveNewPassword.auth.service.js';
 
 // import { OAuth2Client } from 'google-auth-library';
 // export async function googleAuth(req, res) {
@@ -97,7 +100,7 @@ export async function registerUser(req, res) {
 		let existingEmailCheck = await checkExistingEmail(userEmail);
 
 		if (existingEmailCheck == true) {
-			return responseWithStatus(res, 0, 400, 'Error', EMAIL_EXISTS_ALREADY);
+			return responseWithStatus(res, 0, 401, 'Error', EMAIL_EXISTS_ALREADY);
 		}
 		// --------------------------------------------------------------------------- //
 		// Password Confirmation Check
@@ -166,7 +169,7 @@ export async function loginUser(req, res) {
 		let existingEmailCheck = await checkExistingEmail(userEmail);
 
 		if (existingEmailCheck == false) {
-			return await responseWithStatus(res, 0, 400, "Email doesn't exist. Please sign up instead", null);
+			return await responseWithStatus(res, 0, 401, "Email doesn't exist. Please sign up instead", null);
 		} else if (existingEmailCheck == true) {
 			// --------------------------------------------------------------------------- //
 			// Email and Password Combination Check
@@ -309,67 +312,79 @@ export async function refreshToken(req, res) {
 
 // }
 
-// async function forgotPassword(req, res) {
-// 	const emailToCheck = Object.values(req.body).toString();
+export async function forgotPassword(req, res) {
+	const userEmail = Object.values(req.body.data).toString();
 
-// 	try {
-// 		const existingEmailCheck = await checkExistingEmail(emailToCheck)
-// 		if (existingEmailCheck == false) {
-// 			return await res.format({
-// 				json() {
-// 					res.send([
-// 						{
-// 							type: 'error',
-// 							message: "Email doesn't exist. Please sign up instead.",
-// 						},
-// 					]);
-// 				},
-// 			});
-// 		} else {
-// 			const currentTimestamp = new Date();
-// 			let expirationTimestamp = new Date();
-// 			const expiration_time = Number(env.OTP_EXPIRATION_TIME)
-// 			expirationTimestamp = new Date(expirationTimestamp.setMinutes(expirationTimestamp.getMinutes() + expiration_time))
-// 			const currentTimestampISO = currentTimestamp.toISOString().replace('T', ' ').replace('Z', '')
-// 			const expirationTimestampISO = expirationTimestamp.toISOString().replace('T', ' ').replace('Z', '')
-// 			const timeDifferenceForHumans = formatDistance(expirationTimestampISO, currentTimestampISO,
-// 				{
-// 					addSuffix: true,
-// 					includeSeconds: true,
-// 				}
-// 			)
-// 			const ConvertExpirationTimestampToLocal = TZDate.tz("Asia/Karachi", expirationTimestamp.setHours(expirationTimestamp.getHours() + 5)).toISOString()
+	try {
+		const existingEmailCheck = await checkExistingEmail(userEmail)
+		if (existingEmailCheck == false) {
+			return responseWithStatus(res, 0, 422, "Email doesn't exist. Please sign up instead.")
+		} else {
+			const userId = await checkExistingEmail(userEmail, true)
+			const sendEmailResult = await createForgotPasswordEmail(userId, userEmail)
+			return responseWithStatus(res, 1, 200, "An OTP has been shared to your email address. Please use that to reset your password in the next screen.")
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
 
-// 			const formattedExpirationTimestamp = formatDate(ConvertExpirationTimestampToLocal, 'PPPPpp').concat(" PKT")
-// 			const userID = await getUserIdFromExistingEmail(emailToCheck);
+export async function verifyOTP(req, res) {
+	const userEmail = req.body.data.email
+	const userOTP = req.body.data.otp
 
-// 			const token = jwt.sign({ id: userID }, env.ACCESS_TOKEN_SECRET_KEY, { expiresIn: '1h' });
+	const result = await verifyOTPFromDB(userEmail, userOTP)
+	try {
+		if (result === true) {
+			const tempToken = jwt.sign({ id: userEmail }, env.ACCESS_TOKEN_SECRET_KEY, {
+				expiresIn: `${10}MINS`,
+			});
+			return responseWithStatus(res, 1, 200, "OTP has been verified", { temporary_token: tempToken, expires_in: '10 Minutes' })
+		} else {
+			return responseWithStatus(res, 1, 401, "Invalid OTP or email does not exist")
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
 
-// 			const encryptedToken = await bcrypt.hash(token, 10);
-// 			console.log((encryptedToken).toString());
+export async function resetPassword(req, res) {
+	if (!req.header('Authorization')) {
+		return responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please login.');
+	} else {
+		const token = req.header('Authorization').split(' ')[1];
+		try {
+			const verified = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
 
-// 			const passwordResetLink = 'https://localhost:5173/reset?' + encryptedToken;
-// 			await transporter.sendMail({
-// 				from: '"Admin Sender" <test@example.com>',
-// 				to: emailToCheck,
-// 				subject: `Verify your Email: User ${userID}`,
-// 				text: "This is a test email sent via Nodemailer",
-// 				html: `<pThis is a <b>test verification email</b> sent via Nodemailer!</p><br/><p>Please click on the following link to reset your password:<br/><a href='${passwordResetLink}'>${passwordResetLink}</a></p><br/>The link expires <b>${timeDifferenceForHumans}</b> on ${formattedExpirationTimestamp}</p>`,
-// 			});
+			const userEmail = req.body.data.email
+			const userPassword = req.body.data.password
+			const userConfirmedPassword = req.body.data.confirmed_password
 
-// 			return await res.format({
-// 				json() {
-// 					res.send([
-// 						{
-// 							type: 'success',
-// 							message: "Password reset link has been shared to your email address. Please continue from there.",
-// 						},
-// 					]);
-// 				},
-// 			});
-// 		}
+			let confirmPasswordCheck = confirmPassword(userPassword, userConfirmedPassword);
 
-// 	} catch (error) {
-// 		console.log(error);
-// 	}
-// }
+			if (confirmPasswordCheck == false) {
+				return responseWithStatus(res, 0, 400, 'Error', PASSWORDS_DONT_MATCH);
+			}
+
+			try {
+				const userRegistrationResult = await saveNewUserPasswordToDB(userEmail, userPassword);
+				const accessToken = jwt.sign({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
+					expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
+				});
+				const refreshToken = jwt.sign({ id: userRegistrationResult.id }, env.REFRESH_TOKEN_SECRET_KEY, {
+					expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
+				});
+
+				return await responseWithStatus(res, 1, 201, 'Password Reset successful!', {
+					user_details: userRegistrationResult,
+					access_token: accessToken,
+					refresh_token: refreshToken,
+				});
+			} catch (error) {
+				envLogger('Error creating record:', error, res);
+			}
+		} catch (err) {
+			return await responseWithStatus(res, 0, 401, 'Invalid Token. Please request another OTP.', { error_info: `${err}` });
+		}
+	}
+}

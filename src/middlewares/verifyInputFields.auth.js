@@ -1,11 +1,13 @@
 import z from 'zod';
-import { authLoginSchema, authRegisterSchema } from '../utils/schema.validations.js';
+import { authForgotPasswordSchema, authLoginSchema, authRegisterSchema } from '../utils/schema.validations.js';
 import { responseWithStatus } from '../utils/RESPONSES.js';
 
 export async function verifyInputFields(req, res, next) {
 	let reqData;
 	if (req.path == '/register') {
 		reqData = await authRegisterSchema.safeParseAsync(req.body.data);
+	} else if (req.path == '/forgot-password') {
+		reqData = await authForgotPasswordSchema.safeParseAsync(req.body.data);
 	} else {
 		reqData = await authLoginSchema.safeParseAsync(req.body.data);
 	}

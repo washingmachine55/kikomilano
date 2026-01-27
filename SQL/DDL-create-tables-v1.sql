@@ -28,6 +28,15 @@ CREATE TABLE IF NOT EXISTS tbl_users_details (
 	FOREIGN KEY (deleted_by) REFERENCES tbl_users(id)
 );
 
+CREATE TABLE IF NOT EXISTS tbl_users_otp(
+	id SERIAL PRIMARY KEY,
+	users_id INTEGER NOT NULL,
+	otp_value CHAR(6) NOT NULL CHECK (otp_value ~ '^[0-9]{6}$'),
+	date_sent TIMESTAMP NOT NULL,
+	date_expiration TIMESTAMP NOT NULL,
+	FOREIGN KEY (users_id) REFERENCES tbl_users(id)
+);
+
 CREATE TABLE IF NOT EXISTS tbl_users_tokens (
 	id SERIAL PRIMARY KEY,
 	users_id INTEGER,

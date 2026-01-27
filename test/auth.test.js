@@ -175,7 +175,7 @@ describe('Authentication APIs', () => {
 				.withPath('/auth/verify-token')
 				.withHeaders('Content-Type', 'application/json')
 				.withHeaders('Authorization', `Bearer $S{refreshToken}`)
-				.expectStatus(400);
+				.expectStatus(401);
 		});
 	});
 });

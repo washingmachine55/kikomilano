@@ -14,8 +14,7 @@ const verifyToken = (req, res, next) => {
 			req.user = verified;
 			next();
 		} catch (err) {
-			// unauthorizedResponse(res, 400, "Invalid Token. Please login" + err, [])
-			return responseWithStatus(res, 0, 400, 'Invalid Token. Please login.', {
+			return responseWithStatus(res, 0, 401, 'Invalid Token. Please login.', {
 				errors: err,
 			});
 		}
