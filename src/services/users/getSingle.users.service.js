@@ -5,11 +5,10 @@ export async function getSingleUserDetails(userId) {
 
 	try {
 		const result = await conn.query(
-			'SELECT u.id, u.email, u.access_type, u.created_at, ud.first_name, ud.last_name, ud.profile_pic_url from tbl_users u JOIN tbl_users_details ud ON ud.users_id = u.id WHERE u.id = $1;',
+			'SELECT u.id, u.email, u.access_type, u.created_at, ud.first_name, ud.last_name, i.image_url from tbl_users u JOIN tbl_users_details ud ON ud.users_id = u.id FULL JOIN tbl_images i ON i.id = ud.images_id WHERE u.id = $1;',
 			[userId]
 		);
-
-		return result.rows[0];
+		return result.rows;
 	} catch (err) {
 		console.error('Error creating record:', err);
 	} finally {

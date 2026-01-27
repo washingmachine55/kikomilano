@@ -56,6 +56,10 @@ const doc = {
 			name: 'Users',
 			description: 'User related endpoints',
 		},
+		{
+			name: 'Products',
+			description: 'User related endpoints',
+		},
 	],
 };
 

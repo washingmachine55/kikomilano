@@ -6,7 +6,7 @@ process.loadEnvFile();
  * @param {String} errorMessage - Optional message about the error
  * @param {Any} data - Optional object/string/number etc pertaining the error
  * @param {Response} res - Optional if being used in staging to show errors in responses
- * @returns debugging information in repsonse/console depending on NODE_ENV variable
+ * @returns debugging information in response/console depending on NODE_ENV variable
  */
 export const envLogger = (errorMessage = null, data = null, res = null) => {
 	if (process.env.NODE_ENV == 'staging') {

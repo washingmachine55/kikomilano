@@ -8,7 +8,7 @@
  * @returns null
  */
 export async function responseWithStatus(res, type, statusCode, message, data) {
-	const resultData = !data ? [] : [data];
+	const resultData = !data ? [] : data;
 	return await res.status(statusCode).type('json').json({
 		status: statusCode,
 		type: type,

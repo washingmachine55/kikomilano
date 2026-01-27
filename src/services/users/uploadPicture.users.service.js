@@ -4,9 +4,16 @@ export async function uploadUserProfilePictureToDB(userId, file) {
 	const fileToUpload = file.path;
 	const conn = await pool.connect();
 	try {
+		const uploadImage = await conn.query(
+			'INSERT INTO tbl_images(image_url) VALUES ($1) RETURNING id',
+			[fileToUpload]
+		);
+
+		const uploadImageResult = uploadImage.rows[0].id
+
 		const result = await conn.query(
-			'UPDATE tbl_users_details SET profile_pic_url = $1 WHERE users_id = $2 RETURNING profile_pic_url',
-			[fileToUpload, userId]
+			'UPDATE tbl_users_details SET images_id = $1 WHERE users_id = $2 RETURNING images_id',
+			[uploadImageResult, userId]
 		);
 
 		return result.rows[0];

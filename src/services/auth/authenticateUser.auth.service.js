@@ -1,9 +1,10 @@
 import pool from '../../config/db.js';
 import bcrypt from 'bcryptjs';
-import envLogger from '../../utils/customLogger.js';
+// import console.debug from '../../utils/customLogger.js';
 
 export async function isCredentialsMatching(userEmail, userPassword) {
 	const conn = await pool.connect();
+
 
 	try {
 		const credentialsCheck = await conn.query(
@@ -32,10 +33,10 @@ export async function isCredentialsMatching(userEmail, userPassword) {
 				return false;
 			}
 		} catch (error) {
-			envLogger('An error occured', error);
+			console.debug('An error occurred', error);
 		}
 	} catch (err) {
-		envLogger('Error creating record:', err);
+		console.debug('Error reading record:', err);
 	} finally {
 		conn.release();
 	}
@@ -64,7 +65,7 @@ export async function getUserId(userEmail, userPassword) {
 				if (bcryptResult == true) {
 					// const credentialsCheck = await conn.query("SELECT id FROM tbl_users WHERE email = $1;", [userEmail]);
 					const credentialsCheck = await conn.query(
-						'SELECT u.id, u.email, u.access_type, u.created_at, ud.first_name, ud.last_name, ud.profile_pic_url from tbl_users u JOIN tbl_users_details ud ON ud.users_id = u.id WHERE u.email = $1;',
+						'SELECT u.id, u.email, u.access_type, u.created_at, ud.first_name, ud.last_name, ud.images_id from tbl_users u JOIN tbl_users_details ud ON ud.users_id = u.id WHERE u.email = $1;',
 						[userEmail]
 					);
 					let result = credentialsCheck.rows[0];
@@ -76,10 +77,10 @@ export async function getUserId(userEmail, userPassword) {
 				return false;
 			}
 		} catch (error) {
-			envLogger('An error occured', error);
+			console.debug('An error occurred', error);
 		}
 	} catch (err) {
-		envLogger('Error creating record:', err);
+		console.debug('Error reading record:', err);
 	} finally {
 		conn.release();
 	}

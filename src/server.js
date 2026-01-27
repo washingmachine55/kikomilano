@@ -28,6 +28,9 @@ app.use('/auth', authRoutes);
 import usersRoutes from './routes/users.routes.js';
 app.use('/users', usersRoutes);
 
+import productsRoutes from './routes/products.routes.js';
+app.use('/products', productsRoutes);
+
 import { responseWithStatus } from './utils/RESPONSES.js';
 app.use((err, req, res, next) => {
 	if (err instanceof multer.MulterError) {

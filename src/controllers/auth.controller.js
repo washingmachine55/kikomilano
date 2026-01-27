@@ -14,7 +14,7 @@ import { env, loadEnvFile } from 'node:process';
 loadEnvFile();
 import { responseWithStatus } from '../utils/RESPONSES.js';
 import { EMAIL_EXISTS_ALREADY, MISSING_INPUT_FIELDS, PASSWORDS_DONT_MATCH } from '../utils/CONSTANTS.js';
-import envLogger from '../utils/customLogger.js';
+// import console.debug from '../utils/customLogger.js';
 
 // import { OAuth2Client } from 'google-auth-library';
 // export async function googleAuth(req, res) {
@@ -45,6 +45,7 @@ export async function registerUser(req, res) {
 	// #swagger.tags = ['Authentication']
 	// #swagger.summary = 'Endpoint to allow the user to register their account for the first time.'
 	// #swagger.description = 'This endpoint would only be used once to register a new user'
+	// #swagger.security = []
 	/*  #swagger.requestBody = {
 			required: true,
 			schema: { $ref: "#/components/schemas/registerSchema" }  
@@ -126,7 +127,7 @@ export async function registerUser(req, res) {
 				refresh_token: refreshToken,
 			});
 		} catch (error) {
-			envLogger('Error creating record:', error, res);
+			console.debug('Error creating record:', error, res);
 		}
 	}
 }
@@ -135,6 +136,7 @@ export async function loginUser(req, res) {
 	// #swagger.tags = ['Authentication']
 	// #swagger.summary = 'Endpoint to allow the user to login'
 	// #swagger.description = 'Used for to normally log in a user that is unauthenticated.'
+	// #swagger.security = []
 	/*  #swagger.requestBody = {
 		required: true,
 		schema: { $ref: "#/components/schemas/loginSchema" }  
@@ -170,6 +172,7 @@ export async function loginUser(req, res) {
 			// Email and Password Combination Check
 			// --------------------------------------------------------------------------- //
 			let credentialMatchingResult = await isCredentialsMatching(userEmail, userPassword);
+
 			if (credentialMatchingResult == true) {
 				let userDetails = await getUserIdAndAllDetails(userEmail, userPassword);
 				const accessToken = jwt.sign({ id: userDetails.id }, env.ACCESS_TOKEN_SECRET_KEY, {
@@ -189,7 +192,7 @@ export async function loginUser(req, res) {
 			}
 		}
 	} catch (error) {
-		envLogger('Error creating record:', error, res);
+		console.debug('Error reading record:', error);
 	}
 }
 

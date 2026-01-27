@@ -92,7 +92,9 @@ CREATE TABLE IF NOT EXISTS tbl_products_variants_stocks(
 CREATE TABLE IF NOT EXISTS tbl_products_tags_bridge(
 	products_id INTEGER,
 	tags_id INTEGER,
-	PRIMARY KEY (products_id, tags_id)
+	PRIMARY KEY (products_id, tags_id),
+	FOREIGN KEY (products_id) REFERENCES tbl_products(id)
+	FOREIGN KEY (tags_id) REFERENCES tbl_tags(id)
 );
 
 CREATE TABLE IF NOT EXISTS tbl_orders(
@@ -125,7 +127,7 @@ CREATE TABLE IF NOT EXISTS tbl_orders_products(
 	FOREIGN KEY (products_id) REFERENCES tbl_products(id)
 );
 
-CREATE TABLE IF NOT EXISTS tbl_users_products_favourites(
+CREATE TABLE IF NOT EXISTS tbl_users_products_favorites(
 	id SERIAL PRIMARY KEY,
 	products_id INTEGER,
 	users_id INTEGER,
@@ -140,4 +142,12 @@ CREATE TABLE IF NOT EXISTS tbl_notifications(
 	description VARCHAR(255),
 	sent_time TIMESTAMP DEFAULT NOW(),
 	FOREIGN KEY (users_id) REFERENCES tbl_users(id)
+);
+
+CREATE TABLE IF NOT EXISTS tbl_transactions(
+	id SERIAL PRIMARY KEY,
+	shipments_id INTEGER,
+	amount DECIAMAL(6,2),
+	payment_method SMALLINT DEFAULT	0
+	FOREIGN KEY (shipments_id) REFERENCES tbl_shipments(id)
 );
