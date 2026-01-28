@@ -13,31 +13,30 @@ export async function getAllProductsDetails(categoriesName) {
 	try {
 		if (categoriesName !== undefined) {
 			if (allCategories.includes(categoriesName.toLowerCase())) { // fix this lines
-				const result = await conn.query(
-					`
-			SELECT p.id AS product_id, p.name AS product_name, p.rating , c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, p.price, i.image_url 
-			FROM tbl_products p 
-			JOIN tbl_companies c ON c.id = p.companies_id 
-			JOIN tbl_categories cg ON cg.id = p.categories_id 
-			FULL JOIN tbl_images i ON i.id = p.images_id
-			WHERE lower(cg.name) = lower('${categoriesName.toLowerCase()}')
-			ORDER BY p.id ASC
-			;`
-				);
+				const result = await conn.query(`
+					SELECT p.id AS product_id, p.name AS product_name, p.rating , c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
+					FROM tbl_products p
+					JOIN tbl_products_variants pv ON pv.products_id = p.id
+					JOIN tbl_companies c ON c.id = p.companies_id
+					JOIN tbl_categories cg ON cg.id = p.categories_id
+					FULL JOIN tbl_images i ON i.id = pv.images_id
+					WHERE pv.main = TRUE AND lower(cg.name) = lower('${categoriesName.toLowerCase()}')
+					ORDER BY p.id ASC
+				;`);
 				return result.rows;
 			}
 		} else {
 
-			const result = await conn.query(
-				`
-			SELECT p.id AS "product_id", p.name AS "product_name", p.rating , c.name AS "companies_name", cg.name AS "categories_name", cg.id AS "categories_id", p.price, COALESCE(i.image_url, null) as "image_url"
-			FROM tbl_products p 
-			JOIN tbl_companies c ON c.id = p.companies_id 
-			JOIN tbl_categories cg ON cg.id = p.categories_id 
-			FULL JOIN tbl_images i ON i.id = p.images_id
-			ORDER BY p.id ASC
-			;`
-			);
+			const result = await conn.query(`
+				SELECT p.id AS product_id, p.name AS product_name, p.rating , c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
+				FROM tbl_products p
+				JOIN tbl_products_variants pv ON pv.products_id = p.id
+				JOIN tbl_companies c ON c.id = p.companies_id
+				JOIN tbl_categories cg ON cg.id = p.categories_id
+				FULL JOIN tbl_images i ON i.id = pv.images_id
+				WHERE pv.main = TRUE
+				ORDER BY p.id ASC
+			;`);
 			return result.rows;
 		}
 

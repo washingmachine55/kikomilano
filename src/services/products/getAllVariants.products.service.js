@@ -23,3 +23,12 @@ export async function getAllProductsVariants(productId) {
 		conn.release();
 	}
 }
+
+
+// SELECT p.id as products_id, p.name AS product_name, pv.id AS products_variant_id, pv.name AS product_variant_name, p.rating, av.name as color_code 
+// FROM tbl_products_variants pv 
+// JOIN tbl_products p ON p.id = pv.products_id 
+// JOIN tbl_products_variants_attributes_values pvav ON pvav.products_variants_id = pv.id 
+// JOIN tbl_attributes_values av ON av.id = pvav.attributes_values_id 
+// JOIN tbl_attributes a ON a.id = av.attributes_id 
+// WHERE p.id = '019c0342-4aed-7273-985f-e8074ac9c771'

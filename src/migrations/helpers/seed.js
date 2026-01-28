@@ -162,20 +162,18 @@ async function insert(client, sql, params) {
 
 		const attributeValues = [];
 		for (const attr of attributes) {
-			for (const value of ['Red', 'Blue', 'Green', 'Black', 'White']) {
-				attributeValues.push(
-					await insert(
-						client,
-						`
-						INSERT INTO tbl_attributes_values (attributes_id, name)
-						VALUES ($1,$2)
-						ON CONFLICT DO NOTHING
-						RETURNING *
-						`,
-						[attr.id, value]
-					)
-				);
-			}
+			attributeValues.push(
+				await insert(
+					client,
+					`
+					INSERT INTO tbl_attributes_values (attributes_id, name)
+					VALUES ($1,$2)
+					ON CONFLICT DO NOTHING
+					RETURNING *
+					`,
+					[attr.id, faker.color.rgb({ format: 'hex', casing: 'lower' })]
+				)
+			);
 		}
 
 		/* ========= PRODUCTS ========= */
@@ -257,6 +255,21 @@ async function insert(client, sql, params) {
 				const attributeValues = (
 					await client.query(`SELECT * FROM tbl_attributes_values`)
 				).rows;
+
+				const productColor = pick(attributeValues);
+
+				// assign SAME color to all variants of this product
+				for (const variant of variants) {
+					await client.query(
+						`
+						INSERT INTO tbl_products_variants_attributes_values
+						(products_variants_id, attributes_values_id)
+						VALUES ($1,$2)
+						ON CONFLICT DO NOTHING
+						`,
+						[variant.id, productColor.id]
+					);
+				}
 			}
 
 			// tags
@@ -320,10 +333,10 @@ async function insert(client, sql, params) {
 				for (const v of orderVariants) {
 					await client.query(
 						`
-            INSERT INTO tbl_orders_products
-            (orders_id, products_variants_id, quantity)
-            VALUES ($1,$2,$3)
-            `,
+						INSERT INTO tbl_orders_products
+						(orders_id, products_variants_id, quantity)
+						VALUES ($1,$2,$3)
+						`,
 						[order.id, v.id, faker.number.int({ min: 1, max: 3 })]
 					);
 				}

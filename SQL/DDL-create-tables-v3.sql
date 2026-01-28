@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS tbl_addresses(
 	street_num VARCHAR(8) DEFAULT NULL,
 	street_addr VARCHAR(100) DEFAULT NULL,
 	street_addr_line_2 VARCHAR(100) DEFAULT NULL,
-city VARCHAR(35) DEFAULT NULL,
+	city VARCHAR(35) DEFAULT NULL,
 	region VARCHAR(25) DEFAULT NULL,
 	zip_code CHAR(5) DEFAULT NULL,
 	created_by UUID DEFAULT NULL,
@@ -135,14 +135,14 @@ CREATE TABLE IF NOT EXISTS tbl_categories(
 
 CREATE TABLE IF NOT EXISTS tbl_attributes(
 	id UUID PRIMARY KEY DEFAULT UUIDv7(),
-name VARCHAR(25) UNIQUE NOT NULL
+	name VARCHAR(25) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS tbl_attributes_values(
 	id UUID PRIMARY KEY DEFAULT UUIDv7(),
-attributes_id UUID NOT NULL,
+	attributes_id UUID NOT NULL,
 	name VARCHAR(25) UNIQUE NOT NULL,
-FOREIGN KEY (attributes_id) REFERENCES tbl_attributes(id)
+	FOREIGN KEY (attributes_id) REFERENCES tbl_attributes(id)
 );
 
 CREATE TABLE IF NOT EXISTS tbl_products(
@@ -365,6 +365,20 @@ CREATE TABLE IF NOT EXISTS tbl_shipments(
 CREATE UNIQUE INDEX IF NOT EXISTS one_main_per_product
 ON tbl_products_variants (products_id, main)
 WHERE main = TRUE;
+
+-- CREATE UNIQUE INDEX one_color_code_per_product
+-- ON tbl_products_variants_attributes_values (
+--   attributes_values_id,
+--   (SELECT products_id
+--    FROM tbl_products_variants
+--    WHERE tbl_products_variants.id = products_variants_id)
+-- )
+-- WHERE attributes_values_id IN (
+--   SELECT av.id
+--   FROM tbl_attributes_values av
+--   JOIN tbl_attributes a ON a.id = av.attributes_id
+--   WHERE a.name = 'Color Code'
+-- );
 -- INSERT INTO tbl_categories(name)
 -- VALUES ('FACE'), ('HAIR'), ('SKIN'), ('BODY');
 -- INSERT INTO tbl_tags(name)
