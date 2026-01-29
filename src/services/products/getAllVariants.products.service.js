@@ -4,16 +4,25 @@ import { getAllCategoriesDetails } from '../categories/getAll.categories.service
 export async function getAllProductsVariants(productId) {
 	const conn = await pool.connect();
 	try {
-		const getSpecificProduct = await conn.query(`
+		const credentialsCheck = await conn.query(
+			'SELECT CASE WHEN EXISTS(SELECT id FROM tbl_products WHERE id = $1) THEN 1 ELSE 0 END AS ExistsCheck;',
+			[productId]
+		);
+		let resultCredentialsCheck = credentialsCheck.rows[0].existscheck.toString();
+
+		if (resultCredentialsCheck == 1) {
+
+
+			const getSpecificProduct = await conn.query(`
 			SELECT p.id AS product_id, p.name AS product_name, c.name AS company_name, ct.name AS category_name, p.rating AS product_rating, p.details, p.ingredients AS whats_in_it, p.instructions AS how_to_use 
 			FROM tbl_products p 
 			JOIN tbl_categories ct ON ct.id = p.categories_id 
 			JOIN tbl_companies c ON c.id = p.companies_id 
 			WHERE p.id ='${productId}'
 		`);
-		const specificProductID = getSpecificProduct.rows[0].product_id
+			const specificProductID = await getSpecificProduct.rows[0].product_id
 
-		const getSpecificProductTags = await conn.query(`
+			const getSpecificProductTags = await conn.query(`
 			SELECT t.name 
 			FROM tbl_products p 
 			JOIN tbl_products_tags pt ON pt.products_id = p.id 
@@ -21,7 +30,7 @@ export async function getAllProductsVariants(productId) {
 			WHERE p.id = '${specificProductID}'
 		`);
 
-		const getSpecificProductsVariants = await conn.query(`
+			const getSpecificProductsVariants = await conn.query(`
 			SELECT pv.id, pv.name, main, pv.price_retail, i.image_url, av.name AS color_code 
 			FROM tbl_products_variants pv 
 			JOIN tbl_products_variants_attributes_values pvav ON pvav.products_variants_id = pv.id 
@@ -30,18 +39,19 @@ export async function getAllProductsVariants(productId) {
 			WHERE pv.products_id = '${specificProductID}'
 		`);
 
-		// console.log(tagsArr)
+			const tagsArr = []
+			for (const element of Object.values(getSpecificProductTags.rows)) {
+				tagsArr.push(element.name)
+			}
 
-		const tagsArr = []
-		for (const element of Object.values(getSpecificProductTags.rows)) {
-			tagsArr.push(element.name)
+			return Object({
+				product_details: getSpecificProduct.rows[0],
+				product_tags: tagsArr,
+				product_variants: getSpecificProductsVariants.rows
+			})
+		} else {
+			return false
 		}
-
-		return Object({
-			product_details: getSpecificProduct.rows[0],
-			product_tags: tagsArr,
-			product_variants: getSpecificProductsVariants.rows
-		})
 	} catch (err) {
 		console.error('Error reading record:', err);
 	} finally {

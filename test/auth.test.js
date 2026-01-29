@@ -93,7 +93,7 @@ describe('Authentication APIs', () => {
 		});
 	});
 
-	describe('POST /auth/refresh', () => {
+	describe('GET /auth/refresh', () => {
 		it('should refresh access token', async () => {
 			await pactum
 				.spec()
@@ -114,7 +114,7 @@ describe('Authentication APIs', () => {
 
 			await pactum
 				.spec()
-				.withMethod('POST')
+				.withMethod('GET')
 				.withPath('/auth/refresh')
 				.withHeaders('Authorization', `Bearer $S{refreshToken}`)
 				.expectJsonMatch({

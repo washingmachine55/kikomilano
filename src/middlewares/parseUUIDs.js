@@ -3,7 +3,7 @@ import { UUIDSchema } from "../utils/schema.validations.js";
 import { responseWithStatus } from "../utils/RESPONSES.js";
 
 export async function validateUuidUrlParam(req, res, next) {
-	const inputToValidate = req.params.productId
+	const inputToValidate = req.params.productId.toLowerCase();
 	const validationResult = await UUIDSchema.safeParseAsync(inputToValidate)
 
 	if (!validationResult.success) {
