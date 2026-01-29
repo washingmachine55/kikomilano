@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllUsers, getSingleUser } from '../controllers/methods.users.controller.js';
+import { getAllUsers, getFavorites, getSingleUser, setFavorite, unsetFavorite } from '../controllers/methods.users.controller.js';
 import { uploadUserProfilePicture } from '../controllers/uploadImage.users.controller.js';
 import { uploadImages } from '../config/multer.js';
 import verifyToken from '../middlewares/verifyToken.auth.js';
@@ -13,5 +13,8 @@ router.post(
 	uploadImages.single('userProfilePicture'),
 	uploadUserProfilePicture
 );
+router.post("/set-favorites", setFavorite)
+router.post("/remove-favorites", unsetFavorite)
+router.get("/favorites", getFavorites)
 
 export default router;

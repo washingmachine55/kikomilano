@@ -55,10 +55,10 @@ export const authResetPasswordSchema = z
 		email: z.email(),
 		password: passwordSchema,
 		confirmed_password: z.string(),
-	})
+	}).required()
 	.refine((data) => data.password === data.confirmed_password, {
 		message: 'Passwords do not match',
 		path: ['confirmed_password'],
-	});
+	}).required();
 
 export const UUIDSchema = z.uuidv7({ message: "Incorrect format, please enter a valid UUID" });

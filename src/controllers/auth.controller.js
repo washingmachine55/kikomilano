@@ -18,6 +18,7 @@ import envLogger from '../utils/customLogger.js';
 import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service.js';
 import { verifyOTPFromDB } from '../services/auth/verifyOTP.auth.service.js';
 import saveNewUserPasswordToDB from '../services/auth/saveNewPassword.auth.service.js';
+import { signJwtAsync, verifyJwtAsync } from '../utils/jwtUtils.js';
 
 // import { OAuth2Client } from 'google-auth-library';
 // export async function googleAuth(req, res) {
@@ -91,10 +92,10 @@ export async function registerUser(req, res) {
 	let userPassword = request[2];
 	let userConfirmedPassword = request[3];
 
-	if (userName == null || userEmail == null || userPassword == null || userConfirmedPassword == null) {
-		// #swagger.responses[400] = { description: 'One or more input fields are empty. Please fill up all the input fields before submitting.' }
-		return responseWithStatus(res, 0, 400, 'One or more input fields are empty. Please fill up all the input fields before submitting.');
-	} else {
+	// if (userName == null || userEmail == null || userPassword == null || userConfirmedPassword == null) {
+	// 	// #swagger.responses[400] = { description: 'One or more input fields are empty. Please fill up all the input fields before submitting.' }
+	// 	return responseWithStatus(res, 0, 400, 'One or more input fields are empty. Please fill up all the input fields before submitting.');
+	// } else {
 		// --------------------------------------------------------------------------- //
 		// Check if email exists in database already
 		// --------------------------------------------------------------------------- //
@@ -107,12 +108,12 @@ export async function registerUser(req, res) {
 		// --------------------------------------------------------------------------- //
 		// Password Confirmation Check
 		// --------------------------------------------------------------------------- //
-		let confirmPasswordCheck = confirmPassword(userPassword, userConfirmedPassword);
+	// let confirmPasswordCheck = confirmPassword(userPassword, userConfirmedPassword);
 
-		if (confirmPasswordCheck == false) {
-			// #swagger.responses[400] = { description: "Passwords don't match.Please try again instead." }
-			return responseWithStatus(res, 0, 400, 'Error', "Passwords don't match.Please try again instead.");
-		}
+	// if (confirmPasswordCheck == false) {
+	// 	// #swagger.responses[400] = { description: "Passwords don't match. Please try again instead." }
+	// 	return responseWithStatus(res, 0, 400, 'Error', "Passwords don't match. Please try again instead.");
+	// }
 
 		// --------------------------------------------------------------------------- //
 		// Save User details to Database if all checks are cleared
@@ -127,7 +128,33 @@ export async function registerUser(req, res) {
 				expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 			});
 
-			// #swagger.responses[201] = { description: 'Sign Up successful!' }
+			/* #swagger.responses[201] = {
+				description: 'Sign Up successful!',
+				content: {
+					"application/json": {
+						example: {
+							"status": 201,
+							"type": 1,
+							"message": "Sign Up successful!",
+							"data": {
+								"user_details": {
+									"id": "019c0a0c-6a5c-7c53-9686-4f155b77123b",
+									"email": "sample@user.com",
+									"access_type": 0,
+									"created_at": "2026-01-29T13:58:31.772Z",
+									"first_name": "Sample",
+									"last_name": "User",
+									"images_id": null
+								},
+							"access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOWMwYTBjLTZhNWMtN2M1My05Njg2LTRmMTU1Yjc3MTIzYiIsImlhdCI6MTc2OTY5NTExMSwiZXhwIjoxNzY5Njk4NzExfQ.E5wRmBg1YrUBqIA9qGdnqN0XsDh6T02qScSd-8-DweQ",
+							"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOWMwYTBjLTZhNWMtN2M1My05Njg2LTRmMTU1Yjc3MTIzYiIsImlhdCI6MTc2OTY5NTExMSwiZXhwIjoxNzcwMjk5OTExfQ.visdlLXjLsPJHL4xCFR6ikBgbTuBtvJ1MyrkGqksrO8"
+							}
+						}
+					}           
+				}
+			} 
+			*/
+
 			return await responseWithStatus(res, 1, 201, 'Sign Up successful!', {
 				user_details: userRegistrationResult,
 				access_token: accessToken,
@@ -136,7 +163,7 @@ export async function registerUser(req, res) {
 		} catch (error) {
 			console.debug('Error creating record:', error, res);
 		}
-	}
+	// }
 }
 
 export async function loginUser(req, res) {
@@ -411,11 +438,14 @@ export async function verifyOTP(req, res) {
 	const result = await verifyOTPFromDB(userEmail, userOTP)
 	try {
 		if (result === true) {
-			const tempToken = jwt.sign({ id: userEmail }, env.ACCESS_TOKEN_SECRET_KEY, {
-				expiresIn: `${10}MINS`,
+			jwt.sign({ id: userEmail }, env.TEMPORARY_TOKEN_SECRET_KEY, { expiresIn: `${Number(env.TEMPORARY_TOKEN_EXPIRATION_TIME)}MINS` }, (err, tempToken) => {
+				if (err) {
+					return responseWithStatus(res, 1, 500, "Error occurred in creating a temporary token", err)
+				} else {
+					// #swagger.responses[200] = { description: 'OTP has been verified!' }
+					return responseWithStatus(res, 1, 200, "OTP has been verified!", { temporary_token: tempToken, expires_in: '10 Minutes' })
+				}
 			});
-			// #swagger.responses[200] = { description: 'OTP has been verified!' }
-			return responseWithStatus(res, 1, 200, "OTP has been verified!", { temporary_token: tempToken, expires_in: '10 Minutes' })
 		} else {
 			// #swagger.responses[401] = { description: 'Invalid OTP or email does not exist.' }
 			return responseWithStatus(res, 1, 401, "Invalid OTP or email does not exist")
@@ -475,7 +505,7 @@ export async function resetPassword(req, res) {
 	} else {
 		const token = req.header('Authorization').split(' ')[1];
 		try {
-			const verified = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
+			await verifyJwtAsync(token, env.TEMPORARY_TOKEN_SECRET_KEY)
 
 			const userEmail = req.body.data.email
 			const userPassword = req.body.data.password
@@ -490,10 +520,10 @@ export async function resetPassword(req, res) {
 
 			try {
 				const userRegistrationResult = await saveNewUserPasswordToDB(userEmail, userPassword);
-				const accessToken = jwt.sign({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
+				const accessToken = await signJwtAsync({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
 					expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
 				});
-				const refreshToken = jwt.sign({ id: userRegistrationResult.id }, env.REFRESH_TOKEN_SECRET_KEY, {
+				const refreshToken = await signJwtAsync({ id: userRegistrationResult.id }, env.REFRESH_TOKEN_SECRET_KEY, {
 					expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 				});
 
@@ -503,12 +533,12 @@ export async function resetPassword(req, res) {
 					access_token: accessToken,
 					refresh_token: refreshToken,
 				});
-			} catch (error) {
-				envLogger('Error creating record:', error, res);
+			} catch (err) {
+				await envLogger('Error creating record', err, res);
 			}
 		} catch (err) {
 			// #swagger.responses[401] = { description: 'Invalid Token. Please request another OTP.' }
-			return await responseWithStatus(res, 0, 401, 'Invalid Token. Please request another OTP.', { error_info: `${err}` });
+			return await responseWithStatus(res, 0, 401, 'Error in verifying the temporary token. Please request another OTP.', { error_info: err });
 		}
 	}
 }

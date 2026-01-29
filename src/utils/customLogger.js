@@ -8,7 +8,7 @@ process.loadEnvFile();
  * @param {Response} res - Optional if being used in staging to show errors in responses
  * @returns debugging information in response/console depending on NODE_ENV variable
  */
-export const envLogger = (errorMessage = null, data = null, res = null) => {
+export const envLogger = async (errorMessage = null, data = null, res = null) => {
 	if (process.env.NODE_ENV == 'staging') {
 		return responseWithStatus(res, 0, 500, errorMessage, data);
 	} else if (process.env.NODE_ENV == 'dev') {

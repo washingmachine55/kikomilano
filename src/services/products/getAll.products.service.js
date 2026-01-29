@@ -14,7 +14,7 @@ export async function getAllProductsDetails(categoriesName) {
 		if (categoriesName !== undefined) {
 			if (allCategories.includes(categoriesName.toLowerCase())) { // fix this lines
 				const result = await conn.query(`
-					SELECT p.id AS product_id, p.name AS product_name, p.rating , c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
+					SELECT p.id AS product_id, p.name AS product_name, pv.id AS product_variant_id, pv.name AS product_variant_name, p.rating , c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
 					FROM tbl_products p
 					JOIN tbl_products_variants pv ON pv.products_id = p.id
 					JOIN tbl_companies c ON c.id = p.companies_id
@@ -28,7 +28,7 @@ export async function getAllProductsDetails(categoriesName) {
 		} else {
 
 			const result = await conn.query(`
-				SELECT p.id AS product_id, p.name AS product_name, p.rating , c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
+				SELECT p.id AS product_id, p.name AS product_name, pv.id AS product_variant_id, pv.name AS product_variant_name, p.rating, c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
 				FROM tbl_products p
 				JOIN tbl_products_variants pv ON pv.products_id = p.id
 				JOIN tbl_companies c ON c.id = p.companies_id
