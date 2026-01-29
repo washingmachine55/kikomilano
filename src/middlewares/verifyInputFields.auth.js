@@ -1,5 +1,5 @@
 import z from 'zod';
-import { authForgotPasswordSchema, authLoginSchema, authRegisterSchema } from '../utils/schema.validations.js';
+import { authForgotPasswordSchema, authLoginSchema, authRegisterSchema, authResetPasswordSchema, authVerifyOTPSchema } from '../utils/schema.validations.js';
 import { responseWithStatus } from '../utils/RESPONSES.js';
 
 export async function verifyInputFields(req, res, next) {
@@ -8,6 +8,10 @@ export async function verifyInputFields(req, res, next) {
 		reqData = await authRegisterSchema.safeParseAsync(req.body.data);
 	} else if (req.path == '/forgot-password') {
 		reqData = await authForgotPasswordSchema.safeParseAsync(req.body.data);
+	} else if (req.path == '/verify-otp') {
+		reqData = await authVerifyOTPSchema.safeParseAsync(req.body.data);
+	} else if (req.path == '/reset-password') {
+		reqData = await authResetPasswordSchema.safeParseAsync(req.body.data);
 	} else {
 		reqData = await authLoginSchema.safeParseAsync(req.body.data);
 	}

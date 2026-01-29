@@ -196,8 +196,11 @@ CREATE TABLE IF NOT EXISTS tbl_products_variants(
 
 CREATE TABLE IF NOT EXISTS tbl_products_variants_attributes_values(
 	products_variants_id UUID NOT NULL,
+	attributes_id UUID NOT NULL,
 	attributes_values_id UUID NOT NULL,
+	UNIQUE (products_variants_id, attributes_id),
 	PRIMARY KEY (products_variants_id, attributes_values_id),
+	FOREIGN KEY (attributes_id) REFERENCES tbl_attributes(id),
 	FOREIGN KEY (products_variants_id) REFERENCES tbl_products_variants(id),
 	FOREIGN KEY (attributes_values_id) REFERENCES tbl_attributes_values(id)
 );
@@ -221,6 +224,7 @@ CREATE TABLE IF NOT EXISTS tbl_products_tags(
 	products_id UUID NOT NULL,
 	tags_id UUID NOT NULL,
 	PRIMARY KEY (products_id, tags_id),
+	UNIQUE (products_id, tags_id),
 	FOREIGN KEY (products_id) REFERENCES tbl_products(id),
 	FOREIGN KEY (tags_id) REFERENCES tbl_tags(id)
 );

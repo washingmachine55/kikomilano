@@ -48,8 +48,29 @@ async function insert(client, sql, params) {
 		await client.query('BEGIN');
 
 		await client.query("INSERT INTO tbl_categories(name) VALUES('FACE'), ('HAIR'), ('SKIN'), ('BODY')")
-		await client.query("INSERT INTO tbl_tags(name) VALUES('Cruelty Free'), ('Paraben Free'), ('Vegan'), ('Suitable for Sensetive Skin'), ('Dermatologist Tested')")
-		await client.query("INSERT INTO tbl_attributes(name) VALUES('Color Code')")
+		await client.query("INSERT INTO tbl_tags(name) VALUES('Cruelty Free'), ('Paraben Free'), ('Vegan'), ('Suitable for Sensitive Skin'), ('Dermatologist Tested')")
+		const attributesStaticQuery = await client.query("INSERT INTO tbl_attributes(name) VALUES('Color Code') RETURNING id")
+
+		// for (let av = 1; av < 7; av++) {
+		// 	avArray.push(faker.color.rgb({ format: 'hex', casing: 'lower' }))
+		// }
+
+		const avArray = []
+		for (let i = 0; i < 7; i++) {
+			avArray.push(faker.color.rgb({ format: 'hex', casing: 'lower' }))
+			const a = await insert(
+				client,
+				`
+				INSERT INTO tbl_attributes_values(attributes_id, name) VALUES ($1, $2)
+				RETURNING *
+				`,
+				[
+					attributesStaticQuery.rows[0].id,
+					avArray[i]
+				]
+			);
+		}
+
 
 		/* ========= USERS ========= */
 		const users = [];
@@ -92,7 +113,7 @@ async function insert(client, sql, params) {
 				RETURNING *
 				`,
 				[
-					allowedAddressNames[Math.floor(Math.random() * allowedAddressNames.length)],
+					pick(allowedAddressNames),
 					faker.location.buildingNumber(),
 					faker.location.streetAddress(),
 					faker.location.city(),
@@ -160,25 +181,26 @@ async function insert(client, sql, params) {
 		const tags = (await client.query(`SELECT * FROM tbl_tags`)).rows;
 		const attributes = (await client.query(`SELECT * FROM tbl_attributes`)).rows;
 
-		const attributeValues = [];
-		for (const attr of attributes) {
-			attributeValues.push(
-				await insert(
-					client,
-					`
-					INSERT INTO tbl_attributes_values (attributes_id, name)
-					VALUES ($1,$2)
-					ON CONFLICT DO NOTHING
-					RETURNING *
-					`,
-					[attr.id, faker.color.rgb({ format: 'hex', casing: 'lower' })]
-				)
-			);
-		}
+		// const attributeValues = [];
+		// for (const attr of attributes) {
+		// 	attributeValues.push(
+		// 		await insert(
+		// 			client,
+		// 			`
+		// 			INSERT INTO tbl_attributes_values (attributes_id, name)
+		// 			VALUES ($1,$2)
+		// 			ON CONFLICT DO NOTHING
+		// 			RETURNING *
+		// 			`,
+		// 			[attr.id, faker.color.rgb({ format: 'hex', casing: 'lower' })]
+		// 		)
+		// 	);
+		// }
 
 		/* ========= PRODUCTS ========= */
 		const products = [];
 		const variants = [];
+		const productVariants = [];
 
 		for (let i = 0; i < SCALE.PRODUCTS; i++) {
 			const product = await insert(
@@ -231,25 +253,26 @@ async function insert(client, sql, params) {
 				);
 				
 				variants.push(variant);
+				productVariants.push(variant);
 
 				/* ========= ATTRIBUTE VALUES ========= */
-				for (const attr of attributes) {
-					// const values = ['Red', 'Blue', 'Green', 'Black', 'White'];
+				// for (const attr of attributes) {
+				// 	// const values = ['Red', 'Blue', 'Green', 'Black', 'White'];
 
-					// for (const value of values) {
-						await client.query(
-							`
-							INSERT INTO tbl_attributes_values (attributes_id, name)
-							VALUES ($1,$2)
-							ON CONFLICT DO NOTHING
-							`,
-							[
-								attr.id, 
-								faker.color.rgb({ format: 'hex', casing: 'lower' })
-							]
-						);
-					// }
-				}
+				// 	// for (const value of values) {
+				// 		await client.query(
+				// 			`
+				// 			INSERT INTO tbl_attributes_values (attributes_id, name)
+				// 			VALUES ($1,$2)
+				// 			ON CONFLICT DO NOTHING
+				// 			`,
+				// 			[
+				// 				attr.id,
+				// 				faker.color.rgb({ format: 'hex', casing: 'lower' })
+				// 			]
+				// 		);
+				// 	// }
+				// }
 
 				// Fetch them AFTER insertion
 				const attributeValues = (
@@ -259,28 +282,41 @@ async function insert(client, sql, params) {
 				const productColor = pick(attributeValues);
 
 				// assign SAME color to all variants of this product
-				for (const variant of variants) {
+				for (const variant of productVariants) {
 					await client.query(
 						`
 						INSERT INTO tbl_products_variants_attributes_values
-						(products_variants_id, attributes_values_id)
-						VALUES ($1,$2)
+						(products_variants_id, attributes_values_id, attributes_id)
+						VALUES ($1,$2,$3)
 						ON CONFLICT DO NOTHING
 						`,
-						[variant.id, productColor.id]
+						[variant.id, productColor.id, attributesStaticQuery.rows[0].id]
 					);
 				}
 			}
-
-			// tags
-			await client.query(
-				`
-				INSERT INTO tbl_products_tags
+			const tagCount = faker.number.int({ min: 4, max: 5 });
+			const productTags = faker.helpers.arrayElements(tags, tagCount);
+			for (const tag of productTags) {
+				await client.query(
+					`
+				INSERT INTO tbl_products_tags (products_id, tags_id)
 				VALUES ($1,$2)
+				ON CONFLICT DO NOTHING
 				`,
-				[product.id, pick(tags).id]
-			);
+					[product.id, tag.id]
+				);
+			}
+
+			// // tags
+			// await client.query(
+			// 	`
+			// 	INSERT INTO tbl_products_tags
+			// 	VALUES ($1,$2)
+			// 	`,
+			// 	[product.id, pick(tags).id]
+			// );
 		}
+
 
 		/* ========= DISCOUNTS ========= */
 		const discounts = [];

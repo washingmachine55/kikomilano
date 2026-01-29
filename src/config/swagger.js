@@ -58,16 +58,16 @@ const doc = {
 		},
 		{
 			name: 'Products',
-			description: 'User related endpoints',
+			description: 'Product related endpoints',
 		},
 	],
 };
 
 const options = {
 	openapi: '3.1.0',
-	autoHeaders: true,
-	autoQuery: true,
-	autoBody: true,
+	autoHeaders: false,
+	autoQuery: false,
+	autoBody: false,
 };
 
 swaggerAutogen(options)(outputFile, endpointsFiles, doc);

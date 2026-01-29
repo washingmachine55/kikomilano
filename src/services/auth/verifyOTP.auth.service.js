@@ -14,7 +14,10 @@ export async function verifyOTPFromDB(userEmail, userOTP) {
 		} else {
 			let currentTimestamp = new Date();
 			const currentTimestampISO = currentTimestamp.toISOString().replace('T', ' ').replace('Z', '')
-			
+			// FOR TESTING, REMOVE LATER
+			if (userOTP == 112233) {
+				return true
+			}
 
 			const otpCheck = await conn.query(
 				`

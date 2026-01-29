@@ -92,7 +92,8 @@ export async function registerUser(req, res) {
 	let userConfirmedPassword = request[3];
 
 	if (userName == null || userEmail == null || userPassword == null || userConfirmedPassword == null) {
-		return responseWithStatus(res, 0, 400, MISSING_INPUT_FIELDS);
+		// #swagger.responses[400] = { description: 'One or more input fields are empty. Please fill up all the input fields before submitting.' }
+		return responseWithStatus(res, 0, 400, 'One or more input fields are empty. Please fill up all the input fields before submitting.');
 	} else {
 		// --------------------------------------------------------------------------- //
 		// Check if email exists in database already
@@ -100,7 +101,8 @@ export async function registerUser(req, res) {
 		let existingEmailCheck = await checkExistingEmail(userEmail);
 
 		if (existingEmailCheck == true) {
-			return responseWithStatus(res, 0, 401, 'Error', EMAIL_EXISTS_ALREADY);
+			// #swagger.responses[401] = { description: 'Email already exists. Please sign in instead.' }
+			return responseWithStatus(res, 0, 401, 'Error', 'Email already exists. Please sign in instead.');
 		}
 		// --------------------------------------------------------------------------- //
 		// Password Confirmation Check
@@ -108,7 +110,8 @@ export async function registerUser(req, res) {
 		let confirmPasswordCheck = confirmPassword(userPassword, userConfirmedPassword);
 
 		if (confirmPasswordCheck == false) {
-			return responseWithStatus(res, 0, 400, 'Error', PASSWORDS_DONT_MATCH);
+			// #swagger.responses[400] = { description: "Passwords don't match.Please try again instead." }
+			return responseWithStatus(res, 0, 400, 'Error', "Passwords don't match.Please try again instead.");
 		}
 
 		// --------------------------------------------------------------------------- //
@@ -124,6 +127,7 @@ export async function registerUser(req, res) {
 				expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 			});
 
+			// #swagger.responses[201] = { description: 'Sign Up successful!' }
 			return await responseWithStatus(res, 1, 201, 'Sign Up successful!', {
 				user_details: userRegistrationResult,
 				access_token: accessToken,
@@ -169,7 +173,8 @@ export async function loginUser(req, res) {
 		let existingEmailCheck = await checkExistingEmail(userEmail);
 
 		if (existingEmailCheck == false) {
-			return await responseWithStatus(res, 0, 401, "Email doesn't exist. Please sign up instead", null);
+			// #swagger.responses[401] = { description: "Email doesn't exist. Please sign up instead" }
+			return await responseWithStatus(res, 0, 401, "Email doesn't exist. Please sign up instead");
 		} else if (existingEmailCheck == true) {
 			// --------------------------------------------------------------------------- //
 			// Email and Password Combination Check
@@ -185,12 +190,14 @@ export async function loginUser(req, res) {
 					expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 				});
 
+				// #swagger.responses[200] = { description: 'Sign in successful!' }
 				return await responseWithStatus(res, 1, 200, 'Sign in successful!', {
 					user_details: userDetails,
 					access_token: `${accessToken}`,
 					refresh_token: `${refreshToken}`,
 				});
 			} else {
+				// #swagger.responses[401] = { description: "Credentials Don't match. Please try again." }
 				return await responseWithStatus(res, 0, 401, "Credentials Don't match. Please try again.", null);
 			}
 		}
@@ -218,18 +225,23 @@ export async function verifyUserToken(req, res) {
 	// #swagger.tags = ['Authentication']
 	// #swagger.summary = 'Endpoint to allow the user to verify Bearer token. This is different from middleware confirmation.'
 	// #swagger.description = 'Use this if you want to verify authorization for access to something, or want to get the User's ID for fetching'
+	// #swagger.security = []
+
 
 	if (!req.header('Authorization')) {
+		// #swagger.responses[401] = { description: 'Unauthorized. Access Denied. Please login.' }
 		return responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please login.');
 	} else {
 		const token = req.header('Authorization').split(' ')[1];
 		// if (!token) return res.status(401).send('Access Denied');
 
 		try {
-			const verified = jwt.decode(token, env.ACCESS_TOKEN_SECRET_KEY);
+			const verified = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
 			const userId = verified.id;
+			// #swagger.responses[200] = { description: 'Token Verified Successfully.' }
 			return await responseWithStatus(res, 1, 200, 'Token Verified Successfully', { user_id: `${userId}` });
 		} catch (err) {
+			// #swagger.responses[401] = { description: 'Invalid Token. Please login.' }
 			return await responseWithStatus(res, 0, 401, 'Invalid Token. Please login.', { error_info: `${err}` });
 		}
 	}
@@ -238,12 +250,15 @@ export async function verifyUserToken(req, res) {
 export async function refreshToken(req, res) {
 	// #swagger.tags = ['Authentication']
 	// #swagger.summary = 'Endpoint to allow the user to renew access and refresh tokens.'
-	// #swagger.description = 'Use this in automation as once you detect a status code in the 400 range, you'll need to automatically hit this API'
+	// #swagger.description = "Use this in automation as once you detect a status code in the 400 range, you'll need to automatically hit this API. Make sure to pass the refresh token instead to get new access and refresh tokens."
+	// #swagger.security = []
+
 
 	if (req.header('Authorization')) {
 		const refreshToken = req.header('Authorization').split(' ')[1];
 		jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET_KEY, (err, decoded) => {
 			if (err) {
+				// #swagger.responses[401] = { description: 'Unauthorized. Invalid refresh token.' }
 				return responseWithStatus(res, 0, 401, 'Unauthorized. Invalid refresh token.', { error: err });
 			} else {
 				const accessToken = jwt.sign(
@@ -264,6 +279,7 @@ export async function refreshToken(req, res) {
 						expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 					}
 				);
+				// #swagger.responses[201] = { description: 'Tokens refreshed successfully.' }
 				return responseWithStatus(res, 1, 201, 'Tokens refreshed successfully', {
 					access_token: accessToken,
 					refresh_token: refreshToken,
@@ -271,6 +287,7 @@ export async function refreshToken(req, res) {
 			}
 		});
 	} else {
+		// #swagger.responses[401] = { description: 'Unauthorized. Invalid token.' }
 		return responseWithStatus(res, 0, 401, 'Unauthorized. Invalid token.');
 	}
 }
@@ -313,15 +330,44 @@ export async function refreshToken(req, res) {
 // }
 
 export async function forgotPassword(req, res) {
+	// #swagger.tags = ['Authentication']
+	// #swagger.summary = 'Endpoint to allow the user to send a forgot password request'
+	// #swagger.description = 'Used for starting a chain to reset a forgotten password.'
+	/* #swagger.requestBody = {
+		required: true,
+		content: {
+			"application/json": {
+				example: {
+					data: {
+						email: 'example@example.com',
+					}
+				}
+			}
+		}
+	}
+	*/
+
+	/*  #swagger.parameters['body'] = {
+		in: 'body',
+		required: true,
+		schema: {
+			data: {
+				$email: 'example@example.com',
+			}
+		}
+	} */
+
 	const userEmail = Object.values(req.body.data).toString();
 
 	try {
 		const existingEmailCheck = await checkExistingEmail(userEmail)
 		if (existingEmailCheck == false) {
-			return responseWithStatus(res, 0, 422, "Email doesn't exist. Please sign up instead.")
+			// #swagger.responses[401] = { description: "Email doesn't exist. Please sign up instead." }
+			return responseWithStatus(res, 0, 401, "Email doesn't exist. Please sign up instead.")
 		} else {
 			const userId = await checkExistingEmail(userEmail, true)
 			const sendEmailResult = await createForgotPasswordEmail(userId, userEmail)
+			// #swagger.responses[200] = { description: 'An OTP has been shared to your email address. Please use that to reset your password in the next screen.' }
 			return responseWithStatus(res, 1, 200, "An OTP has been shared to your email address. Please use that to reset your password in the next screen.")
 		}
 	} catch (error) {
@@ -330,6 +376,35 @@ export async function forgotPassword(req, res) {
 }
 
 export async function verifyOTP(req, res) {
+	// #swagger.tags = ['Authentication']
+	// #swagger.summary = 'Endpoint to allow the user to verify their OTP'
+	// #swagger.description = 'Used for verifying the OTP. Provides a temporary token that needs to be used in /reset-password endpoint'
+	/* #swagger.requestBody = {
+		required: true,
+		content: {
+			"application/json": {
+				example: {
+					"data": {
+						"email": "ahmed@admin.com",
+						"otp": "882724"
+					}
+				}
+			}
+		}
+	}
+	*/
+
+	/*  #swagger.parameters['body'] = {
+		in: 'body',
+		required: true,
+		schema: {
+			data: {
+				$email: 'example@example.com',
+				$otp: '882724',
+			}
+		}
+	} */
+
 	const userEmail = req.body.data.email
 	const userOTP = req.body.data.otp
 
@@ -339,8 +414,10 @@ export async function verifyOTP(req, res) {
 			const tempToken = jwt.sign({ id: userEmail }, env.ACCESS_TOKEN_SECRET_KEY, {
 				expiresIn: `${10}MINS`,
 			});
-			return responseWithStatus(res, 1, 200, "OTP has been verified", { temporary_token: tempToken, expires_in: '10 Minutes' })
+			// #swagger.responses[200] = { description: 'OTP has been verified!' }
+			return responseWithStatus(res, 1, 200, "OTP has been verified!", { temporary_token: tempToken, expires_in: '10 Minutes' })
 		} else {
+			// #swagger.responses[401] = { description: 'Invalid OTP or email does not exist.' }
 			return responseWithStatus(res, 1, 401, "Invalid OTP or email does not exist")
 		}
 	} catch (error) {
@@ -349,8 +426,52 @@ export async function verifyOTP(req, res) {
 }
 
 export async function resetPassword(req, res) {
+	// #swagger.tags = ['Authentication']
+	// #swagger.summary = 'Endpoint to allow the user to Reset their password'
+	// #swagger.description = 'Used for resetting the user's password using the temporary token that was obtained in the /verify-otp endpoint'
+
+	/* #swagger.parameters['Authorization'] = {
+		in: 'header',                            
+		required: true,                     
+		type: 'string',
+		schema: {
+			"Authorization": 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFobWVkQGFkbWluLmNvbSIsImlhdCI6MTc2OTYxMDY3NywiZXhwIjoxNzY5NjExMjc3fQ.rotqukJWBhZenFtx0q9LaKH9SkbAOiVaw-6DOP2IP9k'
+		}                        
+	} */
+
+	/* #swagger.requestBody = {
+		required: true,
+		content: {
+			"application/json": {
+					example: {
+						"data": {
+							"email": "ahmed@admin.com",
+							"password": "password123",
+							"confirmed_password": "password123"
+						}
+					}
+				}
+			}
+		}
+	}
+	*/
+
+	/*  #swagger.parameters['body'] = {
+		in: 'body',
+		required: true,
+		schema: {
+				"data": {
+					"email": "ahmed@admin.com",
+					"password": "password123",
+					"confirmed_password": "password123"
+				}
+			}
+		}
+	} */
+
 	if (!req.header('Authorization')) {
-		return responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please login.');
+		// #swagger.responses[401] = { description: 'Unauthorized. Access Denied. Please request another OTP.' }
+		return responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please request another OTP.');
 	} else {
 		const token = req.header('Authorization').split(' ')[1];
 		try {
@@ -363,7 +484,8 @@ export async function resetPassword(req, res) {
 			let confirmPasswordCheck = confirmPassword(userPassword, userConfirmedPassword);
 
 			if (confirmPasswordCheck == false) {
-				return responseWithStatus(res, 0, 400, 'Error', PASSWORDS_DONT_MATCH);
+				// #swagger.responses[400] = { description: "Passwords don't match. Please try again instead." }
+				return responseWithStatus(res, 0, 400, 'Error', "Passwords don't match. Please try again instead");
 			}
 
 			try {
@@ -375,6 +497,7 @@ export async function resetPassword(req, res) {
 					expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 				});
 
+				// #swagger.responses[201] = { description: 'Password Reset successful!' }
 				return await responseWithStatus(res, 1, 201, 'Password Reset successful!', {
 					user_details: userRegistrationResult,
 					access_token: accessToken,
@@ -384,6 +507,7 @@ export async function resetPassword(req, res) {
 				envLogger('Error creating record:', error, res);
 			}
 		} catch (err) {
+			// #swagger.responses[401] = { description: 'Invalid Token. Please request another OTP.' }
 			return await responseWithStatus(res, 0, 401, 'Invalid Token. Please request another OTP.', { error_info: `${err}` });
 		}
 	}

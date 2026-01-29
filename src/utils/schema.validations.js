@@ -18,6 +18,11 @@ const passwordSchema = z
 		message: `Password must contain at least one special character from the following: !@#$%^&*()_+={};:'"|,.<>?`,
 	});
 
+const OTPSchema = z
+	.string()
+	.length(6, { message: "OTP must be 6 digits long" })
+	.regex(/^\d+$/, { message: "OTP must only contain numbers" })
+
 export const authRegisterSchema = z
 	.object({
 		name: z.string().min(4).max(64).trim(),
@@ -33,9 +38,27 @@ export const authRegisterSchema = z
 
 export const authLoginSchema = z.object({
 	email: z.email(),
-	password: z.string().min(8).max(36),
+	password: passwordSchema,
 });
 
 export const authForgotPasswordSchema = z.object({
 	email: z.email(),
 });
+
+export const authVerifyOTPSchema = z.object({
+	email: z.email(),
+	otp: OTPSchema,
+});
+
+export const authResetPasswordSchema = z
+	.object({
+		email: z.email(),
+		password: passwordSchema,
+		confirmed_password: z.string(),
+	})
+	.refine((data) => data.password === data.confirmed_password, {
+		message: 'Passwords do not match',
+		path: ['confirmed_password'],
+	});
+
+export const UUIDSchema = z.uuidv7({ message: "Incorrect format, please enter a valid UUID" });
