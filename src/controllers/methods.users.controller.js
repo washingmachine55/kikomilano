@@ -92,14 +92,13 @@ export async function setFavorite(req, res) {
 
 	try {
 		const result = await saveProductFavorite(userId, productVariantId)
-
-		if (result === false) {
-			await responseWithStatus(res, 1, 422, "Error setting product as a favorite", "Product has already been set as favorite")
-		} else {
-			await responseWithStatus(res, 1, 200, "Product has been set as favorite", result)
-		}
+		await responseWithStatus(res, 1, 200, "Product added to favorites", result)
 	} catch (err) {
-		await responseWithStatus(res, 2, 500, "An error occurred", err)
+		if (err.code === '23503' || err.code === '23505') {
+			await responseWithStatus(res, 1, 409, "An error occured", "Conflict in database records")
+		} else {
+			await responseWithStatus(res, 0, 422, "An error occurred", err.message)
+		}
 	}
 }
 

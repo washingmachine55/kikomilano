@@ -61,4 +61,11 @@ export const authResetPasswordSchema = z
 		path: ['confirmed_password'],
 	}).required();
 
-export const UUIDSchema = z.uuidv7({ message: "Incorrect format, please enter a valid UUID" });
+export const UUIDSchema = z.uuidv7({
+	error: (iss) => iss.input === undefined ? "Field is required." : "Incorrect format, please enter a valid UUID"
+});
+
+export const userFavoriteProductSchema = z.object({
+	users_id: UUIDSchema,
+	products_variants_id: UUIDSchema,
+});

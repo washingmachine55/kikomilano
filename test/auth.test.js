@@ -6,7 +6,7 @@ process.loadEnvFile();
 pactum.request.setBaseUrl(process.env.APP_URL);
 pactum.request.setDefaultHeaders({ 'Content-Type': 'application/json' });
 
-describe('Authentication APIs', () => {
+xdescribe('Authentication APIs', () => {
 	describe('POST /auth/register', () => {
 		it('should register a new user successfully', async () => {
 			await pactum

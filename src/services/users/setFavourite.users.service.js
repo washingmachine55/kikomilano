@@ -1,6 +1,6 @@
 import pool from '../../config/db.js';
 
-export async function saveProductFavorite(userId, productVariantId) {
+export const saveProductFavorite = async (userId, productVariantId) => {
 	const conn = await pool.connect();
 
 	try {
@@ -10,7 +10,7 @@ export async function saveProductFavorite(userId, productVariantId) {
 		);
 		const checkIfRecordExists = checkIfRecordExistsQuery.rows[0].existscheck.toString();
 		if (checkIfRecordExists == 1) {
-			return false
+			throw new Error("Product already set as a favourite", { cause: "record exists" });
 		} else {
 			const result = await conn.query(
 				'INSERT INTO tbl_users_products_favorites(users_id, products_variants_id,created_by, created_at) VALUES ($1,$2,$1,NOW()) RETURNING *;',
@@ -19,8 +19,7 @@ export async function saveProductFavorite(userId, productVariantId) {
 			return result.rows[0];
 		}
 	} catch (err) {
-		console.error('Error setting product as a favorite:', err);
-		return false;
+		throw err;
 	} finally {
 		conn.release();
 	}

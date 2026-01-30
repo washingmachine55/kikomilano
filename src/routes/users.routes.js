@@ -3,6 +3,7 @@ import { getAllUsers, getFavorites, getSingleUser, setFavorite, unsetFavorite } 
 import { uploadUserProfilePicture } from '../controllers/uploadImage.users.controller.js';
 import { uploadImages } from '../config/multer.js';
 import verifyToken from '../middlewares/verifyToken.auth.js';
+import { verifyInputFields } from '../middlewares/verifyInputFields.users.js';
 const router = express.Router();
 
 router.get('/profile', verifyToken, getSingleUser);
@@ -13,7 +14,7 @@ router.post(
 	uploadImages.single('userProfilePicture'),
 	uploadUserProfilePicture
 );
-router.post("/set-favorites", setFavorite)
+router.post("/set-favorites", verifyInputFields, setFavorite)
 router.post("/remove-favorites", unsetFavorite)
 router.get("/favorites", getFavorites)
 

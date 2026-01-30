@@ -1,6 +1,7 @@
 import pactum from 'pactum';
 import * as pm from 'pactum-matchers';
 import fs from "node:fs";
+import { randomInt } from "node:crypto";
 
 process.loadEnvFile();
 pactum.request.setBaseUrl(process.env.APP_URL);
@@ -25,7 +26,8 @@ describe('Users APIs', () => {
 				}
 			`
 			)
-			.stores('userAccessToken', 'data.access_token');
+			.stores('userAccessToken', 'data.access_token')
+			.stores('userId', 'data.user_details.id');
 	});
 
 	describe('GET /users', () => {
@@ -183,15 +185,179 @@ describe('Users APIs', () => {
 		});
 	});
 
-	describe('GET /users - Edge Cases', () => {
-		it('should handle multiple requests to get all users', async () => {
+	describe('GET /users/favorites', () => {
+		it('should retrieve user favorites successfully with valid token', async () => {
 			await pactum
 				.spec()
 				.withMethod('GET')
-				.withPath('/users')
+				.withPath('/users/favorites')
 				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
-				.expectStatus(200);
+				.expectStatus(200)
+				.expectJsonLike({
+					message: "User's favorite products",
+				});
+		});
 
+		it('should fail to retrieve favorites without authentication token', async () => {
+			await pactum
+				.spec()
+				.withMethod('GET')
+				.withPath('/users/favorites')
+				.expectStatus(401);
+		});
+
+		it('should fail to retrieve favorites with invalid token', async () => {
+			await pactum
+				.spec()
+				.withMethod('GET')
+				.withPath('/users/favorites')
+				.withHeaders('Authorization', 'Bearer invalid_token_here')
+				.expectStatus(401);
+		});
+
+		it('should return favorites data in correct format', async () => {
+			await pactum
+				.spec()
+				.withMethod('GET')
+				.withPath('/users/favorites')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.expectStatus(200)
+				.expectJsonMatch({
+					type: 1,
+					status: 200,
+				});
+		});
+	});
+
+	describe('POST /users/set-favorites', () => {
+		it('should set favorite successfully with valid token and product id', async () => {
+			// FIXSOON
+			const randomProductNum = randomInt(0, 15);
+			await pactum
+				.spec()
+				.withMethod('GET')
+				.withPath('/products')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.expectStatus(200)
+				.stores('productId', `data.products_details[${randomProductNum}].product_variant_id`);
+
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/set-favorites')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.withBody({
+					data: {
+						users_id: `$S{userId}`,
+						products_variants_id: `$S{productId}`,
+					},
+				})
+				.expectStatus(200)
+				.expectJsonLike({
+					message: 'Product added to favorites',
+				});
+		});
+
+		it('should fail to set favorite without authentication token', async () => {
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/set-favorites')
+				.withBody({
+					data: {
+						product_id: pm.like('s'),
+					},
+				})
+				.expectStatus(401);
+		});
+
+		it('should fail to set favorite with invalid token', async () => {
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/set-favorites')
+				.withHeaders('Authorization', 'Bearer invalid_token_here')
+				.withBody({
+					data: {
+						product_id: pm.like('s'),
+					},
+				})
+				.expectStatus(401);
+		});
+
+		it('should fail to set favorite without product id', async () => {
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/set-favorites')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.withBody({
+					data: {},
+				})
+				.expectStatus(400);
+		});
+	});
+
+	describe('POST /users/remove-favorites', () => {
+		it('should remove favorite successfully with valid token and product id', async () => {
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/remove-favorites')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.withBody({
+					data: {
+						product_id: pm.like('s'),
+					},
+				})
+				.expectStatus(200)
+				.expectJsonLike({
+					message: 'Product removed from favorites',
+				});
+		});
+
+		it('should fail to remove favorite without authentication token', async () => {
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/remove-favorites')
+				.withBody({
+					data: {
+						product_id: pm.like('s'),
+					},
+				})
+				.expectStatus(401);
+		});
+
+		it('should fail to remove favorite with invalid token', async () => {
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/remove-favorites')
+				.withHeaders('Authorization', 'Bearer invalid_token_here')
+				.withBody({
+					data: {
+						product_id: pm.like('s'),
+					},
+				})
+				.expectStatus(401);
+		});
+
+		it('should fail to remove favorite without product id', async () => {
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/remove-favorites')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.withBody({
+					data: {},
+				})
+				.expectStatus(400);
+		});
+	});
+
+	describe('GET /users - Edge Cases', () => {
+		it('should handle multiple requests to get all users', async () => {
 			await pactum
 				.spec()
 				.withMethod('GET')

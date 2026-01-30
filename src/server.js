@@ -32,6 +32,10 @@ import productsRoutes from './routes/products.routes.js';
 app.use('/products', productsRoutes);
 
 import { responseWithStatus } from './utils/RESPONSES.js';
+import jwt from 'jsonwebtoken';
+const { JsonWebTokenError } = jwt;
+
+
 app.use((err, req, res, next) => {
 	if (err instanceof multer.MulterError) {
 		if (err.code === 'LIMIT_FILE_SIZE') {
@@ -53,7 +57,14 @@ app.use((err, req, res, next) => {
 		} else {
 			return responseWithStatus(res, 0, 400, err.message);
 		}
-	} else if (err) {
+	} else if (err instanceof JsonWebTokenError) {
+		return responseWithStatus(res, 0, 401, "Invallid token. Please login or Register", err.message);
+	}
+	// else if (err instanceof pool) {
+	// 	return responseWithStatus(res, 0, 422, "An error occurred", err.code)
+	// 	// return responseWithStatus(res, 0, 422, "Invallid token. Please login or Register", err.message);
+	// } 
+	else if (err) {
 		return responseWithStatus(res, 0, 500, err.message, err);
 	}
 	next(err);
