@@ -31,8 +31,12 @@ app.use('/users', usersRoutes);
 import productsRoutes from './routes/products.routes.js';
 app.use('/products', productsRoutes);
 
+import ordersRoutes from './routes/orders.routes.js';
+app.use('/orders', ordersRoutes);
+
 import { responseWithStatus } from './utils/RESPONSES.js';
 import jwt from 'jsonwebtoken';
+import { NotFoundError, ValidationError } from './utils/errors.js';
 const { JsonWebTokenError } = jwt;
 
 
@@ -58,12 +62,16 @@ app.use((err, req, res, next) => {
 			return responseWithStatus(res, 0, 400, err.message);
 		}
 	} else if (err instanceof JsonWebTokenError) {
-		return responseWithStatus(res, 0, 401, "Invallid token. Please login or Register", err.message);
+		return responseWithStatus(res, 0, 401, "Invalid token. Please login or Register", err.message);
 	}
-	// else if (err instanceof pool) {
-	// 	return responseWithStatus(res, 0, 422, "An error occurred", err.code)
-	// 	// return responseWithStatus(res, 0, 422, "Invallid token. Please login or Register", err.message);
-	// } 
+	else if (err instanceof ValidationError) {
+		console.debug(err.stack);
+		return responseWithStatus(res, 0, 400, err.message, err.details);
+	}
+	else if (err instanceof NotFoundError) {
+		console.debug(err.stack);
+		return responseWithStatus(res, 0, 404, err.message, err);
+	}
 	else if (err) {
 		return responseWithStatus(res, 0, 500, err.message, err);
 	}
