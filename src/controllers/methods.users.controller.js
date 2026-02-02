@@ -9,6 +9,9 @@ import { verifyJwtAsync } from '../utils/jwtUtils.js';
 import { saveProductFavorite } from '../services/users/setFavourite.users.service.js';
 import { deleteProductFavorite } from '../services/users/unsetFavourite.users.service.js';
 import { getAllProductsFavorites } from '../services/users/getAllFavorites.users.service.js';
+import { attempt } from '../utils/errors.js';
+import { allowedFieldsFunc } from '../utils/dynamicAllowedFields.js';
+import { editUserDetails } from '../services/users/editUserDetails.users.service.js';
 
 export async function getAllUsers(req, res) {
 	// #swagger.tags = ['Users']
@@ -85,6 +88,18 @@ export async function getSingleUser(req, res) {
 		}
 	}
 }
+
+export const editUserProfile = await attempt(async (req, res) => {
+
+	const allowedFields = ['name', 'email', 'password', 'confirmed_password']
+	const fieldsToUpdate = await allowedFieldsFunc(allowedFields, req.body.data);
+
+	const token = req.header('Authorization').split(' ')[1];
+	const verified = await verifyJwtAsync(token, env.ACCESS_TOKEN_SECRET_KEY);
+
+	const result = await editUserDetails(fieldsToUpdate, verified.id)
+	return await responseWithStatus(res, 1, 200, "User profile edited successfully", result)
+})
 
 export async function setFavorite(req, res) {
 	const userId = req.body.data.users_id

@@ -31,6 +31,14 @@ export class RecordCheck {
 			.catch(err => {throw Error(`Unable to check if the record exists`, err.message)});
 	}
 
+	async getId() {
+		return await pool.query(`
+			SELECT id FROM ${this.table} WHERE ${this.field} = $1;
+		`, [this.request])
+			.then(res => res.rows[0].id)
+			.catch(err => { throw Error(`Unable to get id of this record`, err.message) });
+	}
+
 	async getResultWhereStatus() {
 		return await pool.query(`
 			SELECT CASE WHEN EXISTS(SELECT ${this.field} FROM ${this.table} WHERE ${this.field} = $1 AND STATUS = 0) THEN true ELSE false END AS ExistsCheck;

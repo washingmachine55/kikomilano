@@ -81,6 +81,8 @@ app.use((err, req, res, next) => {
 		return responseWithStatus(res, 1, 409, "An error occured", "Conflict in database records")
 	}
 	else if (err) {
+		console.log(err);
+
 		return responseWithStatus(res, 0, 500, err.name, err.message);
 	}
 	next(err);

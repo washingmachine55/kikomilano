@@ -1,9 +1,18 @@
 export const attempt = async (func) => {
 	return (res, req, next) => {
-		func(res, req, next).catch(err => next(err));
+		func(res, req, next).catch((err) => next(err));
 	}
 }
 
+export const trialCapture = async (promise) => {
+	try {
+		const result = await promise
+		return [result, null]
+	} catch (error) {
+		console.log(error);
+		return [null, error]
+	}
+}
 
 export class ValidationError extends Error {
 	constructor(message) {

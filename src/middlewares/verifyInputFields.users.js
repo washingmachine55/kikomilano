@@ -8,6 +8,10 @@ export async function verifyInputFields(req, res, next) {
 		case "/set-favorites":
 			reqData = await userFavoriteProductSchema.safeParseAsync(req.body.data);
 			break;
+		case "/profile/edit":
+			reqData = authRegisterSchema.partial();
+			await req.data.safeParseAsync(req.body.data);
+			break;
 		default:
 			break;
 	}
