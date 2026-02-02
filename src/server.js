@@ -34,9 +34,10 @@ app.use('/products', productsRoutes);
 import ordersRoutes from './routes/orders.routes.js';
 app.use('/orders', ordersRoutes);
 
-import { responseWithStatus } from './utils/RESPONSES.js';
+import { responseWithStatus } from './utils/responses.js';
 import jwt from 'jsonwebtoken';
 import { NotFoundError, ValidationError } from './utils/errors.js';
+import { ZodError } from 'zod';
 const { JsonWebTokenError } = jwt;
 
 
@@ -66,14 +67,21 @@ app.use((err, req, res, next) => {
 	}
 	else if (err instanceof ValidationError) {
 		console.debug(err.stack);
-		return responseWithStatus(res, 0, 400, err.message, err.details);
+		return responseWithStatus(res, 0, 400, err.message, err.name);
+	}
+	else if (err instanceof ZodError) {
+		console.debug(err.stack);
+		return responseWithStatus(res, 0, 404, err.name, { cause: err });
 	}
 	else if (err instanceof NotFoundError) {
 		console.debug(err.stack);
 		return responseWithStatus(res, 0, 404, err.message, err);
 	}
+	if (err.code == '23503' || err.code === '23505') {
+		return responseWithStatus(res, 1, 409, "An error occured", "Conflict in database records")
+	}
 	else if (err) {
-		return responseWithStatus(res, 0, 500, err.message, err);
+		return responseWithStatus(res, 0, 500, err.name, err.message);
 	}
 	next(err);
 });

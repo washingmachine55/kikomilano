@@ -12,7 +12,7 @@ import jwt from 'jsonwebtoken';
 // import { TZDate } from '@date-fns/tz';
 import { env, loadEnvFile } from 'node:process';
 loadEnvFile();
-import { responseWithStatus } from '../utils/RESPONSES.js';
+import { responseWithStatus } from '../utils/responses.js';
 import { EMAIL_EXISTS_ALREADY, MISSING_INPUT_FIELDS, PASSWORDS_DONT_MATCH } from '../utils/CONSTANTS.js';
 import envLogger from '../utils/customLogger.js';
 import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service.js';

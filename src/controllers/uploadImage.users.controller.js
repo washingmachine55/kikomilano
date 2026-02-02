@@ -1,7 +1,7 @@
 import { env, loadEnvFile } from 'node:process';
 loadEnvFile();
 import { getSingleUserDetails } from '../services/users/getSingle.users.service.js';
-import { responseWithStatus } from '../utils/RESPONSES.js';
+import { responseWithStatus } from '../utils/responses.js';
 import jwt from 'jsonwebtoken';
 import { getAllUsersDetails } from '../services/users/getAll.users.service.js';
 import { uploadUserProfilePictureToDB } from '../services/users/uploadPicture.users.service.js';

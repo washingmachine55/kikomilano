@@ -1,6 +1,6 @@
 import z from "zod";
 import { UUIDSchema } from "../utils/schema.validations.js";
-import { responseWithStatus } from "../utils/RESPONSES.js";
+import { responseWithStatus } from "../utils/responses.js";
 
 export async function validateUuidUrlParam(req, res, next) {
 	const inputToValidate = req.params.productId.toLowerCase();

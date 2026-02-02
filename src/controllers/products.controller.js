@@ -1,33 +1,31 @@
 import { getAllProductsDetails } from "../services/products/getAll.products.service.js";
 import { getAllProductsVariants } from "../services/products/getAllVariants.products.service.js";
-import { responseWithStatus } from "../utils/RESPONSES.js";
+import { attempt, NotFoundError } from "../utils/errors.js";
+import { responseWithStatus } from "../utils/responses.js";
 
-export async function getAllProducts(req, res) {
+export const getAllProducts = await attempt(async (req, res, next) => {
 	// #swagger.tags = ['Products']
 	// #swagger.summary = 'Endpoint to get all details of all products.'
 	// #swagger.description = "It retrieves the main product's variant details, as well as the base product information."
 
-	try {
-		if (req.query.category !== undefined) {
-			const result = await getAllProductsDetails(req.query.category);
-			if (!result) {
-				// #swagger.responses[404] = { description: 'That category does not exist.' }
-				return await responseWithStatus(res, 1, 404, 'That category does not exist.')
-			} else {
-				// #swagger.responses[200] = { description: 'Details of all available products of the selected category.' }
-				return await responseWithStatus(res, 1, 200, 'Details of all available products of the selected category.', result)
-			}
+	if (req.query.category !== undefined) {
+		const result = await getAllProductsDetails(req.query.category);
+		if (!result) {
+			// #swagger.responses[404] = { description: 'That category does not exist.' }
+			return await responseWithStatus(res, 1, 404, 'That category does not exist.')
 		} else {
-			const result = await getAllProductsDetails();
-			// #swagger.responses[200] = { description: 'Details of all available products.' }
-			return await responseWithStatus(res, 1, 200, 'Details of all available products.', { products_details: result })
+			// #swagger.responses[200] = { description: 'Details of all available products of the selected category.' }
+			return await responseWithStatus(res, 1, 200, 'Details of all available products of the selected category.', result)
 		}
-	} catch (error) {
-		console.debug(error);
+	} else {
+		const result = await getAllProductsDetails();
+		// #swagger.responses[200] = { description: 'Details of all available products.' }
+		return await responseWithStatus(res, 1, 200, 'Details of all available products.', { products_details: result })
 	}
-}
+})
 
-export async function getAllProductVariants(req, res) {
+// export async function getAllProductVariants(req, res) {
+export const getAllProductVariants = await attempt(async (req, res, next) => {
 	// #swagger.tags = ['Products']
 	// #swagger.summary = 'Endpoint to get all variants of a product with a given UUID in endpoint.'
 	// #swagger.description = "It retrieves the base product's details Object, product tags Array, and an Array of Objects of all product variants of the product."
@@ -40,15 +38,16 @@ export async function getAllProductVariants(req, res) {
 	// const parsedParam = req.params.productId.trim()
 
 	const result = await getAllProductsVariants(req.params.productId);
-	try {
+	// try {
 		if (result === false) {
 			// #swagger.responses[404] = { description: 'No product variants found of this product id.' }
-			return await responseWithStatus(res, 1, 404, 'No product variants found of this product id.', result)
+			throw new NotFoundError("No product variants found of this product id", "It is likely that the product id does not exist, please recheck the Product ID from the /products endpoint");
+			// return await responseWithStatus(res, 1, 404, 'No product variants found of this product id.', result)
 		} else {
 			// #swagger.responses[200] = { description: 'Details of all available product variants.' }
 			return await responseWithStatus(res, 1, 200, 'Details of all available product variants.', result)
 		}
-	} catch (error) {
-		console.debug(error);
-	}
-}
+	// } catch (error) {
+	// 	console.debug(error);
+	// }
+})

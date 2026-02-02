@@ -69,3 +69,13 @@ export const userFavoriteProductSchema = z.object({
 	users_id: UUIDSchema,
 	products_variants_id: UUIDSchema,
 });
+
+const extractUuidFromString = (input) => {
+	const match = input.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+	return match?.[0];
+};
+
+export const extractedUuidSchema = z.string()
+	.transform((val) => extractUuidFromString(val)) // 1. Extract the potential UUID string
+	.pipe(z.uuidv7()); // 2. Pipe the extracted string to the built-in uuid validator
+

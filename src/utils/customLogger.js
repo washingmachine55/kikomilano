@@ -1,4 +1,4 @@
-import { responseWithStatus } from './RESPONSES.js';
+import { responseWithStatus } from './responses.js';
 process.loadEnvFile();
 
 /**

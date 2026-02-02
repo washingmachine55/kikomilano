@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { env, loadEnvFile } from 'node:process';
-import { responseWithStatus } from '../utils/RESPONSES.js';
+import { responseWithStatus } from '../utils/responses.js';
 loadEnvFile();
 
 const verifyToken = (req, res, next) => {
@@ -14,9 +14,10 @@ const verifyToken = (req, res, next) => {
 			req.user = verified;
 			next();
 		} catch (err) {
-			return responseWithStatus(res, 0, 401, 'Invalid Token. Please login.', {
-				errors: err,
-			});
+			next(err)
+			// return responseWithStatus(res, 0, 401, 'Invalid Token. Please login.', {
+			// 	errors: err,
+			// });
 		}
 	}
 };

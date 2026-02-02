@@ -1,6 +1,6 @@
 import z from 'zod';
 import { authForgotPasswordSchema, authLoginSchema, authRegisterSchema, authResetPasswordSchema, authVerifyOTPSchema } from '../utils/schema.validations.js';
-import { responseWithStatus } from '../utils/RESPONSES.js';
+import { responseWithStatus } from '../utils/responses.js';
 
 export async function verifyInputFields(req, res, next) {
 	let reqData;

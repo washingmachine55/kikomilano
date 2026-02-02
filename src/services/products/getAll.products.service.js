@@ -1,4 +1,5 @@
 import pool from '../../config/db.js';
+import { NotFoundError } from '../../utils/errors.js';
 import { getAllCategoriesDetails } from '../categories/getAll.categories.service.js';
 
 export async function getAllProductsDetails(categoriesName) {
@@ -26,7 +27,6 @@ export async function getAllProductsDetails(categoriesName) {
 				return result.rows;
 			}
 		} else {
-
 			const result = await conn.query(`
 				SELECT p.id AS product_id, p.name AS product_name, pv.id AS product_variant_id, pv.name AS product_variant_name, p.rating, c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
 				FROM tbl_products p
@@ -40,9 +40,9 @@ export async function getAllProductsDetails(categoriesName) {
 			return result.rows;
 		}
 
-
 	} catch (err) {
 		console.error('Error reading record:', err);
+		throw new NotFoundError("Error getting all products", { cause: err });
 	} finally {
 		conn.release();
 	}
