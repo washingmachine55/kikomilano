@@ -4,11 +4,6 @@ import { forgotPassword, loginUser, refreshToken, registerUser, resetPassword, v
 import verifyToken from '../middlewares/verifyToken.auth.js';
 const router = express.Router();
 
-// router.get('/', validateQueryGetAll, read)
-// router.post('/', validateEmployeesInput, create)
-// router.patch('/:id', validateUuidUrlParam, update)
-// router.delete('/:id', validateUuidUrlParam, remove)
-// router.post('/register', verifyInputFields, registerUser)
 router.post('/register', verifyInputFields, registerUser);
 router.post('/login', verifyInputFields, loginUser);
 router.get('/verify-token', verifyToken, verifyUserToken);
@@ -16,8 +11,5 @@ router.get('/refresh', refreshToken);
 router.post('/forgot-password', verifyInputFields, forgotPassword)
 router.post('/verify-otp', verifyInputFields, verifyOTP)
 router.post('/reset-password', verifyInputFields, resetPassword)
-// router.get('/logout', logoutUser)
-// router.get('/resend-otp', verifyToken, resendOTP)
-// router.get('/verify-access', verifyToken, verifyUserAccess)
 
 export default router;

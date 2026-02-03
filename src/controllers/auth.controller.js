@@ -13,12 +13,12 @@ import jwt from 'jsonwebtoken';
 import { env, loadEnvFile } from 'node:process';
 loadEnvFile();
 import { responseWithStatus } from '../utils/responses.js';
-import { EMAIL_EXISTS_ALREADY, MISSING_INPUT_FIELDS, PASSWORDS_DONT_MATCH } from '../utils/CONSTANTS.js';
 import envLogger from '../utils/customLogger.js';
 import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service.js';
 import { verifyOTPFromDB } from '../services/auth/verifyOTP.auth.service.js';
 import saveNewUserPasswordToDB from '../services/auth/saveNewPassword.auth.service.js';
 import { signJwtAsync, verifyJwtAsync } from '../utils/jwtUtils.js';
+import { attempt } from '../utils/errors.js';
 
 // import { OAuth2Client } from 'google-auth-library';
 // export async function googleAuth(req, res) {
@@ -96,18 +96,18 @@ export async function registerUser(req, res) {
 	// 	// #swagger.responses[400] = { description: 'One or more input fields are empty. Please fill up all the input fields before submitting.' }
 	// 	return responseWithStatus(res, 0, 400, 'One or more input fields are empty. Please fill up all the input fields before submitting.');
 	// } else {
-		// --------------------------------------------------------------------------- //
-		// Check if email exists in database already
-		// --------------------------------------------------------------------------- //
-		let existingEmailCheck = await checkExistingEmail(userEmail);
+	// --------------------------------------------------------------------------- //
+	// Check if email exists in database already
+	// --------------------------------------------------------------------------- //
+	let existingEmailCheck = await checkExistingEmail(userEmail);
 
-		if (existingEmailCheck == true) {
-			// #swagger.responses[401] = { description: 'Email already exists. Please sign in instead.' }
-			return responseWithStatus(res, 0, 401, 'Error', 'Email already exists. Please sign in instead.');
-		}
-		// --------------------------------------------------------------------------- //
-		// Password Confirmation Check
-		// --------------------------------------------------------------------------- //
+	if (existingEmailCheck == true) {
+		// #swagger.responses[401] = { description: 'Email already exists. Please sign in instead.' }
+		return responseWithStatus(res, 0, 401, 'Error', 'Email already exists. Please sign in instead.');
+	}
+	// --------------------------------------------------------------------------- //
+	// Password Confirmation Check
+	// --------------------------------------------------------------------------- //
 	// let confirmPasswordCheck = confirmPassword(userPassword, userConfirmedPassword);
 
 	// if (confirmPasswordCheck == false) {
@@ -115,54 +115,54 @@ export async function registerUser(req, res) {
 	// 	return responseWithStatus(res, 0, 400, 'Error', "Passwords don't match. Please try again instead.");
 	// }
 
-		// --------------------------------------------------------------------------- //
-		// Save User details to Database if all checks are cleared
-		// --------------------------------------------------------------------------- //
-		const entryArray = [userName, userEmail, userPassword];
-		try {
-			const userRegistrationResult = await registerUserToDatabase(entryArray);
-			const accessToken = jwt.sign({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
-				expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
-			});
-			const refreshToken = jwt.sign({ id: userRegistrationResult.id }, env.REFRESH_TOKEN_SECRET_KEY, {
-				expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
-			});
+	// --------------------------------------------------------------------------- //
+	// Save User details to Database if all checks are cleared
+	// --------------------------------------------------------------------------- //
+	const entryArray = [userName, userEmail, userPassword];
+	try {
+		const userRegistrationResult = await registerUserToDatabase(entryArray);
+		const accessToken = jwt.sign({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
+			expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
+		});
+		const refreshToken = jwt.sign({ id: userRegistrationResult.id }, env.REFRESH_TOKEN_SECRET_KEY, {
+			expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
+		});
 
-			/* #swagger.responses[201] = {
-				description: 'Sign Up successful!',
-				content: {
-					"application/json": {
-						example: {
-							"status": 201,
-							"type": 1,
-							"message": "Sign Up successful!",
-							"data": {
-								"user_details": {
-									"id": "019c0a0c-6a5c-7c53-9686-4f155b77123b",
-									"email": "sample@user.com",
-									"access_type": 0,
-									"created_at": "2026-01-29T13:58:31.772Z",
-									"first_name": "Sample",
-									"last_name": "User",
-									"images_id": null
-								},
-							"access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOWMwYTBjLTZhNWMtN2M1My05Njg2LTRmMTU1Yjc3MTIzYiIsImlhdCI6MTc2OTY5NTExMSwiZXhwIjoxNzY5Njk4NzExfQ.E5wRmBg1YrUBqIA9qGdnqN0XsDh6T02qScSd-8-DweQ",
-							"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOWMwYTBjLTZhNWMtN2M1My05Njg2LTRmMTU1Yjc3MTIzYiIsImlhdCI6MTc2OTY5NTExMSwiZXhwIjoxNzcwMjk5OTExfQ.visdlLXjLsPJHL4xCFR6ikBgbTuBtvJ1MyrkGqksrO8"
-							}
+		/* #swagger.responses[201] = {
+			description: 'Sign Up successful!',
+			content: {
+				"application/json": {
+					example: {
+						"status": 201,
+						"type": 1,
+						"message": "Sign Up successful!",
+						"data": {
+							"user_details": {
+								"id": "019c0a0c-6a5c-7c53-9686-4f155b77123b",
+								"email": "sample@user.com",
+								"access_type": 0,
+								"created_at": "2026-01-29T13:58:31.772Z",
+								"first_name": "Sample",
+								"last_name": "User",
+								"images_id": null
+							},
+						"access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOWMwYTBjLTZhNWMtN2M1My05Njg2LTRmMTU1Yjc3MTIzYiIsImlhdCI6MTc2OTY5NTExMSwiZXhwIjoxNzY5Njk4NzExfQ.E5wRmBg1YrUBqIA9qGdnqN0XsDh6T02qScSd-8-DweQ",
+						"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOWMwYTBjLTZhNWMtN2M1My05Njg2LTRmMTU1Yjc3MTIzYiIsImlhdCI6MTc2OTY5NTExMSwiZXhwIjoxNzcwMjk5OTExfQ.visdlLXjLsPJHL4xCFR6ikBgbTuBtvJ1MyrkGqksrO8"
 						}
-					}           
-				}
-			} 
-			*/
+					}
+				}           
+			}
+		} 
+		*/
 
-			return await responseWithStatus(res, 1, 201, 'Sign Up successful!', {
-				user_details: userRegistrationResult,
-				access_token: accessToken,
-				refresh_token: refreshToken,
-			});
-		} catch (error) {
-			console.debug('Error creating record:', error, res);
-		}
+		return await responseWithStatus(res, 1, 201, 'Sign Up successful!', {
+			user_details: userRegistrationResult,
+			access_token: accessToken,
+			refresh_token: refreshToken,
+		});
+	} catch (error) {
+		console.debug('Error creating record:', error, res);
+	}
 	// }
 }
 
@@ -232,21 +232,6 @@ export async function loginUser(req, res) {
 		console.debug('Error reading record:', error);
 	}
 }
-
-// async function logoutUser(req, res) {
-// 	const token = req.header('authorization');
-// 	try {
-// 		const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
-// 		const userId = decoded.id;
-// 		res.status(200).json({
-// 			type: 'success',
-// 			message: `${userId} has been Logged out successfully`,
-// 		});
-// 		// next();
-// 	} catch (err) {
-// 		res.status(401).json({ msg: 'Token is not valid', error: err });
-// 	}
-// }
 
 export async function verifyUserToken(req, res) {
 	// #swagger.tags = ['Authentication']

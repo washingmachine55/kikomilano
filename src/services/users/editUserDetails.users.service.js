@@ -1,37 +1,45 @@
 import pool from "../../config/db.js";
 import { RecordCheck } from "../../providers/recordChecks.providers.js";
-import { NotFoundError, trialCapture } from "../../utils/errors.js";
+import { BadRequestError, NotFoundError, trialCapture } from "../../utils/errors.js";
 import { nameSplitter } from "../../utils/nameSplitter.js";
 import saveNewUserPasswordToDB from "../auth/saveNewPassword.auth.service.js";
 
 export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 	const conn = await pool.connect();
 
-	const emailUpdateArr = []
-	const nameUpdateArr = []
-
-	const namePassUpdateArr = []
-	const emailNameUpdateArr = []
-	const emailPassUpdateArr = []
-
-	const emailPassNameUpdateArr = []
-
 	if (fieldsToUpdate.hasOwnProperty("email")) {
+		// const [data, error] = await trialCapture(
+		// 	new RecordCheck("email", "tbl_users", fieldsToUpdate.email).getResult()
+		// )
 		const [data, error] = await trialCapture(
-			new RecordCheck("email", "tbl_users", fieldsToUpdate.email).getResult()
+			await conn.query(`
+				SELECT CASE WHEN EXISTS (
+					SELECT
+					FROM tbl_users u
+					WHERE email = $1
+				) THEN true ELSE false END AS ExistsCheck;`, [fieldsToUpdate.email])
 		)
 		if (error) {
 			throw new Error("Something went wrong while trying to check if email exists", { cause: error });
 		}
-		if (data === false) {
-			const [emailUpdate, error] = await trialCapture(await conn.query(
+		if (data.rows[0].existscheck === false) {
+			const [emailUpdate, errorEmailUpdate] = await trialCapture(await conn.query(
 				`UPDATE tbl_users SET email = $1, updated_at = NOW(), updated_by = $2 WHERE id = $2 RETURNING id, email, phone_no, access_type, created_at, updated_at`,
 				[fieldsToUpdate.email, verifiedUserId]
 			));
-			if (error) {
+			if (errorEmailUpdate) {
 				throw new NotFoundError("Unable to find user in database");
 			}
-			emailUpdateArr.push(emailUpdate.rows[0])
+		} else {
+			const result = await conn.query(`
+				SELECT CASE WHEN EXISTS (
+					SELECT
+					FROM tbl_users u
+					WHERE email = $1 AND id != $2
+				) THEN true ELSE false END AS ExistsCheck;`, [fieldsToUpdate.email, verifiedUserId])
+			if (result.rows[0].existscheck === true) {
+				throw new BadRequestError("That email is already taken!");
+			}
 		}
 	}
 
@@ -56,7 +64,15 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 			if (errorNameUpdate) {
 				throw new Error("Unable to save name changes in database", { cause: errorNameUpdate });
 			}
-			nameUpdateArr.push(nameUpdate.rows[0])
+		}
+	}
+
+	if (fieldsToUpdate.hasOwnProperty("password")) {
+		const [resultPass, errorPass] = await trialCapture(
+			await saveNewUserPasswordToDB(null, fieldsToUpdate.password, verifiedUserId)
+		)
+		if (errorPass) {
+			throw new Error("Error updating user's password to database", { cause: errorEmailPass });
 		}
 	}
 
@@ -67,14 +83,16 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 		if (errorEmailPass) {
 			throw new Error("Error updating user's password to database", { cause: errorEmailPass });
 		}
-		emailPassUpdateArr.push(emailPass)
-	}
-	// TOFIX: add all into one array as one basic object reagardless of what is updated
-	return {
-		emailPassUpdates: emailPassUpdateArr,
-		nameUpdates: nameUpdateArr,
-		emailUpdates: emailUpdateArr,
 	}
 
+	const result = await conn.query(`
+		SELECT u.id, u.email, u.phone_no, u.access_type, ud.first_name, ud.last_name, i.image_url 
+		FROM tbl_users u 
+		JOIN tbl_users_details ud ON u.id = ud.users_id
+		FULL JOIN tbl_images i ON i.id = ud.images_id 
+		WHERE u.id = $1;
+	`, [verifiedUserId])
+
 	conn.release();
+	return result.rows[0]
 }

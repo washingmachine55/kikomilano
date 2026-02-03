@@ -9,7 +9,7 @@ import { verifyJwtAsync } from '../utils/jwtUtils.js';
 import { saveProductFavorite } from '../services/users/setFavourite.users.service.js';
 import { deleteProductFavorite } from '../services/users/unsetFavourite.users.service.js';
 import { getAllProductsFavorites } from '../services/users/getAllFavorites.users.service.js';
-import { attempt } from '../utils/errors.js';
+import { attempt, NotFoundError, ValidationError } from '../utils/errors.js';
 import { allowedFieldsFunc } from '../utils/dynamicAllowedFields.js';
 import { editUserDetails } from '../services/users/editUserDetails.users.service.js';
 
@@ -117,22 +117,41 @@ export async function setFavorite(req, res) {
 	}
 }
 
-export async function unsetFavorite(req, res) {
+// export async function unsetFavorite(req, res) {
+// 	const userId = req.body.data.users_id
+// 	const productVariantId = req.body.data.products_variants_id
+
+// 	if (!req.body.data.products_variants_id) {
+// 		await responseWithStatus(res, 1, 400, "Product field must not be empty")
+// 	}
+
+// 	try {
+// 		const result = await deleteProductFavorite(userId, productVariantId)
+
+// 		if (result === false) {
+// 			await responseWithStatus(res, 1, 200, "Product already removed")
+// 		} else {
+// 			await responseWithStatus(res, 1, 200, "Product removed from favorites", result)
+// 		}
+// 	} catch (err) {
+// 		await responseWithStatus(res, 2, 500, "An error occurred while removing product from favorites", err)
+// 	}
+// }
+export const unsetFavorite = await attempt(async (req, res, next) => {
 	const userId = req.body.data.users_id
 	const productVariantId = req.body.data.products_variants_id
 
-	try {
-		const result = await deleteProductFavorite(userId, productVariantId)
-
-		if (result === false) {
-			await responseWithStatus(res, 1, 422, "Error removing product from favorites")
-		} else {
-			await responseWithStatus(res, 1, 200, "Product removed from favorites", result)
-		}
-	} catch (err) {
-		await responseWithStatus(res, 2, 500, "An error occurred", err)
+	if (!req.body.data.products_variants_id) {
+		throw new ValidationError("Product ID must not be empty, please provide a valid product ID")
 	}
-}
+
+	const result = await deleteProductFavorite(userId, productVariantId)
+	if (result === false) {
+		await responseWithStatus(res, 1, 200, "Product already removed")
+	} else {
+		await responseWithStatus(res, 1, 200, "Product removed from favorites", result)
+	}
+});
 
 export async function getFavorites(req, res) {
 	// #swagger.tags = ['Users']

@@ -41,7 +41,7 @@ export const getAllProductVariants = await attempt(async (req, res, next) => {
 	// try {
 		if (result === false) {
 			// #swagger.responses[404] = { description: 'No product variants found of this product id.' }
-			throw new NotFoundError("No product variants found of this product id", "It is likely that the product id does not exist, please recheck the Product ID from the /products endpoint");
+			throw new NotFoundError("No product variants found of this product id.", "It is likely that the product id does not exist, please recheck the Product ID from the /products endpoint");
 			// return await responseWithStatus(res, 1, 404, 'No product variants found of this product id.', result)
 		} else {
 			// #swagger.responses[200] = { description: 'Details of all available product variants.' }

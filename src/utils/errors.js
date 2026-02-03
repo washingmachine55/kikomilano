@@ -25,6 +25,17 @@ export class ValidationError extends Error {
 	}
 }
 
+export class BadRequestError extends Error {
+	constructor(message) {
+		super(message); // Call the parent Error constructor
+		this.name = 'Bad Request Error'; // Set a custom name
+		this.message = message;
+		if (Error.captureStackTrace) {
+			Error.captureStackTrace(this, ValidationError);
+		}
+	}
+}
+
 export class ConflictError extends Error {
 	constructor(details) {
 		super(details); // Call the parent Error constructor

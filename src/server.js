@@ -36,7 +36,7 @@ app.use('/orders', ordersRoutes);
 
 import { responseWithStatus } from './utils/responses.js';
 import jwt from 'jsonwebtoken';
-import { NotFoundError, ValidationError } from './utils/errors.js';
+import { BadRequestError, NotFoundError, ValidationError } from './utils/errors.js';
 import { ZodError } from 'zod';
 const { JsonWebTokenError } = jwt;
 
@@ -68,6 +68,10 @@ app.use((err, req, res, next) => {
 	else if (err instanceof ValidationError) {
 		console.debug(err.stack);
 		return responseWithStatus(res, 0, 400, err.message, err.name);
+	}
+	else if (err instanceof BadRequestError) {
+		console.debug(err.stack);
+		return responseWithStatus(res, 0, 400, err.name, err.message);
 	}
 	else if (err instanceof ZodError) {
 		console.debug(err.stack);

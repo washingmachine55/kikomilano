@@ -265,7 +265,8 @@ describe('Users APIs', () => {
 				.withPath('/users/set-favorites')
 				.withBody({
 					data: {
-						product_id: pm.like('s'),
+						users_id: `$S{userId}`,
+						products_variants_id: `$S{productId}`,
 					},
 				})
 				.expectStatus(401);
@@ -279,7 +280,8 @@ describe('Users APIs', () => {
 				.withHeaders('Authorization', 'Bearer invalid_token_here')
 				.withBody({
 					data: {
-						product_id: pm.like('s'),
+						users_id: `$S{userId}`,
+						products_variants_id: `$S{productId}`,
 					},
 				})
 				.expectStatus(401);
@@ -307,7 +309,8 @@ describe('Users APIs', () => {
 				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
 				.withBody({
 					data: {
-						product_id: pm.like('s'),
+						users_id: `$S{userId}`,
+						products_variants_id: `$S{productId}`,
 					},
 				})
 				.expectStatus(200)
@@ -323,7 +326,8 @@ describe('Users APIs', () => {
 				.withPath('/users/remove-favorites')
 				.withBody({
 					data: {
-						product_id: pm.like('s'),
+						users_id: `$S{userId}`,
+						products_variants_id: `$S{productId}`,
 					},
 				})
 				.expectStatus(401);
@@ -337,7 +341,8 @@ describe('Users APIs', () => {
 				.withHeaders('Authorization', 'Bearer invalid_token_here')
 				.withBody({
 					data: {
-						product_id: pm.like('s'),
+						users_id: `$S{userId}`,
+						products_variants_id: `$S{productId}`,
 					},
 				})
 				.expectStatus(401);
@@ -350,7 +355,9 @@ describe('Users APIs', () => {
 				.withPath('/users/remove-favorites')
 				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
 				.withBody({
-					data: {},
+					data: {
+						users_id: `$S{userId}`,
+					},
 				})
 				.expectStatus(400);
 		});

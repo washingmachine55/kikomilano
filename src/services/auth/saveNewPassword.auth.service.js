@@ -1,14 +1,17 @@
 import pool from '../../config/db.js';
 import bcrypt from 'bcryptjs';
-import { SOMETHING_WENT_WRONG_CREATE } from '../../utils/CONSTANTS.js';
 
-export default async function saveNewUserPasswordToDB(userEmail, userPassword) {
+export default async function saveNewUserPasswordToDB(userEmail = null, userPassword, userId = null) {
 	const conn = await pool.connect();
 
 	try {
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(userPassword, salt);
-		await conn.query('UPDATE tbl_users SET password_hash = $1 WHERE email = $2 RETURNING id', [hashedPassword, userEmail]);
+		if (userId !== null) {
+			await conn.query('UPDATE tbl_users SET password_hash = $1 WHERE id = $2 RETURNING id', [hashedPassword, userId]);
+		} else {
+			await conn.query('UPDATE tbl_users SET password_hash = $1 WHERE email = $2 RETURNING id', [hashedPassword, userEmail]);
+		}
 
 		const userDetails = await conn.query(
 			`

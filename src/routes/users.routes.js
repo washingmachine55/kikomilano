@@ -7,7 +7,7 @@ import { verifyInputFields } from '../middlewares/verifyInputFields.users.js';
 const router = express.Router();
 
 router.get('/profile', verifyToken, getSingleUser);
-router.post('/profile/edit', editUserProfile);
+router.post('/profile/edit', verifyToken, editUserProfile);
 router.get('/', verifyToken, getAllUsers);
 router.post(
 	'/profile-picture-upload',
@@ -15,8 +15,8 @@ router.post(
 	uploadImages.single('userProfilePicture'),
 	uploadUserProfilePicture
 );
-router.post("/set-favorites", verifyInputFields, setFavorite)
-router.post("/remove-favorites", unsetFavorite)
-router.get("/favorites", getFavorites)
+router.post("/set-favorites", verifyToken, verifyInputFields, setFavorite)
+router.post("/remove-favorites", verifyToken, unsetFavorite)
+router.get("/favorites", verifyToken, getFavorites)
 
 export default router;
