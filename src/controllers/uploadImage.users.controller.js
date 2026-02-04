@@ -1,22 +1,22 @@
 import { env, loadEnvFile } from 'node:process';
 loadEnvFile();
-import { getSingleUserDetails } from '../services/users/getSingle.users.service.js';
+// import { getSingleUserDetails } from '../services/users/getSingle.users.service.js';
 import { responseWithStatus } from '../utils/responses.js';
-import jwt from 'jsonwebtoken';
-import { getAllUsersDetails } from '../services/users/getAll.users.service.js';
+// import jwt from 'jsonwebtoken';
+// import { getAllUsersDetails } from '../services/users/getAll.users.service.js';
 import { uploadUserProfilePictureToDB } from '../services/users/uploadPicture.users.service.js';
 
-export async function getAllUsers(req, res) {
-	// #swagger.tags = ['Users']
-	// #swagger.summary = 'Endpoint to get details of all users.'
-	const result = await getAllUsersDetails();
-	try {
-		// #swagger.responses[200] = { description: 'Details of all available users' }
-		return await responseWithStatus(res, 1, 200, 'Details of all available users', { users_details: result });
-	} catch (error) {
-		console.debug(error);
-	}
-}
+// export async function getAllUsers(req, res) {
+// 	// #swagger.tags = ['Users']
+// 	// #swagger.summary = 'Endpoint to get details of all users.'
+// 	const result = await getAllUsersDetails();
+// 	try {
+// 		// #swagger.responses[200] = { description: 'Details of all available users' }
+// 		return await responseWithStatus(res, 1, 200, 'Details of all available users', { users_details: result });
+// 	} catch (error) {
+// 		console.debug(error);
+// 	}
+// }
 
 export async function uploadUserProfilePicture(req, res) {
 	// #swagger.tags = ['Users']
@@ -54,30 +54,30 @@ export async function uploadUserProfilePicture(req, res) {
 	}
 }
 
-export async function getSingleUser(req, res) {
-	// #swagger.tags = ['Users']
-	// #swagger.summary = 'Endpoint to get details of a user that is logged in.'
-	// #swagger.description = 'Just pass the jwt token correctly to get the logged in user's profile.'
-	/*  #swagger.auto = false
-		#swagger.path = '/users/profile'
-		#swagger.method = 'get'
-		#swagger.produces = ['application/json']
-		#swagger.consumes = ['application/json']
-	*/
+// export async function getSingleUser(req, res) {
+// 	// #swagger.tags = ['Users']
+// 	// #swagger.summary = 'Endpoint to get details of a user that is logged in.'
+// 	// #swagger.description = 'Just pass the jwt token correctly to get the logged in user's profile.'
+// 	/*  #swagger.auto = false
+// 		#swagger.path = '/users/profile'
+// 		#swagger.method = 'get'
+// 		#swagger.produces = ['application/json']
+// 		#swagger.consumes = ['application/json']
+// 	*/
 
-	if (!req.header('Authorization')) {
-		// #swagger.responses[401] = { description: 'Unauthorized. Access Denied. Please login.' }
-		return await responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please login.');
-	} else {
-		const token = req.header('Authorization').split(' ')[1];
-		const verified = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
-		const userId = verified.id;
-		const result = await getSingleUserDetails(userId);
-		try {
-			// #swagger.responses[200] = { description: 'User profile details.' }
-			await responseWithStatus(res, 1, 200, 'User profile details', { user_details: result });
-		} catch (error) {
-			console.debug(error);
-		}
-	}
-}
+// 	if (!req.header('Authorization')) {
+// 		// #swagger.responses[401] = { description: 'Unauthorized. Access Denied. Please login.' }
+// 		return await responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please login.');
+// 	} else {
+// 		const token = req.header('Authorization').split(' ')[1];
+// 		const verified = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
+// 		const userId = verified.id;
+// 		const result = await getSingleUserDetails(userId);
+// 		try {
+// 			// #swagger.responses[200] = { description: 'User profile details.' }
+// 			await responseWithStatus(res, 1, 200, 'User profile details', { user_details: result });
+// 		} catch (error) {
+// 			console.debug(error);
+// 		}
+// 	}
+// }

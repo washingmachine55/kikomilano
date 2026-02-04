@@ -117,27 +117,12 @@ export async function setFavorite(req, res) {
 	}
 }
 
-// export async function unsetFavorite(req, res) {
-// 	const userId = req.body.data.users_id
-// 	const productVariantId = req.body.data.products_variants_id
 
-// 	if (!req.body.data.products_variants_id) {
-// 		await responseWithStatus(res, 1, 400, "Product field must not be empty")
-// 	}
-
-// 	try {
-// 		const result = await deleteProductFavorite(userId, productVariantId)
-
-// 		if (result === false) {
-// 			await responseWithStatus(res, 1, 200, "Product already removed")
-// 		} else {
-// 			await responseWithStatus(res, 1, 200, "Product removed from favorites", result)
-// 		}
-// 	} catch (err) {
-// 		await responseWithStatus(res, 2, 500, "An error occurred while removing product from favorites", err)
-// 	}
-// }
 export const unsetFavorite = await attempt(async (req, res, next) => {
+	// #swagger.tags = ['Users']
+	// #swagger.summary = 'Endpoint to remove a product favorite of a user that is logged in.'
+	// #swagger.description = "POST request to pass the user id and the product variant id to remove from user's favorites."
+
 	const userId = req.body.data.users_id
 	const productVariantId = req.body.data.products_variants_id
 

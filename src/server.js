@@ -19,8 +19,7 @@ app.use(
 );
 
 import SwaggerUI from 'swagger-ui-express';
-import swaggerDocument from '../swagger_output.json' with { type: 'json' };
-app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(swaggerDocument));
+app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(openapiSpecification));
 
 import authRoutes from './routes/auth.routes.js';
 app.use('/auth', authRoutes);
@@ -38,6 +37,7 @@ import { responseWithStatus } from './utils/responses.js';
 import jwt from 'jsonwebtoken';
 import { BadRequestError, NotFoundError, ValidationError } from './utils/errors.js';
 import { ZodError } from 'zod';
+import { openapiSpecification } from './config/swagger.js';
 const { JsonWebTokenError } = jwt;
 
 
@@ -116,3 +116,4 @@ server.keepAliveTimeout = Number(env.APP_KEEP_ALIVE_TIMEOUT);
 server.headersTimeout = Number(env.APP_HEADERS_TIMEOUT);
 
 export default app;
+

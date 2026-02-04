@@ -271,11 +271,11 @@ describe('Authentication APIs', () => {
 					message: 'OTP has been verified!',
 				})
 				.stores('tempToken', 'data.temporary_token')
-				.expectStatus(200);
+				.expectStatus(200).then(() => done());
 		});
 
 		it('should fail OTP verification with invalid OTP', async () => {
-			await pactum
+			return await pactum
 				.spec()
 				.withMethod('POST')
 				.withPath('/auth/verify-otp')
@@ -289,7 +289,8 @@ describe('Authentication APIs', () => {
 					}
 				`
 				)
-				.expectStatus(401);
+				.expectStatus(401).then(() => done());
+
 		});
 
 		it('should fail OTP verification with missing fields', async () => {
