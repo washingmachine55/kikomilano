@@ -90,7 +90,7 @@ app.use((err, req, res, next) => {
 		return responseWithStatus(res, 0, 404, err.message, err);
 	}
 	if (err.code == '23503' || err.code === '23505') {
-		return responseWithStatus(res, 1, 409, "An error occured", "Conflict in database records")
+		return responseWithStatus(res, 1, 409, "An error occurred", "Conflict in database records")
 	}
 	else if (err) {
 		console.log(err);

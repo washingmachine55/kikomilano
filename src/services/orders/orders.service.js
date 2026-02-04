@@ -16,7 +16,6 @@ export async function saveOrder(data) {
 		throw new NotFoundError("User does not exist in database. Please create a new account");
 	} else {
 		await conn.query('BEGIN')
-		console.log(Number(data.cart_total));
 
 		if (Number(data.cart_total) > 9999 || Number(data.cart_total) < 1) {
 			throw new ValidationError(`Applied cart total must be above 0 and less than 9999, currently ${data.cart_total}. Please retry after making the necessary changes.`);
