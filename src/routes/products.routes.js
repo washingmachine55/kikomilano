@@ -7,7 +7,7 @@ import { validateUuidUrlParam } from '../middlewares/parseUUIDs.js';
 const router = express.Router();
 
 router.get('/', verifyToken, getAllProducts);
-router.get('/:productId/variants', validateUuidUrlParam, verifyToken, getAllProductVariants);
+router.get('/:productId/variants', verifyToken, validateUuidUrlParam, getAllProductVariants);
 // router.post(
 // 	'/profile-picture-upload',
 // 	verifyToken,

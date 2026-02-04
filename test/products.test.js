@@ -1,5 +1,6 @@
 import pactum from 'pactum';
 import * as pm from "pactum-matchers";
+import { randomInt } from "node:crypto";
 
 process.loadEnvFile();
 pactum.request.setBaseUrl(process.env.APP_URL);
@@ -11,16 +12,19 @@ describe('Products APIs', () => {
 
 	// Setup: Login to get access token
 	before(async () => {
+		const randomNum = randomInt(0, 15);
 		await pactum
 			.spec()
 			.withMethod('POST')
-			.withPath('/auth/login')
+			.withPath('/auth/register')
 			.withBody(
 				`
 				{
 					"data": {
-						"email": "admin@admin.com",
-						"password": "Passw*rd1"
+						"name": "Sample ${randomNum}",
+						"email": "admin${randomNum}@admin.com",
+						"password": "Passw*rd1",
+						"confirmed_password": "Passw*rd1"
 					}
 				}
 			`
@@ -34,7 +38,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', 'Bearer $S{productAccessToken}')
 				.expectStatus(200)
 				.expectJsonLike({
 					message: 'Details of all available products.',
@@ -63,7 +67,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', 'Bearer $S{productAccessToken}')
 				.expectStatus(200)
 				.expectJsonMatch({
 					type: 1,
@@ -76,7 +80,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', 'Bearer $S{productAccessToken}')
 				.expectStatus(200)
 				// .expectJsonMatch({
 				// 	data: {
@@ -93,8 +97,8 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
+				.withHeaders('Authorization', 'Bearer $S{productAccessToken}')
 				.withQueryParams('category', 'FACE')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
 				.expectStatus(200)
 				.expectJsonLike({
 					message: 'Details of all available products of the selected category.',
@@ -106,8 +110,8 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
+				.withHeaders('Authorization', 'Bearer $S{productAccessToken}')
 				.withQueryParams('category', 'non_existent_category_xyz')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
 				.expectStatus(404)
 				.expectJsonLike({
 					message: 'That category does not exist.',
@@ -129,7 +133,7 @@ describe('Products APIs', () => {
 				.withMethod('GET')
 				.withPath('/products')
 				.withQueryParams('category', 'FACE')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', 'Bearer $S{productAccessToken}')
 				.expectStatus(200)
 				.expectJsonMatch({
 					type: 1,
@@ -142,27 +146,30 @@ describe('Products APIs', () => {
 		// Note: This assumes a valid product ID exists in the database
 		// If no products exist, these tests may fail
 		before(async () => {
+			const randomNum = randomInt(0, 25);
 			await pactum
 				.spec()
 				.withMethod('POST')
-				.withPath('/auth/login')
+				.withPath('/auth/register')
 				.withBody(
 					`
 				{
 					"data": {
-						"email": "admin@admin.com",
-						"password": "Passw*rd1"
+						"name": "Sample ${randomNum}",
+						"email": "admin.${randomNum}@admin.com",
+						"password": "Passw*rd1",
+						"confirmed_password": "Passw*rd1"
 					}
 				}
 			`
 				)
-				.stores('productAccessToken', 'data.access_token');
+				.stores('altProductAccessToken', 'data.access_token');
 
 			await pactum
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', 'Bearer $S{altProductAccessToken}')
 				.stores('productId', 'data.products_details[0].product_id');
 		});
 
@@ -188,7 +195,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products/019c0729-5c77-75fe-8e6c-ea9a542fe2c6/variants')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', 'Bearer $S{altProductAccessToken}')
 				.expectStatus(404)
 				.expectJsonLike({
 					message: 'No product variants found of this product id.',
@@ -200,7 +207,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products/$S{productId}/variants')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', 'Bearer $S{altProductAccessToken}')
 				.expectStatus(200);
 		});
 
@@ -209,7 +216,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products/invalid-uuid-format/variants')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(400);
 		});
 	});
@@ -220,14 +227,14 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(200);
 
 			await pactum
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(200);
 		});
 
@@ -236,14 +243,14 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(200);
 
 			const secondCall = await pactum
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(200);
 
 			if (!firstCall.body.data.products_details) {
@@ -260,14 +267,14 @@ describe('Products APIs', () => {
 				.withMethod('GET')
 				.withPath('/products')
 				.withQueryParams('category', 'FACE')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(200);
 
 			await pactum
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(200);
 		});
 	});
@@ -297,7 +304,7 @@ describe('Products APIs', () => {
 				.withMethod('GET')
 				.withPath('/products')
 				.withQueryParams('category', '  clothing  ')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(200);
 		});
 	});
@@ -308,7 +315,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products/not-a-uuid/variants')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(400);
 		});
 
@@ -317,7 +324,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products/00000000-0000-0000-0000-000000000000/variants')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(400);
 		});
 
@@ -326,7 +333,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products/ffffffff-ffff-ffff-ffff-ffffffffffff/variants')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(400);
 		});
 
@@ -335,7 +342,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products/019C074B-7E98-7A38-BBD9-F82E2BD8C5C8/variants')
-				.withHeaders('Authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('Authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(200);
 		});
 	});
@@ -355,7 +362,7 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('authorization', `Bearer $S{productAccessToken}`)
+				.withHeaders('authorization', `Bearer $S{altProductAccessToken}`)
 				.expectStatus(200); // HTTP headers are case-insensitive
 		});
 	});

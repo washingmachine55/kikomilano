@@ -55,7 +55,8 @@ export async function createForgotPasswordEmail(userId, userEmail) {
 
 		await transporter.sendMail({
 			from: '"Admin Sender" <test@example.com>',
-			to: userEmail,
+			to: process.env.NODE_ENV === 'staging' ? process.env.SMTP_USER : userEmail,
+			// to: userEmail,
 			// to: process.env.SMTP_USER,
 			subject: `Verify your Email: User ${userId}`,
 			text: "This is a test email sent via Nodemailer",

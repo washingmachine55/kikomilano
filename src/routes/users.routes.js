@@ -7,7 +7,7 @@ import { verifyInputFields } from '../middlewares/verifyInputFields.users.js';
 const router = express.Router();
 
 router.get('/profile', verifyToken, getSingleUser);
-router.post('/profile/edit', verifyToken, editUserProfile);
+router.post('/profile/edit', verifyToken, verifyInputFields, editUserProfile);
 router.get('/', verifyToken, getAllUsers);
 router.post(
 	'/profile-picture-upload',

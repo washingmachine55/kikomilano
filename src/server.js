@@ -59,6 +59,14 @@ app.use((err, req, res, next) => {
 				'Form field does not satisfy requirement. Please enter the correct field name for uploading the file.',
 				{ error_details: err.message }
 			);
+		} else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+			return responseWithStatus(
+				res,
+				0,
+				415,
+				'Form field does not satisfy requirement. Please enter the correct field name for uploading the file.',
+				{ error_details: err.message }
+			);
 		} else {
 			return responseWithStatus(res, 0, 400, err.message);
 		}

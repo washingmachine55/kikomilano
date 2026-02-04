@@ -41,6 +41,10 @@ export const authLoginSchema = z.object({
 	password: passwordSchema,
 });
 
+export const nameSchema = z.object({
+	name: z.string().min(4).max(64).trim(),
+});
+
 export const authForgotPasswordSchema = z.object({
 	email: z.email(),
 });
@@ -53,6 +57,16 @@ export const authVerifyOTPSchema = z.object({
 export const authResetPasswordSchema = z
 	.object({
 		email: z.email(),
+		password: passwordSchema,
+		confirmed_password: z.string(),
+	}).required()
+	.refine((data) => data.password === data.confirmed_password, {
+		message: 'Passwords do not match',
+		path: ['confirmed_password'],
+	}).required();
+
+export const PasswordChangeSchema = z
+	.object({
 		password: passwordSchema,
 		confirmed_password: z.string(),
 	}).required()
