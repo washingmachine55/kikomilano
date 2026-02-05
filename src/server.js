@@ -33,6 +33,9 @@ app.use('/products', productsRoutes);
 import ordersRoutes from './routes/orders.routes.js';
 app.use('/orders', ordersRoutes);
 
+import paymentsRoutes from './routes/payments.routes.js';
+app.use('/payments', paymentsRoutes);
+
 import { responseWithStatus } from './utils/responses.js';
 import jwt from 'jsonwebtoken';
 import { BadRequestError, NotFoundError, ValidationError } from './utils/errors.js';
@@ -94,8 +97,36 @@ app.use((err, req, res, next) => {
 	}
 	else if (err) {
 		console.log(err);
-
-		return responseWithStatus(res, 0, 500, err.name, err.message);
+		switch (err.type) {
+			case 'StripeCardError':
+				// A declined card error
+				responseWithStatus(res, 0, 500, err.name, err.message);
+				break;
+			case 'StripeRateLimitError':
+				// Too many requests made to the API too quickly
+				responseWithStatus(res, 0, 500, err.name, err.message);
+				break;
+			case 'StripeInvalidRequestError':
+				// Invalid parameters were supplied to Stripe's API
+				responseWithStatus(res, 0, 500, err.name, err.message);
+				break;
+			case 'StripeAPIError':
+				// An error occurred internally with Stripe's API
+				responseWithStatus(res, 0, 500, err.name, err.message);
+				break;
+			case 'StripeConnectionError':
+				// Some kind of error occurred during the HTTPS communication
+				responseWithStatus(res, 0, 500, err.name, err.message);
+				break;
+			case 'StripeAuthenticationError':
+				// You probably used an incorrect API key
+				responseWithStatus(res, 0, 500, err.name, err.message);
+				break;
+			default:
+				// Handle any other types of unexpected errors
+				responseWithStatus(res, 0, 500, err.name, err.message);
+				break;
+		}
 	}
 	next(err);
 });
