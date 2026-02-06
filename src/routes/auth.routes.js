@@ -1,7 +1,6 @@
 import express from 'express';
-import { verifyInputFields } from '../middlewares/verifyInputFields.auth.js';
-import { forgotPassword, loginUser, refreshToken, registerUser, resetPassword, verifyOTP, verifyUserToken } from '../controllers/auth.controller.js';
 import verifyToken from '../middlewares/verifyToken.auth.js';
+import { forgotPassword, loginUser, refreshToken, registerUser, resetPassword, verifyOTP, verifyUserToken } from '../controllers/auth.controller.js';
 const router = express.Router();
 
 /**
@@ -46,7 +45,7 @@ const router = express.Router();
  *       401:
  *         description: Email already exists. Please sign in instead.
  */
-router.post('/register', verifyInputFields, registerUser);
+router.post('/register', registerUser);
 
 /**
  * @swagger
@@ -71,7 +70,56 @@ router.post('/register', verifyInputFields, registerUser);
  *       401:
  *         description: Email doesn't exist. Please sign up instead or Credentials Don't match. Please try again.
  */
-router.post('/login', verifyInputFields, loginUser);
+router.post('/login', loginUser);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Endpoint to allow the user to send a forgot password request
+ *     description: Used for starting a chain to reset a forgotten password.
+ *     tags:
+ *       - Authentication
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             data:
+ *               email: 'example@example.com'
+ *     responses:
+ *       200:
+ *         description: An OTP has been shared to your email address. Please use that to reset your password in the next screen.
+ *       401:
+ *         description: Email doesn't exist. Please sign up instead.
+ */
+router.post('/forgot-password', forgotPassword)
+
+/**
+ * @swagger
+ * /auth/verify-otp:
+ *   post:
+ *     summary: Endpoint to allow the user to verify their OTP
+ *     description: Used for verifying the OTP. Provides a temporary token that needs to be used in /reset-password endpoint
+ *     tags:
+ *       - Authentication
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             data:
+ *               email: 'ahmed@admin.com'
+ *               otp: '882724'
+ *     responses:
+ *       200:
+ *         description: OTP has been verified!
+ *       401:
+ *         description: Invalid OTP or email does not exist.
+ */
+router.post('/verify-otp', verifyOTP)
 
 /**
  * @swagger
@@ -111,55 +159,6 @@ router.get('/refresh', refreshToken);
 
 /**
  * @swagger
- * /auth/forgot-password:
- *   post:
- *     summary: Endpoint to allow the user to send a forgot password request
- *     description: Used for starting a chain to reset a forgotten password.
- *     tags:
- *       - Authentication
- *     security: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           example:
- *             data:
- *               email: 'example@example.com'
- *     responses:
- *       200:
- *         description: An OTP has been shared to your email address. Please use that to reset your password in the next screen.
- *       401:
- *         description: Email doesn't exist. Please sign up instead.
- */
-router.post('/forgot-password', verifyInputFields, forgotPassword)
-
-/**
- * @swagger
- * /auth/verify-otp:
- *   post:
- *     summary: Endpoint to allow the user to verify their OTP
- *     description: Used for verifying the OTP. Provides a temporary token that needs to be used in /reset-password endpoint
- *     tags:
- *       - Authentication
- *     security: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           example:
- *             data:
- *               email: 'ahmed@admin.com'
- *               otp: '882724'
- *     responses:
- *       200:
- *         description: OTP has been verified!
- *       401:
- *         description: Invalid OTP or email does not exist.
- */
-router.post('/verify-otp', verifyInputFields, verifyOTP)
-
-/**
- * @swagger
  * /auth/reset-password:
  *   post:
  *     summary: Endpoint to allow the user to Reset their password
@@ -185,6 +184,6 @@ router.post('/verify-otp', verifyInputFields, verifyOTP)
  *       401:
  *         description: Unauthorized. Access Denied. Please request another OTP. or Invalid Token. Please request another OTP.
  */
-router.post('/reset-password', verifyInputFields, resetPassword)
+router.post('/reset-password', resetPassword)
 
 export default router;

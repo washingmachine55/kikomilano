@@ -3,8 +3,9 @@ import { editUserProfile, getAllUsers, getFavorites, getSingleUser, setFavorite,
 import { uploadUserProfilePicture } from '../controllers/uploadImage.users.controller.js';
 import { uploadImages } from '../config/multer.js';
 import verifyToken from '../middlewares/verifyToken.auth.js';
-import { verifyInputFields } from '../middlewares/verifyInputFields.users.js';
 const router = express.Router();
+
+router.use(verifyToken)
 
 /**
  * @swagger
@@ -22,7 +23,7 @@ const router = express.Router();
  *       401:
  *         description: Unauthorized. Access Denied. Please login.
  */
-router.get('/profile', verifyToken, getSingleUser);
+router.get('/profile', getSingleUser);
 
 /**
  * @swagger
@@ -48,7 +49,7 @@ router.get('/profile', verifyToken, getSingleUser);
  *       200:
  *         description: User profile edited successfully.
  */
-router.post('/profile/edit', verifyToken, verifyInputFields, editUserProfile);
+router.post('/profile/edit', editUserProfile);
 
 /**
  * @swagger
@@ -96,7 +97,6 @@ router.get('/', verifyToken, getAllUsers);
  */
 router.post(
 	'/profile-picture-upload',
-	verifyToken,
 	uploadImages.single('userProfilePicture'),
 	uploadUserProfilePicture
 );
@@ -126,7 +126,7 @@ router.post(
  *       422:
  *         description: An error occurred with the provided data.
  */
-router.post("/set-favorites", verifyToken, verifyInputFields, setFavorite)
+router.post("/set-favorites", setFavorite)
 
 /**
  * @swagger
@@ -150,7 +150,7 @@ router.post("/set-favorites", verifyToken, verifyInputFields, setFavorite)
  *       200:
  *         description: Product removed from favorites or already removed
  */
-router.post("/remove-favorites", verifyToken, unsetFavorite)
+router.post("/remove-favorites", unsetFavorite)
 
 /**
  * @swagger
@@ -168,6 +168,6 @@ router.post("/remove-favorites", verifyToken, unsetFavorite)
  *       401:
  *         description: Unauthorized. Access Denied. Please login.
  */
-router.get("/favorites", verifyToken, getFavorites)
+router.get("/favorites", getFavorites)
 
 export default router;

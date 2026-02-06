@@ -1,5 +1,5 @@
 import z from 'zod';
-import { authForgotPasswordSchema, authLoginSchema, authRegisterSchema, authResetPasswordSchema, authVerifyOTPSchema, nameSchema, PasswordChangeSchema, userFavoriteProductSchema, UUIDSchema } from '../utils/schema.validations.js';
+import { authForgotPasswordSchema, authLoginSchema, authRegisterSchema, authResetPasswordSchema, authVerifyOTPSchema, nameSchema, PasswordChangeSchema, userFavoriteProductSchema } from '../utils/schema.validations.js';
 import { responseWithStatus } from '../utils/responses.js';
 
 export async function verifyInputFields(req, res, next) {
@@ -16,6 +16,34 @@ export async function verifyInputFields(req, res, next) {
 	}
 
 	switch (req.path) {
+		case "/auth/register":
+			reqData = await authRegisterSchema.safeParseAsync(req.body.data);
+			await successTrial();
+			break;
+		case "/auth/login":
+			reqData = await authLoginSchema.safeParseAsync(req.body.data);
+			await successTrial();
+			break;
+		case "/auth/forgot-password":
+			reqData = await authForgotPasswordSchema.safeParseAsync(req.body.data);
+			await successTrial();
+			break;
+		case "/auth/verify-otp":
+			reqData = await authVerifyOTPSchema.safeParseAsync(req.body.data);
+			await successTrial();
+			break;
+		case "/auth/reset-password":
+			reqData = await authResetPasswordSchema.safeParseAsync(req.body.data);
+			await successTrial();
+			break;
+		case "/users/profile":
+			reqData = await authVerifyOTPSchema.safeParseAsync(req.body.data);
+			await successTrial();
+			break;
+		case "/users/profile/edit":
+			reqData = await authVerifyOTPSchema.safeParseAsync(req.body.data);
+			await successTrial();
+			break;
 		case "/set-favorites":
 			reqData = await userFavoriteProductSchema.safeParseAsync(req.body.data);
 			await successTrial();

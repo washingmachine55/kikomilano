@@ -12,10 +12,9 @@ export const createPayment = await attempt(async (req,res,next) => {
 	// });
 
 	// console.log(customer.id);
-	const modifiedObjs = await new TextModification(req.body.data).fullySanitizeObjectKey()
-
-	console.log(modifiedObjs);
-	console.log(modifiedObjs.data)
+	// const modifiedObjs = await new TextModification(req.body.data).fullySanitizeObjectKey()
+	
+	// console.log(modifiedObjs);
 	
 	
 	return await responseWithStatus(res,1,200,"works")

@@ -19,7 +19,6 @@ export class TextModification {
 				Object.entries(obj).map(([key, value]) => [
 					key.trim()
 						.toLowerCase()
-						.replace(specialCharactersReGex, "")
 						.replace(extraSpacesReGex, ' ')
 						.replaceAll(' ', "_"),
 

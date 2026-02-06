@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
-import multer from 'multer';
 import { env, loadEnvFile } from 'node:process';
 
 loadEnvFile();
@@ -18,11 +17,18 @@ app.use(
 	})
 );
 
+// ======================================================================
+// ================  All da Routes for da flutes  =======================
+// ======================================================================
 import SwaggerUI from 'swagger-ui-express';
 app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(openapiSpecification));
 
 import authRoutes from './routes/auth.routes.js';
 app.use('/auth', authRoutes);
+
+// dis would make sure that all POST requests from the routes below have a validation which is powered by Zod.
+import { globallyVerifyInputFields } from './middlewares/globalInputVerification.js';
+app.use(globallyVerifyInputFields)
 
 import usersRoutes from './routes/users.routes.js';
 app.use('/users', usersRoutes);
@@ -36,13 +42,18 @@ app.use('/orders', ordersRoutes);
 import paymentsRoutes from './routes/payments.routes.js';
 app.use('/payments', paymentsRoutes);
 
-import { responseWithStatus } from './utils/responses.js';
-import jwt from 'jsonwebtoken';
-import { BadRequestError, NotFoundError, ValidationError } from './utils/errors.js';
-import { ZodError } from 'zod';
-import { openapiSpecification } from './config/swagger.js';
-const { JsonWebTokenError } = jwt;
+// ======================================================================
+// ======================  GROBAR ERROR HANDLING  =======================
+// ======================================================================
 
+import multer from 'multer';
+import { ZodError } from 'zod';
+import { responseWithStatus } from './utils/responses.js';
+import { BadRequestError, NotFoundError, ValidationError } from './utils/errors.js';
+import { openapiSpecification } from './config/swagger.js';
+
+import jwt from 'jsonwebtoken';
+const { JsonWebTokenError } = jwt;
 
 app.use((err, req, res, next) => {
 	if (err instanceof multer.MulterError) {
@@ -135,8 +146,9 @@ app.use((req, res) => {
 	responseWithStatus(res, 0, 404, `Page not found. Use the [/api-docs] endpoint for a guide on all available APIs.`);
 });
 
-// ------------------------------------------------------------------------
-// App Initialization
+// ======================================================================
+// ======================  App Initialization  ==========================
+// ======================================================================
 export const server = app.listen(env.APP_PORT, () => {
 	if (env.NODE_ENV == 'dev') {
 		console.log(`${env.APP_NAME} listening on port ${env.APP_PORT}`);
@@ -147,4 +159,3 @@ server.keepAliveTimeout = Number(env.APP_KEEP_ALIVE_TIMEOUT);
 server.headersTimeout = Number(env.APP_HEADERS_TIMEOUT);
 
 export default app;
-
