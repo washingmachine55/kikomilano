@@ -44,12 +44,7 @@ export async function uploadUserProfilePicture(req, res) {
 
 	if (!req.file) {
 		// #swagger.responses[400] = { description: 'No image uploaded. Please upload an image before trying again.' }
-		return await responseWithStatus(
-			res,
-			0,
-			400,
-			'No image uploaded. Please upload an image before trying again.',
-		);
+		return await responseWithStatus(res, 0, 400, 'No image uploaded. Please upload an image before trying again.');
 	}
 
 	const result = await uploadUserProfilePictureToDB(req.user.id, req.file);
@@ -90,51 +85,49 @@ export async function getSingleUser(req, res) {
 }
 
 export const editUserProfile = await attempt(async (req, res) => {
-
-	const allowedFields = ['name', 'email', 'password', 'confirmed_password']
+	const allowedFields = ['name', 'email', 'password', 'confirmed_password'];
 	const fieldsToUpdate = await allowedFieldsFunc(allowedFields, req.body.data);
 
 	const token = req.header('Authorization').split(' ')[1];
 	const verified = await verifyJwtAsync(token, env.ACCESS_TOKEN_SECRET_KEY);
 
-	const result = await editUserDetails(fieldsToUpdate, verified.id)
-	return await responseWithStatus(res, 1, 200, "User profile edited successfully", result)
-})
+	const result = await editUserDetails(fieldsToUpdate, verified.id);
+	return await responseWithStatus(res, 1, 200, 'User profile edited successfully', result);
+});
 
 export async function setFavorite(req, res) {
-	const userId = req.body.data.users_id
-	const productVariantId = req.body.data.products_variants_id
+	const userId = req.body.data.users_id;
+	const productVariantId = req.body.data.products_variants_id;
 
 	try {
-		const result = await saveProductFavorite(userId, productVariantId)
-		await responseWithStatus(res, 1, 200, "Product added to favorites", result)
+		const result = await saveProductFavorite(userId, productVariantId);
+		await responseWithStatus(res, 1, 200, 'Product added to favorites', result);
 	} catch (err) {
 		if (err.code === '23503' || err.code === '23505') {
-			await responseWithStatus(res, 1, 409, "An error occured", "Conflict in database records")
+			await responseWithStatus(res, 1, 409, 'An error occured', 'Conflict in database records');
 		} else {
-			await responseWithStatus(res, 0, 422, "An error occurred", err.message)
+			await responseWithStatus(res, 0, 422, 'An error occurred', err.message);
 		}
 	}
 }
-
 
 export const unsetFavorite = await attempt(async (req, res, next) => {
 	// #swagger.tags = ['Users']
 	// #swagger.summary = 'Endpoint to remove a product favorite of a user that is logged in.'
 	// #swagger.description = "POST request to pass the user id and the product variant id to remove from user's favorites."
 
-	const userId = req.body.data.users_id
-	const productVariantId = req.body.data.products_variants_id
+	const userId = req.body.data.users_id;
+	const productVariantId = req.body.data.products_variants_id;
 
 	if (!req.body.data.products_variants_id) {
-		throw new ValidationError("Product ID must not be empty, please provide a valid product ID")
+		throw new ValidationError('Product ID must not be empty, please provide a valid product ID');
 	}
 
-	const result = await deleteProductFavorite(userId, productVariantId)
+	const result = await deleteProductFavorite(userId, productVariantId);
 	if (result === false) {
-		await responseWithStatus(res, 1, 200, "Product already removed")
+		await responseWithStatus(res, 1, 200, 'Product already removed');
 	} else {
-		await responseWithStatus(res, 1, 200, "Product removed from favorites", result)
+		await responseWithStatus(res, 1, 200, 'Product removed from favorites', result);
 	}
 });
 

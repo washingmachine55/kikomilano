@@ -37,12 +37,7 @@ export async function uploadUserProfilePicture(req, res) {
 
 	if (!req.file) {
 		// #swagger.responses[400] = { description: 'No image uploaded. Please upload an image before trying again.' }
-		return await responseWithStatus(
-			res,
-			0,
-			400,
-			'No image uploaded. Please upload an image before trying again.',
-		);
+		return await responseWithStatus(res, 0, 400, 'No image uploaded. Please upload an image before trying again.');
 	}
 
 	const result = await uploadUserProfilePictureToDB(req.user.id, req.file);

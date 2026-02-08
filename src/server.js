@@ -23,12 +23,15 @@ app.use(
 import SwaggerUI from 'swagger-ui-express';
 app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(openapiSpecification));
 
-import authRoutes from './routes/auth.routes.js';
-app.use('/auth', authRoutes);
+import verifyToken from './middlewares/verifyToken.auth.js';
+app.use(verifyToken); // Further validation is done inside the middleware to bypass certain routes for token verification
 
 // dis would make sure that all POST requests from the routes below have a validation which is powered by Zod.
 import { globallyVerifyInputFields } from './middlewares/globalInputVerification.js';
-app.use(globallyVerifyInputFields)
+app.use(globallyVerifyInputFields);
+
+import authRoutes from './routes/auth.routes.js';
+app.use('/auth', authRoutes);
 
 import usersRoutes from './routes/users.routes.js';
 app.use('/users', usersRoutes);
@@ -85,28 +88,23 @@ app.use((err, req, res, next) => {
 			return responseWithStatus(res, 0, 400, err.message);
 		}
 	} else if (err instanceof JsonWebTokenError) {
-		return responseWithStatus(res, 0, 401, "Invalid token. Please login or Register", err.message);
-	}
-	else if (err instanceof ValidationError) {
+		return responseWithStatus(res, 0, 401, 'Invalid token. Please login or Register', err.message);
+	} else if (err instanceof ValidationError) {
 		console.debug(err.stack);
 		return responseWithStatus(res, 0, 400, err.message, err.name);
-	}
-	else if (err instanceof BadRequestError) {
+	} else if (err instanceof BadRequestError) {
 		console.debug(err.stack);
 		return responseWithStatus(res, 0, 400, err.name, err.message);
-	}
-	else if (err instanceof ZodError) {
+	} else if (err instanceof ZodError) {
 		console.debug(err.stack);
-		return responseWithStatus(res, 0, 404, err.name, { cause: err });
-	}
-	else if (err instanceof NotFoundError) {
+		return responseWithStatus(res, 0, 400, err.name, { cause: err });
+	} else if (err instanceof NotFoundError) {
 		console.debug(err.stack);
 		return responseWithStatus(res, 0, 404, err.message, err);
 	}
 	if (err.code == '23503' || err.code === '23505') {
-		return responseWithStatus(res, 1, 409, "An error occurred", "Conflict in database records")
-	}
-	else if (err) {
+		return responseWithStatus(res, 1, 409, 'An error occurred', 'Conflict in database records');
+	} else if (err) {
 		console.log(err);
 		switch (err.type) {
 			case 'StripeCardError':

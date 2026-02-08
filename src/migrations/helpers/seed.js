@@ -25,10 +25,10 @@ faker.seed(42);
 const maybeSoftDelete = () =>
 	Math.random() < SOFT_DELETE_RATE
 		? {
-			deleted_at: faker.date.past(),
-			deleted_by: null,
-			status: 1,
-		}
+				deleted_at: faker.date.past(),
+				deleted_by: null,
+				status: 1,
+			}
 		: { deleted_at: null, deleted_by: null, status: 0 };
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -47,30 +47,30 @@ async function insert(client, sql, params) {
 	try {
 		await client.query('BEGIN');
 
-		await client.query("INSERT INTO tbl_categories(name) VALUES('FACE'), ('HAIR'), ('SKIN'), ('BODY')")
-		await client.query("INSERT INTO tbl_tags(name) VALUES('Cruelty Free'), ('Paraben Free'), ('Vegan'), ('Suitable for Sensitive Skin'), ('Dermatologist Tested')")
-		const attributesStaticQuery = await client.query("INSERT INTO tbl_attributes(name) VALUES('Color Code') RETURNING id")
+		await client.query("INSERT INTO tbl_categories(name) VALUES('FACE'), ('HAIR'), ('SKIN'), ('BODY')");
+		await client.query(
+			"INSERT INTO tbl_tags(name) VALUES('Cruelty Free'), ('Paraben Free'), ('Vegan'), ('Suitable for Sensitive Skin'), ('Dermatologist Tested')"
+		);
+		const attributesStaticQuery = await client.query(
+			"INSERT INTO tbl_attributes(name) VALUES('Color Code') RETURNING id"
+		);
 
 		// for (let av = 1; av < 7; av++) {
 		// 	avArray.push(faker.color.rgb({ format: 'hex', casing: 'lower' }))
 		// }
 
-		const avArray = []
+		const avArray = [];
 		for (let i = 0; i < 7; i++) {
-			avArray.push(faker.color.rgb({ format: 'hex', casing: 'lower' }))
+			avArray.push(faker.color.rgb({ format: 'hex', casing: 'lower' }));
 			const a = await insert(
 				client,
 				`
 				INSERT INTO tbl_attributes_values(attributes_id, name) VALUES ($1, $2)
 				RETURNING *
 				`,
-				[
-					attributesStaticQuery.rows[0].id,
-					avArray[i]
-				]
+				[attributesStaticQuery.rows[0].id, avArray[i]]
 			);
 		}
-
 
 		/* ========= USERS ========= */
 		const users = [];
@@ -89,9 +89,7 @@ async function insert(client, sql, params) {
 				`,
 				[
 					faker.internet.email().toLowerCase(),
-					faker.datatype.boolean()
-						? faker.string.numeric(11)
-						: null,
+					faker.datatype.boolean() ? faker.string.numeric(11) : null,
 					passwordHash,
 					isAdmin ? 1 : 0,
 				]
@@ -251,7 +249,7 @@ async function insert(client, sql, params) {
 						faker.commerce.price({ min: 30, max: 80 }),
 					]
 				);
-				
+
 				variants.push(variant);
 				productVariants.push(variant);
 
@@ -275,9 +273,7 @@ async function insert(client, sql, params) {
 				// }
 
 				// Fetch them AFTER insertion
-				const attributeValues = (
-					await client.query(`SELECT * FROM tbl_attributes_values`)
-				).rows;
+				const attributeValues = (await client.query(`SELECT * FROM tbl_attributes_values`)).rows;
 
 				const productColor = pick(attributeValues);
 
@@ -317,7 +313,6 @@ async function insert(client, sql, params) {
 			// );
 		}
 
-
 		/* ========= DISCOUNTS ========= */
 		const discounts = [];
 		for (let i = 0; i < 5; i++) {
@@ -330,7 +325,7 @@ async function insert(client, sql, params) {
 					RETURNING *
 					`,
 					[
-						faker.company.buzzVerb().padEnd("10",Math.random(Math.floor())),
+						faker.company.buzzVerb().padEnd('10', Math.random(Math.floor())),
 						faker.string.alphanumeric(6).toUpperCase(),
 						faker.number.int({ min: 5, max: 30 }),
 						pick(users).id,

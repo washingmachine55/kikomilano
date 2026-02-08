@@ -10,7 +10,6 @@ export async function getAllProductsVariants(productId) {
 		let resultProductCheck = productCheck.rows[0].existscheck.toString();
 
 		if (resultProductCheck == 1) {
-
 			const getSpecificProduct = await conn.query(`
 				SELECT p.id AS product_id, p.name AS product_name, c.name AS company_name, ct.name AS category_name, p.rating AS product_rating, p.details, p.ingredients AS whats_in_it, p.instructions AS how_to_use
 				FROM tbl_products p
@@ -18,7 +17,7 @@ export async function getAllProductsVariants(productId) {
 				JOIN tbl_companies c ON c.id = p.companies_id
 				WHERE p.id ='${productId}'
 			`);
-			const specificProductID = await getSpecificProduct.rows[0].product_id
+			const specificProductID = await getSpecificProduct.rows[0].product_id;
 
 			const getSpecificProductTags = await conn.query(`
 				SELECT t.name
@@ -37,18 +36,18 @@ export async function getAllProductsVariants(productId) {
 				WHERE pv.products_id = '${specificProductID}'
 			`);
 
-			const tagsArr = []
+			const tagsArr = [];
 			for (const element of Object.values(getSpecificProductTags.rows)) {
-				tagsArr.push(element.name)
+				tagsArr.push(element.name);
 			}
 
 			return Object({
 				product_details: getSpecificProduct.rows[0],
 				product_tags: tagsArr,
-				product_variants: getSpecificProductsVariants.rows
-			})
+				product_variants: getSpecificProductsVariants.rows,
+			});
 		} else {
-			return false
+			return false;
 		}
 	} catch (err) {
 		console.error('Error reading record:', err);

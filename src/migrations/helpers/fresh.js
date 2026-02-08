@@ -8,8 +8,8 @@ import { readTextFile } from '../../utils/readFile.js';
 		await client.query('BEGIN');
 
 		await client.query(`
-			${await readTextFile("./SQL/DDL-truncate-tables-v3.sql")}
-		`)
+			${await readTextFile('./SQL/DDL-truncate-tables-v3.sql')}
+		`);
 
 		await client.query('COMMIT');
 		console.log('✅ Migration Freshened successfully');

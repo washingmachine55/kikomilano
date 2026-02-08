@@ -19,12 +19,11 @@ export async function checkExistingEmail(request, getUserId = false) {
 		} else {
 			if (result == 1) {
 				const userId = await conn.query('SELECT id FROM tbl_users WHERE email = $1', [request]);
-				return userId.rows[0].id
+				return userId.rows[0].id;
 			} else {
-				throw new Error("No user found");
+				throw new Error('No user found');
 			}
 		}
-
 	} catch (err) {
 		console.error('Error creating record:', err);
 	} finally {

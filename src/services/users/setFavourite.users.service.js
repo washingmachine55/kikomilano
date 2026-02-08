@@ -10,7 +10,7 @@ export const saveProductFavorite = async (userId, productVariantId) => {
 		);
 		const checkIfRecordExists = checkIfRecordExistsQuery.rows[0].existscheck.toString();
 		if (checkIfRecordExists == 1) {
-			throw new Error("Product already set as a favorite", { cause: "record exists" });
+			throw new Error('Product already set as a favorite', { cause: 'record exists' });
 		} else {
 			const result = await conn.query(
 				'INSERT INTO tbl_users_products_favorites(users_id, products_variants_id,created_by, created_at) VALUES ($1,$2,$1,NOW()) RETURNING *;',
@@ -23,5 +23,4 @@ export const saveProductFavorite = async (userId, productVariantId) => {
 	} finally {
 		conn.release();
 	}
-	
-}
+};

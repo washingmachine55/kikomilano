@@ -4,7 +4,7 @@ import express from 'express';
 import { createOrder } from '../controllers/orders.controller.js';
 const router = express.Router();
 
-router.use(verifyToken)
+router.use(verifyToken);
 
 /**
  * @swagger
@@ -23,7 +23,7 @@ router.use(verifyToken)
  *           example:
  *             data:
  *               users_id: '019c0a0c-6a5c-7c53-9686-4f155b77123b'
- *               products: 
+ *               products:
  *                 - products_variants_id: '019c0a0c-6a5c-7c53-9686-4f155b77456c'
  *                   qty: 2
  *               cart_total: 99.99
@@ -37,7 +37,7 @@ router.use(verifyToken)
  *               type: 1
  *               message: Order created successfully
  *               data:
- *                 order_details: 
+ *                 order_details:
  *                    id: "019c29ba-872a-7c2e-9d11-b9c967893346"
  *                    users_id: "019c28e7-5042-7ea5-86f1-70fca1d7f10b"
  *                    cart_total: "255.55"
@@ -51,7 +51,7 @@ router.use(verifyToken)
  *                    deleted_by: "null"
  *                    deleted_at: "null"
  *                    status: "1"
- *                 order_products: 
+ *                 order_products:
  *                    - id: "019c29ba-872d-778e-b905-74ea5f92054a"
  *                      orders_id: "019c29ba-872a-7c2e-9d11-b9c967893346"
  *                      products_variants_id: "019c28e5-33d5-7384-b936-d1a51cd7b6c8"
@@ -69,6 +69,6 @@ router.use(verifyToken)
  *       401:
  *         description: Unauthorized. Access Denied. Please login.
  */
-router.post("/", verifyToken, createOrder)
+router.post('/', verifyToken, createOrder);
 
 export default router;

@@ -5,15 +5,16 @@ import { getAllCategoriesDetails } from '../categories/getAll.categories.service
 export async function getAllProductsDetails(categoriesName) {
 	const conn = await pool.connect();
 
-	const allAvailableCategories = await getAllCategoriesDetails()
-	const allCategories = []
-	allAvailableCategories.forEach(element => {
-		allCategories.push(element.name.toLowerCase())
+	const allAvailableCategories = await getAllCategoriesDetails();
+	const allCategories = [];
+	allAvailableCategories.forEach((element) => {
+		allCategories.push(element.name.toLowerCase());
 	});
 
 	try {
 		if (categoriesName !== undefined) {
-			if (allCategories.includes(categoriesName.toLowerCase())) { // fix this lines
+			if (allCategories.includes(categoriesName.toLowerCase())) {
+				// fix this lines
 				const result = await conn.query(`
 					SELECT p.id AS product_id, p.name AS product_name, pv.id AS product_variant_id, pv.name AS product_variant_name, p.rating , c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
 					FROM tbl_products p
@@ -39,10 +40,9 @@ export async function getAllProductsDetails(categoriesName) {
 			;`);
 			return result.rows;
 		}
-
 	} catch (err) {
 		console.error('Error reading record:', err);
-		throw new NotFoundError("Error getting all products", { cause: err });
+		throw new NotFoundError('Error getting all products', { cause: err });
 	} finally {
 		conn.release();
 	}

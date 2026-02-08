@@ -1,6 +1,6 @@
 import pactum from 'pactum';
-import * as pm from "pactum-matchers";
-import { randomInt } from "node:crypto";
+import * as pm from 'pactum-matchers';
+import { randomInt } from 'node:crypto';
 
 process.loadEnvFile();
 pactum.request.setBaseUrl(process.env.APP_URL);
@@ -46,11 +46,7 @@ describe('Products APIs', () => {
 		});
 
 		it('should fail to retrieve products without authentication token', async () => {
-			await pactum
-				.spec()
-				.withMethod('GET')
-				.withPath('/products')
-				.expectStatus(401);
+			await pactum.spec().withMethod('GET').withPath('/products').expectStatus(401);
 		});
 
 		it('should fail to retrieve products with invalid token', async () => {
@@ -174,11 +170,7 @@ describe('Products APIs', () => {
 		});
 
 		it('should fail to retrieve variants without authentication token', async () => {
-			await pactum
-				.spec()
-				.withMethod('GET')
-				.withPath('/products/$S{productId}/variants')
-				.expectStatus(401);
+			await pactum.spec().withMethod('GET').withPath('/products/$S{productId}/variants').expectStatus(401);
 		});
 
 		it('should fail to retrieve variants with invalid token', async () => {
@@ -353,7 +345,10 @@ describe('Products APIs', () => {
 				.spec()
 				.withMethod('GET')
 				.withPath('/products')
-				.withHeaders('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InRhbXBlcmVkIn0.invalid')
+				.withHeaders(
+					'Authorization',
+					'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InRhbXBlcmVkIn0.invalid'
+				)
 				.expectStatus(401);
 		});
 

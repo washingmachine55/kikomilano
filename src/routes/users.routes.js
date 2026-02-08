@@ -1,11 +1,18 @@
 import express from 'express';
-import { editUserProfile, getAllUsers, getFavorites, getSingleUser, setFavorite, unsetFavorite } from '../controllers/methods.users.controller.js';
+import {
+	editUserProfile,
+	getAllUsers,
+	getFavorites,
+	getSingleUser,
+	setFavorite,
+	unsetFavorite,
+} from '../controllers/methods.users.controller.js';
 import { uploadUserProfilePicture } from '../controllers/uploadImage.users.controller.js';
 import { uploadImages } from '../config/multer.js';
 import verifyToken from '../middlewares/verifyToken.auth.js';
 const router = express.Router();
 
-router.use(verifyToken)
+router.use(verifyToken);
 
 /**
  * @swagger
@@ -95,11 +102,7 @@ router.get('/', verifyToken, getAllUsers);
  *       415:
  *         description: Form field does not satisfy requirement. Please enter the correct field name for uploading the file.
  */
-router.post(
-	'/profile-picture-upload',
-	uploadImages.single('userProfilePicture'),
-	uploadUserProfilePicture
-);
+router.post('/profile-picture-upload', uploadImages.single('userProfilePicture'), uploadUserProfilePicture);
 
 /**
  * @swagger
@@ -126,7 +129,7 @@ router.post(
  *       422:
  *         description: An error occurred with the provided data.
  */
-router.post("/set-favorites", setFavorite)
+router.post('/set-favorites', setFavorite);
 
 /**
  * @swagger
@@ -150,7 +153,7 @@ router.post("/set-favorites", setFavorite)
  *       200:
  *         description: Product removed from favorites or already removed
  */
-router.post("/remove-favorites", unsetFavorite)
+router.post('/remove-favorites', unsetFavorite);
 
 /**
  * @swagger
@@ -168,6 +171,6 @@ router.post("/remove-favorites", unsetFavorite)
  *       401:
  *         description: Unauthorized. Access Denied. Please login.
  */
-router.get("/favorites", getFavorites)
+router.get('/favorites', getFavorites);
 
 export default router;

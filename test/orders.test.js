@@ -1,6 +1,6 @@
 import pactum from 'pactum';
 import * as pm from 'pactum-matchers';
-import { randomInt } from "node:crypto";
+import { randomInt } from 'node:crypto';
 
 process.loadEnvFile();
 pactum.request.setBaseUrl(process.env.APP_URL);

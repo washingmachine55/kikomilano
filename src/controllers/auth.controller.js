@@ -5,13 +5,6 @@ import {
 import { checkExistingEmail } from '../services/auth/checkExistingEmail.auth.service.js';
 import registerUserToDatabase from '../services/auth/registerUser.auth.service.js';
 import { confirmPassword } from '../utils/confirmPassword.js';
-
-import jwt from 'jsonwebtoken';
-// import verifyUserAccessFromDatabase from '../services/verifyUserAccessDatabaseService.js';
-// import { formatDate, formatDistance } from 'date-fns';
-// import { TZDate } from '@date-fns/tz';
-import { env, loadEnvFile } from 'node:process';
-loadEnvFile();
 import { responseWithStatus } from '../utils/responses.js';
 import envLogger from '../utils/customLogger.js';
 import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service.js';
@@ -19,31 +12,9 @@ import { verifyOTPFromDB } from '../services/auth/verifyOTP.auth.service.js';
 import saveNewUserPasswordToDB from '../services/auth/saveNewPassword.auth.service.js';
 import { signJwtAsync, verifyJwtAsync } from '../utils/jwtUtils.js';
 import { attempt } from '../utils/errors.js';
-
-// import { OAuth2Client } from 'google-auth-library';
-// export async function googleAuth(req, res) {
-// 	try {
-// 		const client = new OAuth2Client();
-// 		const ticket = await client.verifyIdToken({
-// 			idToken: token,
-// 			audience: WEB_CLIENT_ID,  // Specify the WEB_CLIENT_ID of the app that accesses the backend
-// 			// Or, if multiple clients access the backend:
-// 			//[WEB_CLIENT_ID_1, WEB_CLIENT_ID_2, WEB_CLIENT_ID_3]
-// 		});
-// 		const payload = ticket.getPayload();
-// 		// This ID is unique to each Google Account, making it suitable for use as a primary key
-// 		// during account lookup. Email is not a good choice because it can be changed by the user.
-// 		const userid = payload['sub'];
-// 		// If the request specified a Google Workspace domain:
-// 		// const domain = payload['hd'];
-
-// 		console.log(userid);
-// 		console.log(payload)
-
-// 	} catch (error) {
-// 		console.log(error);
-// 	}
-// }
+import jwt from 'jsonwebtoken';
+import { env, loadEnvFile } from 'node:process';
+loadEnvFile();
 
 export async function registerUser(req, res) {
 	// #swagger.tags = ['Authentication']
@@ -239,7 +210,6 @@ export async function verifyUserToken(req, res) {
 	// #swagger.description = 'Use this if you want to verify authorization for access to something, or want to get the User's ID for fetching'
 	// #swagger.security = []
 
-
 	if (!req.header('Authorization')) {
 		// #swagger.responses[401] = { description: 'Unauthorized. Access Denied. Please login.' }
 		return responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please login.');
@@ -264,7 +234,6 @@ export async function refreshToken(req, res) {
 	// #swagger.summary = 'Endpoint to allow the user to renew access and refresh tokens.'
 	// #swagger.description = "Use this in automation as once you detect a status code in the 400 range, you'll need to automatically hit this API. Make sure to pass the refresh token instead to get new access and refresh tokens."
 	// #swagger.security = []
-
 
 	if (req.header('Authorization')) {
 		const refreshToken = req.header('Authorization').split(' ')[1];
@@ -372,15 +341,20 @@ export async function forgotPassword(req, res) {
 	const userEmail = Object.values(req.body.data).toString();
 
 	try {
-		const existingEmailCheck = await checkExistingEmail(userEmail)
+		const existingEmailCheck = await checkExistingEmail(userEmail);
 		if (existingEmailCheck == false) {
 			// #swagger.responses[401] = { description: "Email doesn't exist. Please sign up instead." }
-			return responseWithStatus(res, 0, 401, "Email doesn't exist. Please sign up instead.")
+			return responseWithStatus(res, 0, 401, "Email doesn't exist. Please sign up instead.");
 		} else {
-			const userId = await checkExistingEmail(userEmail, true)
-			const sendEmailResult = await createForgotPasswordEmail(userId, userEmail)
+			const userId = await checkExistingEmail(userEmail, true);
+			const sendEmailResult = await createForgotPasswordEmail(userId, userEmail);
 			// #swagger.responses[200] = { description: 'An OTP has been shared to your email address. Please use that to reset your password in the next screen.' }
-			return responseWithStatus(res, 1, 200, "An OTP has been shared to your email address. Please use that to reset your password in the next screen.")
+			return responseWithStatus(
+				res,
+				1,
+				200,
+				'An OTP has been shared to your email address. Please use that to reset your password in the next screen.'
+			);
 		}
 	} catch (error) {
 		console.log(error);
@@ -417,23 +391,31 @@ export async function verifyOTP(req, res) {
 		}
 	} */
 
-	const userEmail = req.body.data.email
-	const userOTP = req.body.data.otp
+	const userEmail = req.body.data.email;
+	const userOTP = req.body.data.otp;
 
-	const result = await verifyOTPFromDB(userEmail, userOTP)
+	const result = await verifyOTPFromDB(userEmail, userOTP);
 	try {
 		if (result === true) {
-			jwt.sign({ id: userEmail }, env.TEMPORARY_TOKEN_SECRET_KEY, { expiresIn: `${Number(env.TEMPORARY_TOKEN_EXPIRATION_TIME)}MINS` }, (err, tempToken) => {
-				if (err) {
-					return responseWithStatus(res, 1, 500, "Error occurred in creating a temporary token", err)
-				} else {
-					// #swagger.responses[200] = { description: 'OTP has been verified!' }
-					return responseWithStatus(res, 1, 200, "OTP has been verified!", { temporary_token: tempToken, expires_in: '10 Minutes' })
+			jwt.sign(
+				{ id: userEmail },
+				env.TEMPORARY_TOKEN_SECRET_KEY,
+				{ expiresIn: `${Number(env.TEMPORARY_TOKEN_EXPIRATION_TIME)}MINS` },
+				(err, tempToken) => {
+					if (err) {
+						return responseWithStatus(res, 1, 500, 'Error occurred in creating a temporary token', err);
+					} else {
+						// #swagger.responses[200] = { description: 'OTP has been verified!' }
+						return responseWithStatus(res, 1, 200, 'OTP has been verified!', {
+							temporary_token: tempToken,
+							expires_in: '10 Minutes',
+						});
+					}
 				}
-			});
+			);
 		} else {
 			// #swagger.responses[401] = { description: 'Invalid OTP or email does not exist.' }
-			return responseWithStatus(res, 1, 401, "Invalid OTP or email does not exist")
+			return responseWithStatus(res, 1, 401, 'Invalid OTP or email does not exist');
 		}
 	} catch (error) {
 		console.log(error);
@@ -490,11 +472,11 @@ export async function resetPassword(req, res) {
 	} else {
 		const token = req.header('Authorization').split(' ')[1];
 		try {
-			await verifyJwtAsync(token, env.TEMPORARY_TOKEN_SECRET_KEY)
+			await verifyJwtAsync(token, env.TEMPORARY_TOKEN_SECRET_KEY);
 
-			const userEmail = req.body.data.email
-			const userPassword = req.body.data.password
-			const userConfirmedPassword = req.body.data.confirmed_password
+			const userEmail = req.body.data.email;
+			const userPassword = req.body.data.password;
+			const userConfirmedPassword = req.body.data.confirmed_password;
 
 			let confirmPasswordCheck = confirmPassword(userPassword, userConfirmedPassword);
 
@@ -508,9 +490,13 @@ export async function resetPassword(req, res) {
 				const accessToken = await signJwtAsync({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
 					expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
 				});
-				const refreshToken = await signJwtAsync({ id: userRegistrationResult.id }, env.REFRESH_TOKEN_SECRET_KEY, {
-					expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
-				});
+				const refreshToken = await signJwtAsync(
+					{ id: userRegistrationResult.id },
+					env.REFRESH_TOKEN_SECRET_KEY,
+					{
+						expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
+					}
+				);
 
 				// #swagger.responses[201] = { description: 'Password Reset successful!' }
 				return await responseWithStatus(res, 1, 201, 'Password Reset successful!', {
@@ -523,7 +509,13 @@ export async function resetPassword(req, res) {
 			}
 		} catch (err) {
 			// #swagger.responses[401] = { description: 'Invalid Token. Please request another OTP.' }
-			return await responseWithStatus(res, 0, 401, 'Error in verifying the temporary token. Please request another OTP.', { error_info: err });
+			return await responseWithStatus(
+				res,
+				0,
+				401,
+				'Error in verifying the temporary token. Please request another OTP.',
+				{ error_info: err }
+			);
 		}
 	}
 }

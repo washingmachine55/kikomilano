@@ -8,9 +8,15 @@ export default async function saveNewUserPasswordToDB(userEmail = null, userPass
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(userPassword, salt);
 		if (userId !== null) {
-			await conn.query('UPDATE tbl_users SET password_hash = $1 WHERE id = $2 RETURNING id', [hashedPassword, userId]);
+			await conn.query('UPDATE tbl_users SET password_hash = $1 WHERE id = $2 RETURNING id', [
+				hashedPassword,
+				userId,
+			]);
 		} else {
-			await conn.query('UPDATE tbl_users SET password_hash = $1 WHERE email = $2 RETURNING id', [hashedPassword, userEmail]);
+			await conn.query('UPDATE tbl_users SET password_hash = $1 WHERE email = $2 RETURNING id', [
+				hashedPassword,
+				userEmail,
+			]);
 		}
 
 		const userDetails = await conn.query(

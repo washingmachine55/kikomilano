@@ -4,7 +4,8 @@ export async function getAllProductsFavorites(userId) {
 	const conn = await pool.connect();
 
 	try {
-		const result = await conn.query(`
+		const result = await conn.query(
+			`
 			SELECT 
 				p.id AS product_id, 
 				p.name AS product_name, 
@@ -18,7 +19,9 @@ export async function getAllProductsFavorites(userId) {
 			JOIN tbl_products p ON p.id = pv.products_id 
 			JOIN tbl_users u ON u.id = upf.users_id 
 			WHERE upf.users_id = $1 AND upf.status = 1;
-			`,[userId]);
+			`,
+			[userId]
+		);
 		return result.rows;
 	} catch (err) {
 		console.error('Error creating record:', err);

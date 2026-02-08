@@ -1,8 +1,18 @@
 import express from 'express';
 import verifyToken from '../middlewares/verifyToken.auth.js';
-import { forgotPassword, loginUser, refreshToken, registerUser, resetPassword, verifyOTP, verifyUserToken } from '../controllers/auth.controller.js';
+import {
+	forgotPassword,
+	loginUser,
+	refreshToken,
+	registerUser,
+	resetPassword,
+	verifyOTP,
+	verifyUserToken,
+} from '../controllers/auth.controller.js';
+import { globallyVerifyInputFields } from '../middlewares/globalInputVerification.js';
 const router = express.Router();
 
+router.use(globallyVerifyInputFields);
 /**
  * @swagger
  * /auth/register:
@@ -94,7 +104,7 @@ router.post('/login', loginUser);
  *       401:
  *         description: Email doesn't exist. Please sign up instead.
  */
-router.post('/forgot-password', forgotPassword)
+router.post('/forgot-password', forgotPassword);
 
 /**
  * @swagger
@@ -119,7 +129,7 @@ router.post('/forgot-password', forgotPassword)
  *       401:
  *         description: Invalid OTP or email does not exist.
  */
-router.post('/verify-otp', verifyOTP)
+router.post('/verify-otp', verifyOTP);
 
 /**
  * @swagger
@@ -184,6 +194,6 @@ router.get('/refresh', refreshToken);
  *       401:
  *         description: Unauthorized. Access Denied. Please request another OTP. or Invalid Token. Please request another OTP.
  */
-router.post('/reset-password', resetPassword)
+router.post('/reset-password', resetPassword);
 
 export default router;

@@ -13,10 +13,10 @@ export async function verifyOTPFromDB(userEmail, userOTP) {
 			return false;
 		} else {
 			let currentTimestamp = new Date();
-			const currentTimestampISO = currentTimestamp.toISOString().replace('T', ' ').replace('Z', '')
+			const currentTimestampISO = currentTimestamp.toISOString().replace('T', ' ').replace('Z', '');
 			// FOR TESTING, REMOVE LATER
 			if (userOTP == 112233) {
-				return true
+				return true;
 			}
 
 			const otpCheck = await conn.query(
@@ -30,9 +30,9 @@ export async function verifyOTPFromDB(userEmail, userOTP) {
 				;`,
 				[userOTP]
 			);
-			let otpCheckResult = otpCheck.rows[0].existscheck
+			let otpCheckResult = otpCheck.rows[0].existscheck;
 			if (otpCheckResult == 1) {
-				return true
+				return true;
 			} else {
 				return false;
 			}

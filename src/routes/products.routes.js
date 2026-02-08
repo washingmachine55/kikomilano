@@ -4,7 +4,7 @@ import { getAllProducts, getAllProductVariants } from '../controllers/products.c
 import { validateUuidUrlParam } from '../middlewares/parseUUIDs.js';
 const router = express.Router();
 
-router.use(verifyToken)
+router.use(verifyToken);
 
 /**
  * @swagger

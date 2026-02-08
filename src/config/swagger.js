@@ -97,7 +97,7 @@ const options = {
 					scheme: 'bearer',
 					bearerFormat: 'JWT',
 				},
-			}
+			},
 		},
 		security: [
 			{

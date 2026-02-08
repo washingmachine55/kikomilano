@@ -5,7 +5,6 @@ import bcrypt from 'bcryptjs';
 export async function isCredentialsMatching(userEmail, userPassword) {
 	const conn = await pool.connect();
 
-
 	try {
 		const credentialsCheck = await conn.query(
 			'SELECT CASE WHEN EXISTS(SELECT email FROM tbl_users WHERE email = $1) THEN 1 ELSE 0 END AS ExistsCheck;',

@@ -5,5 +5,5 @@ export const nameSplitter = async (nameField) => {
 	const firstName = filteredUsernameArray[0];
 	const lastName = filteredUsernameArray[filteredUsernameArray.length - 1];
 
-	return [firstName, lastName]
-}
+	return [firstName, lastName];
+};
