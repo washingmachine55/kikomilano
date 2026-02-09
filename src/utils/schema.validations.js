@@ -94,7 +94,6 @@ const productsInOrder = z
 
 export const ordersNewJsonSchema = z
 	.object({
-		users_id: UUIDSchema,
 		products: z
 			.array(productsInOrder)
 			.min(1, 'Products: Must have at least one item in cart to proceed with the order')

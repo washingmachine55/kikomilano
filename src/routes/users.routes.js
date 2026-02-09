@@ -9,10 +9,7 @@ import {
 } from '../controllers/methods.users.controller.js';
 import { uploadUserProfilePicture } from '../controllers/uploadImage.users.controller.js';
 import { uploadImages } from '../config/multer.js';
-import verifyToken from '../middlewares/verifyToken.auth.js';
 const router = express.Router();
-
-router.use(verifyToken);
 
 /**
  * @swagger
@@ -71,7 +68,7 @@ router.post('/profile/edit', editUserProfile);
  *       200:
  *         description: Details of all available users
  */
-router.get('/', verifyToken, getAllUsers);
+router.get('/', getAllUsers);
 
 /**
  * @swagger

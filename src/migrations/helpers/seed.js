@@ -51,6 +51,7 @@ async function insert(client, sql, params) {
 		await client.query(
 			"INSERT INTO tbl_tags(name) VALUES('Cruelty Free'), ('Paraben Free'), ('Vegan'), ('Suitable for Sensitive Skin'), ('Dermatologist Tested')"
 		);
+		await client.query("INSERT INTO tbl_payments_providers (name) VALUES ('Stripe')");
 		const attributesStaticQuery = await client.query(
 			"INSERT INTO tbl_attributes(name) VALUES('Color Code') RETURNING id"
 		);

@@ -1,10 +1,7 @@
 import express from 'express';
-import verifyToken from '../middlewares/verifyToken.auth.js';
 import { getAllProducts, getAllProductVariants } from '../controllers/products.controller.js';
 import { validateUuidUrlParam } from '../middlewares/parseUUIDs.js';
 const router = express.Router();
-
-router.use(verifyToken);
 
 /**
  * @swagger
@@ -28,7 +25,7 @@ router.use(verifyToken);
  *       404:
  *         description: That category does not exist.
  */
-router.get('/', verifyToken, getAllProducts);
+router.get('/', getAllProducts);
 
 /**
  * @swagger
@@ -93,7 +90,7 @@ router.get('/', verifyToken, getAllProducts);
  *       404:
  *         description: No product variants found of this product id.
  */
-router.get('/:productId/variants', verifyToken, validateUuidUrlParam, getAllProductVariants);
+router.get('/:productId/variants', validateUuidUrlParam, getAllProductVariants);
 // router.post(
 // 	'/profile-picture-upload',
 // 	verifyToken,

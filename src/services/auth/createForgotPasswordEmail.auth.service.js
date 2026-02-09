@@ -78,14 +78,10 @@ export async function createForgotPasswordEmail(userId, userEmail) {
 		});
 	} else {
 		try {
-			try {
-				await conn.query(
-					'INSERT INTO tbl_users_otp(users_id,otp_value,date_sent,date_expiration) VALUES ($1,$2,$3,$4);',
-					[userId, otp, currentTimestampISO, expirationTimestampISO]
-				);
-			} catch (error) {
-				console.debug(error);
-			}
+			const emailResult = await conn.query(
+				'INSERT INTO tbl_users_otp(users_id,otp_value,date_sent,date_expiration) VALUES ($1,$2,$3,$4);',
+				[userId, otp, currentTimestampISO, expirationTimestampISO]
+			);
 
 			await transporter.sendMail({
 				from: '"Admin Sender" <test@example.com>',
@@ -104,6 +100,8 @@ export async function createForgotPasswordEmail(userId, userEmail) {
 			<br/>
 			<p>The OTP expires <b>${timeDifferenceForHumans}</b> on ${formattedExpirationTimestamp}</p>`,
 			});
+
+			return emailResult;
 		} catch (error) {
 			console.debug(error);
 		} finally {

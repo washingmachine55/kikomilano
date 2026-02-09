@@ -1,5 +1,4 @@
 import express from 'express';
-import verifyToken from '../middlewares/verifyToken.auth.js';
 import {
 	forgotPassword,
 	loginUser,
@@ -9,10 +8,9 @@ import {
 	verifyOTP,
 	verifyUserToken,
 } from '../controllers/auth.controller.js';
-import { globallyVerifyInputFields } from '../middlewares/globalInputVerification.js';
 const router = express.Router();
 
-router.use(globallyVerifyInputFields);
+// router.use(globallyVerifyInputFields);
 /**
  * @swagger
  * /auth/register:
@@ -147,7 +145,7 @@ router.post('/verify-otp', verifyOTP);
  *       401:
  *         description: Unauthorized. Access Denied. Please login. or Invalid Token. Please login.
  */
-router.get('/verify-token', verifyToken, verifyUserToken);
+router.get('/verify-token', verifyUserToken);
 
 /**
  * @swagger

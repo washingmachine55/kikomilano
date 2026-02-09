@@ -50,8 +50,6 @@ export const globallyVerifyInputFields = async (req, res, next) => {
 			break;
 		case '/users/profile/edit':
 			reqData = await userProfileEditJsonSchema.safeParseAsync(req.body.data);
-			console.log(reqData);
-
 			await successTrial(reqData);
 			break;
 		// case "/users/profile-picture-upload":

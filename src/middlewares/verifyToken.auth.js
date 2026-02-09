@@ -32,10 +32,10 @@ const verifyToken = async (req, res, next) => {
 		case '/auth/verify-otp':
 			next();
 			break;
-		case '/auth/refresh': // Bypassing this as it requires usage of Refresh token isntead of access token
+		case '/auth/refresh': // Bypassing this as it requires usage of Refresh token instead of access token
 			next();
 			break;
-		case '/auth/reset-password': // Bypassing this as it requires usage of Temporary token isntead of access token
+		case '/auth/reset-password': // Bypassing this as it requires usage of Temporary token instead of access token
 			next();
 			break;
 		default:

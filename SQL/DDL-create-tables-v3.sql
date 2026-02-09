@@ -307,7 +307,7 @@ CREATE TABLE IF NOT EXISTS tbl_notifications(
 CREATE TABLE IF NOT EXISTS tbl_payments_providers(
 	id UUID PRIMARY KEY DEFAULT UUIDv7(),
 	name VARCHAR(255) NOT NULL,
-	callback_url TEXT NOT NULL,
+	callback_url TEXT DEFAULT NULL,
 	created_by UUID DEFAULT NULL,
 	created_at TIMESTAMP DEFAULT NOW(),
 	updated_by UUID DEFAULT NULL,
@@ -326,6 +326,7 @@ CREATE TABLE IF NOT EXISTS tbl_payments(
 	amount DECIMAL(6,2) NOT NULL,
 	payments_providers_id UUID NOT NULL,
 	providers_transaction_id VARCHAR(1000) DEFAULT NULL,
+	providers_transaction_status VARCHAR(50) DEFAULT NULL,
 	payment_method SMALLINT DEFAULT 0,
 	payment_status SMALLINT DEFAULT 0,
 	created_by UUID DEFAULT NULL,

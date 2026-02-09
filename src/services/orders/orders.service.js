@@ -5,11 +5,11 @@ import format from 'pg-format';
 import { extractedUuidSchema, UUIDSchema } from '../../utils/schema.validations.js';
 import { isValidUUID } from '../../utils/validateUUID.js';
 
-export async function saveOrder(data) {
+export async function saveOrder(data, userId) {
 	const conn = await pool.connect();
 
 	// try {
-	const userCheck = new RecordCheck('id', 'tbl_users', data.users_id);
+	const userCheck = new RecordCheck('id', 'tbl_users', userId);
 	await userCheck.confirmFromWhitelist();
 
 	if ((await userCheck.getResult()) === false) {
@@ -25,7 +25,7 @@ export async function saveOrder(data) {
 
 		const newOrderID = await conn.query(
 			'INSERT INTO tbl_orders(users_id, cart_total, created_by) VALUES ($1, $2, $1) RETURNING *',
-			[data.users_id, Number(data.cart_total)]
+			[userId, Number(data.cart_total)]
 		);
 
 		if (Object.hasOwn(data, 'discount_code') && data.discount_code !== null) {
@@ -70,7 +70,7 @@ export async function saveOrder(data) {
 			}
 
 			for (let i = 0; i < productsOfUserOrder.length; i++) {
-				productsOfUserOrder[i].push(newOrderID.rows[0].id, data.users_id, 'NOW()');
+				productsOfUserOrder[i].push(newOrderID.rows[0].id, userId, 'NOW()');
 			}
 
 			const finalQuery = format(
@@ -108,3 +108,34 @@ export async function saveOrder(data) {
 
 	// throw new Error(err.message, { cause: err });
 }
+
+export const getOrderDetails = async (orderId, userId) => {
+	const conn = await pool.connect();
+
+	const orderAuthorization = await conn.query(
+		`
+		SELECT CASE WHEN EXISTS(
+			SELECT id, status, users_id FROM tbl_orders WHERE id = $1 AND status = 1 AND users_id = $2
+		) THEN true ELSE false END AS ExistsCheck;
+	`,
+		[orderId, userId]
+	);
+
+	if (orderAuthorization.rows[0].existscheck === true) {
+		const result = await conn.query(
+			`
+		SELECT 
+		o.id AS orders_id, o.users_id, u.email, o.cart_total, o.order_status, o.created_by, o.created_at, o.updated_by, o.updated_at, o.status
+		FROM tbl_orders o
+		JOIN tbl_users u ON o.users_id = u.id
+		WHERE o.id = $1 AND o.status = 1
+		`,
+			[orderId]
+		);
+
+		conn.release();
+		return result.rows[0];
+	} else {
+		throw new NotFoundError('Requested order does not exist for this user');
+	}
+};
