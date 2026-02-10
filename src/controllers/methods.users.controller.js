@@ -9,9 +9,10 @@ import { verifyJwtAsync } from '../utils/jwtUtils.js';
 import { saveProductFavorite } from '../services/users/setFavourite.users.service.js';
 import { deleteProductFavorite } from '../services/users/unsetFavourite.users.service.js';
 import { getAllProductsFavorites } from '../services/users/getAllFavorites.users.service.js';
-import { attempt, NotFoundError, ValidationError } from '../utils/errors.js';
+import { attempt, BadRequestError, NotFoundError, trialCapture, ValidationError } from '../utils/errors.js';
 import { allowedFieldsFunc } from '../utils/dynamicAllowedFields.js';
 import { editUserDetails } from '../services/users/editUserDetails.users.service.js';
+import { saveAddress } from '../services/users/saveAddress.users.service.js';
 
 export async function getAllUsers(req, res) {
 	// #swagger.tags = ['Users']
@@ -83,6 +84,24 @@ export async function getSingleUser(req, res) {
 		}
 	}
 }
+
+export const saveUserAddress = await attempt(async (req, res, next) => {
+	const addressName = req.body.data.address_name
+	const addressInfo = req.body.data.address_info
+	// const modifiedAddressInfo = await parseSingleAddressLine(addressInfo);
+	const result = await saveAddress(addressName, addressInfo, req.user.id);
+	return responseWithStatus(res, 1, 200, "User address saved successfully!", result)
+});
+
+export const getUserAddresses = await attempt(async (req, res, next) => {
+	const addressName = req.body.data.address_name
+	const addressInfo = req.body.data.address_info
+	// const modifiedAddressInfo = await parseSingleAddressLine(addressInfo);
+	const result = await saveAddress(addressName, addressInfo, req.user.id);
+	return responseWithStatus(res, 1, 200, "User address saved successfully!", result)
+});
+
+
 
 export const editUserProfile = await attempt(async (req, res) => {
 	const allowedFields = ['name', 'email', 'password', 'confirmed_password'];

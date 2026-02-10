@@ -19,7 +19,7 @@ const passwordSchema = z
 	});
 
 export const passwordConfirmationSchema = z
-	.object({
+	.strictObject({
 		password: passwordSchema,
 		confirmed_password: z.string(),
 	})
@@ -61,7 +61,10 @@ export const authVerifyOTPSchema = z.object({
 export const authResetPasswordSchema = z.strictObject({
 	email: emailSchema,
 	...passwordConfirmationSchema.shape,
-});
+}).refine((data) => data.password === data.confirmed_password, {
+	message: 'Passwords do not match',
+	path: ['confirmed_password'],
+});;
 
 export const UUIDSchema = z.uuidv7({
 	error: (iss) => (iss.input === undefined ? 'Field is required.' : 'Incorrect format, please enter a valid UUID'),

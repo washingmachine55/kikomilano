@@ -4,6 +4,8 @@ import {
 	getAllUsers,
 	getFavorites,
 	getSingleUser,
+	getUserAddresses,
+	saveUserAddress,
 	setFavorite,
 	unsetFavorite,
 } from '../controllers/methods.users.controller.js';
@@ -169,5 +171,9 @@ router.post('/remove-favorites', unsetFavorite);
  *         description: Unauthorized. Access Denied. Please login.
  */
 router.get('/favorites', getFavorites);
+
+
+router.post('/addresses/', saveUserAddress)
+router.get('/addresses/', getUserAddresses)
 
 export default router;

@@ -192,13 +192,12 @@ export async function forgotPassword(req, res) {
 			return responseWithStatus(res, 0, 401, "Email doesn't exist. Please sign up instead.");
 		} else {
 			const userId = await checkExistingEmail(userEmail, true);
-			const sendEmailResult = await createForgotPasswordEmail(userId, userEmail);
+			await createForgotPasswordEmail(userId, userEmail);
 			return responseWithStatus(
 				res,
 				1,
 				200,
-				'An OTP has been shared to your email address. Please use that to reset your password in the next screen.',
-				sendEmailResult
+				'An OTP has been shared to your email address. Please use that to reset your password in the next screen.'
 			);
 		}
 	} catch (error) {
@@ -234,13 +233,11 @@ export async function verifyOTP(req, res) {
 	}
 }
 
-// export async function resetPassword(req, res) {
 export const resetPassword = await attempt(async (req, res, next) => {
 	if (!req.header('Authorization')) {
 		return responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please request another OTP.');
 	} else {
 		const token = req.header('Authorization').split(' ')[1];
-		// try {
 		const userEmail = req.body.data.email;
 		const userPassword = req.body.data.password;
 		const userConfirmedPassword = req.body.data.confirmed_password;
@@ -255,13 +252,6 @@ export const resetPassword = await attempt(async (req, res, next) => {
 			throw new Error(tempTokenError.message, { cause: tempTokenError });
 		}
 
-		let confirmPasswordCheck = confirmPassword(userPassword, userConfirmedPassword);
-
-		if (confirmPasswordCheck == false) {
-			return responseWithStatus(res, 0, 400, 'Error', "Passwords don't match. Please try again instead");
-		}
-
-		// try {
 		const [userRegistrationResult, userRegistrationError] = await trialCapture(
 			await saveNewUserPasswordToDB(userEmail, userPassword)
 		);
@@ -280,17 +270,5 @@ export const resetPassword = await attempt(async (req, res, next) => {
 			access_token: accessToken,
 			refresh_token: refreshToken,
 		});
-		// } catch (err) {
-		// 	await envLogger('Error creating record', err, res);
-		// }
-		// } catch (err) {
-		// 	return await responseWithStatus(
-		// 		res,
-		// 		0,
-		// 		401,
-		// 		'Error in verifying the temporary token. Please request another OTP.',
-		// 		{ error_info: err }
-		// 	);
-		// }
 	}
 });

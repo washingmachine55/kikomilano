@@ -37,7 +37,6 @@ export const confirmPayment = await attempt(async (req, res, next) => {
 	const orderID = req.body.data.orders_id;
 
 	const orderDetails = await getOrderDetails(orderID, userID);
-	console.log(orderDetails);
 
 	// const paymentIntentId = await paymentIntentId(userID);
 

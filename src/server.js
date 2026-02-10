@@ -105,7 +105,6 @@ app.use((err, req, res, next) => {
 	if (err.code == '23503' || err.code === '23505') {
 		return responseWithStatus(res, 1, 409, 'An error occurred', 'Conflict in database records');
 	} else if (err) {
-		console.log(err);
 		switch (err.type) {
 			case 'StripeCardError':
 				// A declined card error

@@ -7,7 +7,7 @@
     "dev-nm-server": "nodemon server.js",
     "dev-nm-debug": "DEBUG=3-week-plan:* nodemon server.js",
     "secure-dev-debug": "HTTPS=true DEBUG=coordinate-test:* nodemon server.js",
-    "dev-node-debug": "node --watch server.js --env-file=.env -trace-sync-io",
+    "dev-node-debug": "node --watch --no-deprecation src/server.js --env-file=.env --trace-sync-io",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "mocha",

@@ -53,8 +53,6 @@ export async function saveOrder(data, userId) {
 						`Applied quantity value must be above 0 and less than 20, currently ${product_variant.qty}. Please retry after making the necessary changes.`
 					);
 				}
-				console.log(product_variant.qty);
-
 				productsOfUserOrder.push(Object.values(product_variant));
 			});
 			for (let w = 0; w < productsOfUserOrder.length; w++) {
