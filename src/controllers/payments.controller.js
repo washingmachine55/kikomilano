@@ -14,20 +14,26 @@ export const createPayment = await attempt(async (req, res, next) => {
 
 	const orderDetails = await getOrderDetails(orderID, userID);
 
-	// const paymentIntent = await stripe.paymentIntents.create({
-	// 	amount: Number(orderDetails.cart_total) * 100,
-	// 	currency: 'usd',
-	// 	confirm: false,
-	// 	use_stripe_sdk: true,
-	// 	receipt_email: orderDetails.email,
-	// 	automatic_payment_methods: {
-	// 		enabled: true,
-	// 	},
-	// });
+	const paymentIntent = await stripe.paymentIntents.create({
+		amount: Number(orderDetails.cart_total) * 100,
+		currency: 'usd',
+		confirm: false,
+		use_stripe_sdk: true,
+		receipt_email: orderDetails.email,
+		automatic_payment_methods: {
+			enabled: true,
+		},
+	});
 
 	const savePayment = await savePaymentInfo(paymentIntent, orderDetails);
 
-	return await responseWithStatus(res, 1, 200, 'works', savePayment);
+	return await responseWithStatus(res, 1, 200, 'works', {
+		server_info: savePayment,
+		stripe_info: {
+			paymentIntent: paymentIntent.client_secret,
+			publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+		}
+	});
 });
 
 export const confirmPayment = await attempt(async (req, res, next) => {

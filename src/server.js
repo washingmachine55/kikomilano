@@ -6,6 +6,10 @@ import { env, loadEnvFile } from 'node:process';
 loadEnvFile();
 const app = express();
 
+// Running Stripe's webhook before any of the other middlewares and routes, to ensure that no parsing/modification is done of the received data as Stripe requires payload to be provided as a string or a Buffer
+import webhookRoutes from './routes/webhook.routes.js';
+app.use('/webhook', webhookRoutes);
+
 app.set('query parser', 'simple');
 app.use(express.json());
 app.use(compression());
