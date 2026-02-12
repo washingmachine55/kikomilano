@@ -180,9 +180,7 @@ kikomilano/
 │   │   ├── auth.controller.js
 │   │   ├── products.controller.js
 │   │   ├── users.controller.js
-│   │   ├── methods.users.controller.js
 │   │   ├── orders.controller.js
-│   │   └── uploadImage.users.controller.js
 │   ├── routes/             	# API routes
 │   │   ├── auth.routes.js
 │   │   ├── products.routes.js

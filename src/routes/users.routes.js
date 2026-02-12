@@ -4,12 +4,11 @@ import {
 	getAllUsers,
 	getFavorites,
 	getSingleUser,
-	getUserAddresses,
 	saveUserAddress,
 	setFavorite,
 	unsetFavorite,
-} from '../controllers/methods.users.controller.js';
-import { uploadUserProfilePicture } from '../controllers/uploadImage.users.controller.js';
+} from '../controllers/users.controller.js';
+import { uploadUserProfilePicture } from '../controllers/users.controller.js';
 import { uploadImages } from '../config/multer.js';
 const router = express.Router();
 
@@ -174,6 +173,6 @@ router.get('/favorites', getFavorites);
 
 
 router.post('/addresses/', saveUserAddress)
-router.get('/addresses/', getUserAddresses)
+// router.get('/addresses/', getUserAddresses)
 
 export default router;

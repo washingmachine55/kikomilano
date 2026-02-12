@@ -1,6 +1,7 @@
 import pool from '../../config/db.js';
 import bcrypt from 'bcryptjs';
 import { SOMETHING_WENT_WRONG_CREATE } from '../../utils/CONSTANTS.js';
+import { GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers.js';
 
 export default async function registerUserToDatabase(request) {
 	const conn = await pool.connect();
@@ -31,7 +32,7 @@ export default async function registerUserToDatabase(request) {
 			);
 
 			const credentialsCheck = await conn.query(
-				'SELECT u.id, u.email, u.access_type, u.created_at, ud.first_name, ud.last_name, ud.images_id from tbl_users u JOIN tbl_users_details ud ON ud.users_id = u.id WHERE u.email = $1;',
+				GET_ALL_USER_DETAILS_BY_EMAIL,
 				[request[1]]
 			);
 

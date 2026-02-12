@@ -27,30 +27,12 @@ export async function getAllUsers(req, res) {
 }
 
 export async function uploadUserProfilePicture(req, res) {
-	// #swagger.tags = ['Users']
-	// #swagger.summary = "Endpoint to upload user's profile picture."
-	/* #swagger.requestBody = {
-		required: true,
-		content: {
-			"multipart/form-data": {
-				example: {
-					userProfilePicture: "Sample"
-				}
-			}
-		}
-	}
-	*/
-	// #swagger.responses[415] = { description: 'Form field does not satisfy requirement. Please enter the correct field name for uploading the file.' }
-	// #swagger.responses[413] = { description: `File is too large. Maximum size is 1MB.` }
-
 	if (!req.file) {
-		// #swagger.responses[400] = { description: 'No image uploaded. Please upload an image before trying again.' }
 		return await responseWithStatus(res, 0, 400, 'No image uploaded. Please upload an image before trying again.');
 	}
 
 	const result = await uploadUserProfilePictureToDB(req.user.id, req.file);
 	try {
-		// #swagger.responses[200] = { description: 'Image uploaded successfully' }
 		return await responseWithStatus(res, 1, 200, 'Image uploaded successfully', result);
 	} catch (error) {
 		console.debug(error);
@@ -93,15 +75,13 @@ export const saveUserAddress = await attempt(async (req, res, next) => {
 	return responseWithStatus(res, 1, 200, "User address saved successfully!", result)
 });
 
-export const getUserAddresses = await attempt(async (req, res, next) => {
-	const addressName = req.body.data.address_name
-	const addressInfo = req.body.data.address_info
-	// const modifiedAddressInfo = await parseSingleAddressLine(addressInfo);
-	const result = await saveAddress(addressName, addressInfo, req.user.id);
-	return responseWithStatus(res, 1, 200, "User address saved successfully!", result)
-});
-
-
+// export const getUserAddresses = await attempt(async (req, res, next) => {
+// 	const addressName = req.body.data.address_name
+// 	const addressInfo = req.body.data.address_info
+// 	// const modifiedAddressInfo = await parseSingleAddressLine(addressInfo);
+// 	const result = await saveAddress(addressName, addressInfo, req.user.id);
+// 	return responseWithStatus(res, 1, 200, "User address saved successfully!", result)
+// });
 
 export const editUserProfile = await attempt(async (req, res) => {
 	const allowedFields = ['name', 'email', 'password', 'confirmed_password'];

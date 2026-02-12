@@ -13,7 +13,6 @@ app.use('/webhook', webhookRoutes);
 app.set('query parser', 'simple');
 app.use(express.json());
 app.use(compression());
-app.use(express.static('../public'));
 app.use(
 	cors({
 		origin: '*',
@@ -24,6 +23,9 @@ app.use(
 // ======================================================================
 // ================  All da Routes for da flutes  =======================
 // ======================================================================
+import staticRoutes from './routes/static.routes.js';
+app.use('/static', staticRoutes);
+
 import SwaggerUI from 'swagger-ui-express';
 app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(openapiSpecification));
 
@@ -107,6 +109,7 @@ app.use((err, req, res, next) => {
 		return responseWithStatus(res, 0, 404, err.message, err);
 	}
 	if (err.code == '23503' || err.code === '23505') {
+		console.debug(err)
 		return responseWithStatus(res, 1, 409, 'An error occurred', 'Conflict in database records');
 	} else if (err) {
 		switch (err.type) {

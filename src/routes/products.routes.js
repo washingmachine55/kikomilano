@@ -91,11 +91,5 @@ router.get('/', getAllProducts);
  *         description: No product variants found of this product id.
  */
 router.get('/:productId/variants', validateUuidUrlParam, getAllProductVariants);
-// router.post(
-// 	'/profile-picture-upload',
-// 	verifyToken,
-// 	uploadImages.single('userProfilePicture'),
-// 	uploadUserProfilePicture
-// );
 
 export default router;

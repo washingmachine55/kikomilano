@@ -8,8 +8,11 @@ export const saveAddress = async (addressName, addressInfo, userId) => {
 
 	const [queryAddress, queryAddressError] = await trialCapture(await conn.query('INSERT INTO tbl_addresses (address_name, address_line, created_by) VALUES ($1,$2,$3) RETURNING id', [addressName, addressInfo, userId]))
 
-	const [queryUsers, queryUsersError] = await trialCapture(await conn.query('UPDATE tbl_users_details SET addresses_id = $1, users_id = $2 RETURNING *', 
+	const [queryUsers, queryUsersError] = await trialCapture(await conn.query('UPDATE tbl_users_details SET addresses_id = $1 WHERE users_id = $2 RETURNING *', 
 		[queryAddress.rows[0].id, userId]))
+
+	console.log(queryUsers);
+
 
 	await conn.query("COMMIT");
 

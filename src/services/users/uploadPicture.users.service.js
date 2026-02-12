@@ -5,7 +5,7 @@ export async function uploadUserProfilePictureToDB(userId, file) {
 	const conn = await pool.connect();
 	try {
 		const uploadImage = await conn.query('INSERT INTO tbl_images(image_url) VALUES ($1) RETURNING id', [
-			fileToUpload,
+			fileToUpload.replace("public/", ""),
 		]);
 
 		const uploadImageResult = uploadImage.rows[0].id;

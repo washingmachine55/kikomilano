@@ -1,11 +1,12 @@
 import { TZDate } from '@date-fns/tz';
 import pool from '../../config/db.js';
+import { CASE_EMAIL_CHECK } from '../../providers/commonQueries.providers.js';
 export async function verifyOTPFromDB(userEmail, userOTP) {
 	const conn = await pool.connect();
 
 	try {
 		const emailCheck = await conn.query(
-			'SELECT CASE WHEN EXISTS(SELECT email FROM tbl_users WHERE email = $1) THEN 1 ELSE 0 END AS ExistsCheck;',
+			CASE_EMAIL_CHECK,
 			[userEmail]
 		);
 		let emailCheckResult = emailCheck.rows[0].existscheck.toString();

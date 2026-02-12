@@ -1,13 +1,13 @@
 import pool from '../../config/db.js';
 import bcrypt from 'bcryptjs';
-// import console.debug from '../../utils/customLogger.js';
+import { CASE_EMAIL_CHECK, GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers.js';
 
 export async function isCredentialsMatching(userEmail, userPassword) {
 	const conn = await pool.connect();
 
 	try {
 		const credentialsCheck = await conn.query(
-			'SELECT CASE WHEN EXISTS(SELECT email FROM tbl_users WHERE email = $1) THEN 1 ELSE 0 END AS ExistsCheck;',
+			CASE_EMAIL_CHECK,
 			[userEmail]
 		);
 
@@ -46,7 +46,7 @@ export async function getUserId(userEmail, userPassword) {
 
 	try {
 		const credentialsCheck = await conn.query(
-			'SELECT CASE WHEN EXISTS(SELECT email FROM tbl_users WHERE email = $1) THEN 1 ELSE 0 END AS ExistsCheck;',
+			CASE_EMAIL_CHECK,
 			[userEmail]
 		);
 
@@ -62,9 +62,8 @@ export async function getUserId(userEmail, userPassword) {
 				const bcryptResult = await bcrypt.compare(userPassword, hashedPasswordFromDB);
 
 				if (bcryptResult == true) {
-					// const credentialsCheck = await conn.query("SELECT id FROM tbl_users WHERE email = $1;", [userEmail]);
 					const credentialsCheck = await conn.query(
-						'SELECT u.id, u.email, u.access_type, u.created_at, ud.first_name, ud.last_name, ud.images_id from tbl_users u JOIN tbl_users_details ud ON ud.users_id = u.id WHERE u.email = $1;',
+						GET_ALL_USER_DETAILS_BY_EMAIL,
 						[userEmail]
 					);
 					let result = credentialsCheck.rows[0];
