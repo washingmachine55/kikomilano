@@ -1,14 +1,17 @@
 import express from 'express';
 import {
-	editUserProfile,
-	getAllUsers,
-	getFavorites,
-	getSingleUser,
-	saveUserAddress,
-	setFavorite,
-	unsetFavorite,
+    getSingleUser,
+    editUserProfile,
+    getAllUsers,
+    uploadUserProfilePicture,
+    getFavorites,
+    setFavorite,
+    unsetFavorite,
+    getUserAddresses,
+    saveUserAddress,
+    unsetUserAddresses,
 } from '../controllers/users.controller.js';
-import { uploadUserProfilePicture } from '../controllers/users.controller.js';
+import { } from '../controllers/users.controller.js';
 import { uploadImages } from '../config/multer.js';
 const router = express.Router();
 
@@ -103,8 +106,8 @@ router.get('/', getAllUsers);
 router.post('/profile-picture-upload', uploadImages.single('userProfilePicture'), uploadUserProfilePicture);
 
 /**
- * @swagger
- * /users/set-favorites:
+ *  @swagger
+ *  /users/set-favorites:
  *   post:
  *     summary: Endpoint to add a product to user's favorites.
  *     tags:
@@ -171,8 +174,106 @@ router.post('/remove-favorites', unsetFavorite);
  */
 router.get('/favorites', getFavorites);
 
-
+/**
+ * @swagger
+ * /users/addresses:
+ *   post:
+ *     summary: Endpoint to a create an address.
+ *     description: Allows a logged in user to create an address.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             data:
+ *               address_name: 23s32
+ *               address_info: 231, 123 main St Apt 4B, New York, NY 10001
+ *     responses:
+ *       200:
+ *         description: A similar address already exists.
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 200
+ *               type: 1
+ *               message: User address saved successfully!
+ *               data:
+ *                 id: '019c5752-250c-7834-9263-8e6a602a4904'
+ *                 email: samples@users.czom
+ *                 phone_no: 
+ *                 access_type: 0
+ *                 first_name: Sample
+ *                 last_name: Sample
+ *                 image_url: images/uploads/userProfilePicture-1770994009070-625979629.png
+ *                 address_name: 23ss3ss2
+ *                 address_line: 231, 123 main St Apt 4B, New York, NY 10001
+ *       409:
+ *         description: A similar address already exists.
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 409
+ *               type: 0
+ *               message: A similar address already exists. Please change values to create another one.
+ *               data:
+ *                 error_type: Conflicting Record
+ *       422:
+ *         description: Can not create more than 2 addresses.
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 422
+ *               type: 0
+ *               message: User can not create more than 2 addresses. Please delete one to create another..
+ *               data:
+ *                 error_type: Unprocessable Content
+ */
 router.post('/addresses/', saveUserAddress)
-// router.get('/addresses/', getUserAddresses)
+
+/**
+ * @swagger
+ * /users/addresses:
+ *   get:
+ *     summary: Endpoint to get all addresses of a user that is logged in.
+ *     description: Just pass the jwt token correctly to get the logged in user's saved addresses.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User's addresses.
+ *         content:
+ *           application/json:
+ *             example:
+ *                status: 200
+ *                type: 1
+ *                message: User address fetched successfully!
+ *                data:
+ *                  addresses_info:
+ *                  - address_name: Work
+ *                    address_line: 231, 123 main St Apt 4B, New York, NY 10001
+ *                  - address_name: Home
+ *                    address_line: 242 Greene St, New York, NY 10003, USA
+ *  
+ *       404:
+ *         description: No addresses found.
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 404
+ *               type: 0
+ *               message: No addresses found of this user. Create a new address using POST method to see it here later.
+ *               data:
+ *                 error_type: Entity not found
+ *  
+ */
+router.get('/addresses/', getUserAddresses)
+
+router.post('/addresses/delete', unsetUserAddresses)
 
 export default router;

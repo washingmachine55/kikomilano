@@ -1,11 +1,12 @@
 import pool from '../../config/db.js';
+import { GET_ALL_USER_DETAILS_BY_ID } from '../../providers/commonQueries.providers.js';
 
 export async function getSingleUserDetails(userId) {
 	// const conn = await pool.connect();
 
 	try {
 		const result = await pool.query(
-			'SELECT u.id, u.email, u.access_type, u.created_at, ud.first_name, ud.last_name, i.image_url from tbl_users u JOIN tbl_users_details ud ON ud.users_id = u.id FULL JOIN tbl_images i ON i.id = ud.images_id WHERE u.id = $1;',
+			GET_ALL_USER_DETAILS_BY_ID,
 			[userId]
 		);
 		return result.rows[0];

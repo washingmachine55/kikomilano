@@ -9,6 +9,7 @@ import {
 	authLoginSchema,
 	emailSchema,
 	userFavoriteProductSchema,
+	userUnsetFavoriteProductSchema,
 } from '../utils/schema.validations.js';
 
 export const globallyVerifyInputFields = async (req, res, next) => {
@@ -61,7 +62,7 @@ export const globallyVerifyInputFields = async (req, res, next) => {
 			await successTrial(reqData);
 			break;
 		case '/users/remove-favorites':
-			reqData = await userFavoriteProductSchema.safeParseAsync(req.body.data);
+			reqData = await userUnsetFavoriteProductSchema.safeParseAsync(req.body.data);
 			await successTrial(reqData);
 			break;
 		case '/orders':

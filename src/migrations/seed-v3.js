@@ -1,5 +1,3 @@
-// Version 4
-
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
 import pool from '../../config/db.js';
@@ -147,26 +145,16 @@ async function insert(client, sql, params) {
 			await client.query(
 				`
 				INSERT INTO tbl_users_details
-				(users_id, first_name, last_name, images_id, created_by)
-				VALUES ($1,$2,$3,$4,$5)
+				(users_id, first_name, last_name, images_id, addresses_id, created_by)
+				VALUES ($1,$2,$3,$4,$5,$6)
 				`,
 				[
 					user.id,
 					faker.person.firstName(),
 					faker.person.lastName(),
 					pick(images).id,
-					user.id,
-				]
-			);
-			await client.query(
-				`
-				INSERT INTO tbl_users_addresses
-				(users_id, addresses_id)
-				VALUES ($1,$2)
-				`,
-				[
-					user.id,
 					pick(addresses).id,
+					user.id,
 				]
 			);
 		}

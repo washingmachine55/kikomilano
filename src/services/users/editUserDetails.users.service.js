@@ -1,4 +1,5 @@
 import pool from '../../config/db.js';
+import { GET_ALL_USER_DETAILS_BY_ID } from '../../providers/commonQueries.providers.js';
 import { RecordCheck } from '../../providers/recordChecks.providers.js';
 import { BadRequestError, NotFoundError, trialCapture } from '../../utils/errors.js';
 import { nameSplitter } from '../../utils/nameSplitter.js';
@@ -101,13 +102,7 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 	}
 
 	const result = await pool.query(
-		`
-		SELECT u.id, u.email, u.phone_no, u.access_type, ud.first_name, ud.last_name, i.image_url 
-		FROM tbl_users u 
-		JOIN tbl_users_details ud ON u.id = ud.users_id
-		FULL JOIN tbl_images i ON i.id = ud.images_id 
-		WHERE u.id = $1;
-	`,
+		GET_ALL_USER_DETAILS_BY_ID,
 		[verifiedUserId]
 	);
 

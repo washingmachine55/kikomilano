@@ -36,7 +36,7 @@ export const trialCapture = async (promise) => {
 export class UnprocessableContentError extends Error {
 	constructor(message) {
 		super(message); // Call the parent Error constructor
-		this.name = 'Validation Error'; // Set a custom name
+		this.name = 'Unprocessable Content'; // Set a custom name
 		this.message = message;
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, UnprocessableContentError);
@@ -74,7 +74,7 @@ export class BadRequestError extends Error {
 export class ConflictError extends Error {
 	constructor(message, details) {
 		super(message); // Call the parent Error constructor
-		this.name = 'Conflicting Record Error'; // Set a custom name
+		this.name = 'Conflicting Record'; // Set a custom name
 		this.message = message;
 		this.cause = details;
 		if (Error.captureStackTrace) {

@@ -3,7 +3,7 @@
 	"prettier.configPath": ".prettierrc",
 	"editor.formatOnSave": true,
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"cSpell.words": ["MONTHNAME", "pactum", "stringbool", "uuidv", "VARCHAR", "venv"],
+	"cSpell.words": ["Favourited", "MONTHNAME", "pactum", "stringbool", "uuidv", "VARCHAR", "venv"],
 	"cSpell.ignoreWords": ["GROBAR", "Passw", "RDBMS", "existscheck", "lutbl"],
 	"[sql]": {
 		"editor.defaultFormatter": "ms-ossdata.vscode-pgsql"

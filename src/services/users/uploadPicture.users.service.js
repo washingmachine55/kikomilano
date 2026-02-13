@@ -9,11 +9,18 @@ export async function uploadUserProfilePictureToDB(userId, file) {
 		]);
 
 		const uploadImageResult = uploadImage.rows[0].id;
-
-		const result = await pool.query(
+		await pool.query(
 			'UPDATE tbl_users_details SET images_id = $1 WHERE users_id = $2 RETURNING images_id',
 			[uploadImageResult, userId]
 		);
+
+		const result = await pool.query(`
+			SELECT ud.users_id, i.image_url
+			FROM tbl_users_details ud
+			JOIN tbl_images i ON ud.images_id = i.id
+		`).catch(err => {
+			throw new Error("Unable to fetch user's profile picture");
+		})
 
 		return result.rows[0];
 	} catch (err) {

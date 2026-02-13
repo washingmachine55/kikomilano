@@ -148,6 +148,13 @@ export const userFavoriteProductSchema = z
 	})
 	.partial({ users_id: true });
 
+export const userUnsetFavoriteProductSchema = z
+	.strictObject({
+		products_variants_array: z.array(
+			UUIDSchema
+		).min(1),
+	})
+
 // ====================	ADDRESSES TABLE SCHEMAS ====================
 const addressesBaseSchema = z.object({
 	address_name: z.string().max(10).nullable(),

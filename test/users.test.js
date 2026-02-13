@@ -125,7 +125,7 @@ describe('Users APIs', () => {
 				.expectJsonMatch({
 					data: {
 						user_details: {
-							id: pm.like('s'),
+							users_id: pm.like('s'),
 							email: pm.like('s'),
 						},
 					},
@@ -422,6 +422,27 @@ describe('Users APIs', () => {
 	});
 
 	describe('GET /users/favorites', () => {
+		before(async () => {
+			const randomProductNum = randomInt(0, 25);
+			await pactum
+				.spec()
+				.withMethod('GET')
+				.withPath('/products')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.expectStatus(200)
+				.stores('productId', `data.products_details[${randomProductNum}].product_variant_id`);
+
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/set-favorites')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.withBody({
+					data: {
+						products_variants_id: `$S{productId}`,
+					},
+				})
+		});
 		it('should retrieve user favorites successfully with valid token', async () => {
 			await pactum
 				.spec()
@@ -462,9 +483,29 @@ describe('Users APIs', () => {
 	});
 
 	describe('POST /users/set-favorites', () => {
+		before(async () => {
+			const randomProductNum = randomInt(0, 25);
+			await pactum
+				.spec()
+				.withMethod('GET')
+				.withPath('/products')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.expectStatus(200)
+				.stores('productId', `data.products_details[${randomProductNum}].product_variant_id`);
+
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/set-favorites')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.withBody({
+					data: {
+						products_variants_id: `$S{productId}`,
+					},
+				})
+		});
 		it('should set favorite successfully with valid token and product id', async () => {
-			// FIXSOON
-			const randomProductNum = randomInt(0, 15);
+			const randomProductNum = randomInt(0, 25);
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -533,6 +574,27 @@ describe('Users APIs', () => {
 	});
 
 	describe('POST /users/remove-favorites', () => {
+		before(async () => {
+			const randomProductNum = randomInt(0, 25);
+			await pactum
+				.spec()
+				.withMethod('GET')
+				.withPath('/products')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.expectStatus(200)
+				.stores('productId', `data.products_details[${randomProductNum}].product_variant_id`);
+
+			await pactum
+				.spec()
+				.withMethod('POST')
+				.withPath('/users/set-favorites')
+				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
+				.withBody({
+					data: {
+						products_variants_id: `$S{productId}`,
+					},
+				})
+		});
 		it('should remove favorite successfully with valid token and product id', async () => {
 			await pactum
 				.spec()
@@ -541,13 +603,14 @@ describe('Users APIs', () => {
 				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
 				.withBody({
 					data: {
-						users_id: `$S{userId}`,
-						products_variants_id: `$S{productId}`,
-					},
+						products_variants_array: [
+							`$S{productId}`
+						]
+					}
 				})
 				.expectStatus(200)
 				.expectJsonLike({
-					message: 'Product removed from favorites',
+					message: 'Product(s) removed from favorites successfully!',
 				});
 		});
 
@@ -558,8 +621,9 @@ describe('Users APIs', () => {
 				.withPath('/users/remove-favorites')
 				.withBody({
 					data: {
-						users_id: `$S{userId}`,
-						products_variants_id: `$S{productId}`,
+						products_variants_array: [
+							`$S{productId}`
+						],
 					},
 				})
 				.expectStatus(401);
@@ -573,8 +637,9 @@ describe('Users APIs', () => {
 				.withHeaders('Authorization', 'Bearer invalid_token_here')
 				.withBody({
 					data: {
-						users_id: `$S{userId}`,
-						products_variants_id: `$S{productId}`,
+						products_variants_array: [
+							`$S{productId}`
+						],
 					},
 				})
 				.expectStatus(401);
@@ -588,7 +653,7 @@ describe('Users APIs', () => {
 				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
 				.withBody({
 					data: {
-						users_id: `$S{userId}`,
+						products_variants_array: [],
 					},
 				})
 				.expectStatus(400);

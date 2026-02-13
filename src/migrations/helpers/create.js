@@ -8,7 +8,7 @@ import { readTextFile } from '../../utils/readFile.js';
 		await client.query('BEGIN');
 
 		await client.query(`
-			${await readTextFile('./SQL/DDL-create-tables-v3.sql')}
+			${await readTextFile(process.env.CREATE_DATABASE_FILE_PATH)}
 		`);
 
 		await client.query('COMMIT');
