@@ -4,9 +4,10 @@ import { TZDate } from '@date-fns/tz';
 import { formatDate, formatDistance } from 'date-fns';
 import transporter from '../../config/mailTransporter.js';
 import { getRandomOTP } from '../../utils/getRandomOTP.js';
+import { GET_USER_ID_FROM_EMAIL } from '../../providers/commonQueries.providers.js';
 
-export async function createForgotPasswordEmail(userId, userEmail) {
-	const conn = await pool.connect();
+export async function createForgotPasswordEmail(userEmail) {
+	// const conn = await pool.connect();
 
 	const currentTimestamp = new Date();
 	let expirationTimestamp = new Date();
@@ -25,7 +26,10 @@ export async function createForgotPasswordEmail(userId, userEmail) {
 
 	const otp = getRandomOTP();
 
-	const otpCheck = await conn.query(
+	const getUserIdFromEmail = await pool.query(GET_USER_ID_FROM_EMAIL, [userEmail])
+	const userId = getUserIdFromEmail.rows[0].id
+
+	const otpCheck = await pool.query(
 		`
 			SELECT CASE WHEN EXISTS(
 			SELECT otp_value
@@ -40,7 +44,7 @@ export async function createForgotPasswordEmail(userId, userEmail) {
 
 	if (otpCheckResult === true) {
 		// return true
-		const getUnexpiredOTPEmailDetails = await conn.query(
+		const getUnexpiredOTPEmailDetails = await pool.query(
 			'SELECT otp_value, date_sent, date_expiration from tbl_users_otp WHERE users_id = $1;',
 			[userId]
 		);
@@ -78,7 +82,7 @@ export async function createForgotPasswordEmail(userId, userEmail) {
 		});
 	} else {
 		try {
-			const emailResult = await conn.query(
+			const emailResult = await pool.query(
 				'INSERT INTO tbl_users_otp(users_id,otp_value,date_sent,date_expiration) VALUES ($1,$2,$3,$4);',
 				[userId, otp, currentTimestampISO, expirationTimestampISO]
 			);
@@ -104,8 +108,9 @@ export async function createForgotPasswordEmail(userId, userEmail) {
 			return emailResult;
 		} catch (error) {
 			console.debug(error);
-		} finally {
-			conn.release();
-		}
+		} 
+		// finally {
+		// 	conn.release();
+		// }
 	}
 }

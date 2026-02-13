@@ -2,38 +2,34 @@ import {
 	getUserId as getUserIdAndAllDetails,
 	isCredentialsMatching,
 } from '../services/auth/authenticateUser.auth.service.js';
-import { checkExistingEmail } from '../services/auth/checkExistingEmail.auth.service.js';
+import { checkExistingEmail, checkExistingEmail_v2 } from '../services/auth/checkExistingEmail.auth.service.js';
 import registerUserToDatabase from '../services/auth/registerUser.auth.service.js';
-import { confirmPassword } from '../utils/confirmPassword.js';
 import { responseWithStatus } from '../utils/responses.js';
-import envLogger from '../utils/customLogger.js';
 import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service.js';
 import { verifyOTPFromDB } from '../services/auth/verifyOTP.auth.service.js';
 import saveNewUserPasswordToDB from '../services/auth/saveNewPassword.auth.service.js';
 import { signJwtAsync, verifyJwtAsync } from '../utils/jwtUtils.js';
-import { attempt, BadRequestError, trialCapture } from '../utils/errors.js';
+import { attempt, BadRequestError, ForbiddenError, trialCapture, UnauthorizedError } from '../utils/errors.js';
 import { env, loadEnvFile } from 'node:process';
 loadEnvFile();
 
-export async function registerUser(req, res) {
-	let request = Object.values(req.body.data);
-	let userName = request[0];
-	let userEmail = request[1];
-	let userPassword = request[2];
+export const registerUser = await attempt(async (req, res, next) => {
+	const request = Object.values(req.body.data);
+	const userName = request[0];
+	const userEmail = request[1];
+	const userPassword = request[2];
 
 	// --------------------------------------------------------------------------- //
 	// Check if email exists in database already
 	// --------------------------------------------------------------------------- //
-	let existingEmailCheck = await checkExistingEmail(userEmail);
-
-	if (existingEmailCheck == true) {
-		return responseWithStatus(res, 0, 401, 'Error', 'Email already exists. Please sign in instead.');
-	}
-	// --------------------------------------------------------------------------- //
-	// Save User details to Database if all checks are cleared
-	// --------------------------------------------------------------------------- //
-	const entryArray = [userName, userEmail, userPassword];
-	try {
+	const existingEmailCheck = await checkExistingEmail_v2(userEmail);
+	if (existingEmailCheck === true) {
+		throw new ForbiddenError('Cant register user as user email already exists. Please sign in instead');
+	} else {
+		// --------------------------------------------------------------------------- //
+		// Save User details to Database if all checks are cleared
+		// --------------------------------------------------------------------------- //
+		const entryArray = [userName, userEmail, userPassword];
 		const userRegistrationResult = await registerUserToDatabase(entryArray);
 		const accessToken = await signJwtAsync({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
 			expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
@@ -47,59 +43,52 @@ export async function registerUser(req, res) {
 			access_token: accessToken,
 			refresh_token: refreshToken,
 		});
-	} catch (error) {
-		console.debug('Error creating record:', error, res);
 	}
-}
+});
 
-export async function loginUser(req, res) {
-	let request = Object.values(req.body.data);
-	let userEmail = request[0];
-	let userPassword = request[1];
+export const loginUser = await attempt(async (req, res) => {
+	const request = Object.values(req.body.data);
+	const userEmail = request[0];
+	const userPassword = request[1];
 
-	try {
+	// --------------------------------------------------------------------------- //
+	// Check if email doesn't exist in database already
+	// --------------------------------------------------------------------------- //
+	const existingEmailCheck = await checkExistingEmail_v2(userEmail);
+
+	if (existingEmailCheck === false) {
+		throw new UnauthorizedError("Email doesn't exist. Please sign up instead.");
+	} else if (existingEmailCheck === true) {
 		// --------------------------------------------------------------------------- //
-		// Check if email doesn't exist in database already
+		// Email and Password Combination Check
 		// --------------------------------------------------------------------------- //
-		let existingEmailCheck = await checkExistingEmail(userEmail);
+		const credentialMatchingResult = await isCredentialsMatching(userEmail, userPassword);
 
-		if (existingEmailCheck == false) {
-			return await responseWithStatus(res, 0, 401, "Email doesn't exist. Please sign up instead");
-		} else if (existingEmailCheck == true) {
-			// --------------------------------------------------------------------------- //
-			// Email and Password Combination Check
-			// --------------------------------------------------------------------------- //
-			let credentialMatchingResult = await isCredentialsMatching(userEmail, userPassword);
+		if (credentialMatchingResult == true) {
+			const userDetails = await getUserIdAndAllDetails(userEmail, userPassword);
+			const accessToken = await signJwtAsync({ id: userDetails.id }, env.ACCESS_TOKEN_SECRET_KEY, {
+				expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
+			});
+			const refreshToken = await signJwtAsync({ id: userDetails.id }, env.REFRESH_TOKEN_SECRET_KEY, {
+				expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
+			});
 
-			if (credentialMatchingResult == true) {
-				let userDetails = await getUserIdAndAllDetails(userEmail, userPassword);
-				const accessToken = await signJwtAsync({ id: userDetails.id }, env.ACCESS_TOKEN_SECRET_KEY, {
-					expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
-				});
-				const refreshToken = await signJwtAsync({ id: userDetails.id }, env.REFRESH_TOKEN_SECRET_KEY, {
-					expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
-				});
-
-				return await responseWithStatus(res, 1, 200, 'Sign in successful!', {
-					user_details: userDetails,
-					access_token: `${accessToken}`,
-					refresh_token: `${refreshToken}`,
-				});
-			} else {
-				return await responseWithStatus(res, 0, 401, "Credentials Don't match. Please try again.", null);
-			}
+			return await responseWithStatus(res, 1, 200, 'Sign in successful!', {
+				user_details: userDetails,
+				access_token: `${accessToken}`,
+				refresh_token: `${refreshToken}`,
+			});
+		} else {
+			return await responseWithStatus(res, 0, 401, "Credentials Don't match. Please try again.", null);
 		}
-	} catch (error) {
-		console.debug('Error reading record:', error);
 	}
-}
+});
 
 export async function verifyUserToken(req, res) {
 	if (!req.header('Authorization')) {
 		return responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please login.');
 	} else {
 		const token = req.header('Authorization').split(' ')[1];
-
 		try {
 			const verified = await verifyJwtAsync(token, env.ACCESS_TOKEN_SECRET_KEY);
 			const userId = verified.id;
@@ -183,27 +172,26 @@ export async function refreshToken(req, res) {
 
 // }
 
-export async function forgotPassword(req, res) {
+export const forgotPassword = await attempt(async (req, res) => {
 	const userEmail = Object.values(req.body.data).toString();
 
-	try {
-		const existingEmailCheck = await checkExistingEmail(userEmail);
-		if (existingEmailCheck == false) {
-			return responseWithStatus(res, 0, 401, "Email doesn't exist. Please sign up instead.");
-		} else {
-			const userId = await checkExistingEmail(userEmail, true);
-			await createForgotPasswordEmail(userId, userEmail);
-			return responseWithStatus(
-				res,
-				1,
-				200,
-				'An OTP has been shared to your email address. Please use that to reset your password in the next screen.'
-			);
-		}
-	} catch (error) {
-		console.log(error);
+	// try {
+	const existingEmailCheck = await checkExistingEmail_v2(userEmail);
+	if (existingEmailCheck === false) {
+		throw new UnauthorizedError("Email doesn't exist. Please sign up instead.");
+	} else {
+		async () => await createForgotPasswordEmail(userEmail);
+		return responseWithStatus(
+			res,
+			1,
+			200,
+			'An OTP has been shared to your email address. Please use that to reset your password in the next screen.'
+		);
 	}
-}
+	// } catch (error) {
+	// 	console.log(error);
+	// }
+});
 
 export async function verifyOTP(req, res) {
 	const userEmail = req.body.data.email;

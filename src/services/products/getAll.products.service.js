@@ -3,7 +3,7 @@ import { NotFoundError } from '../../utils/errors.js';
 import { getAllCategoriesDetails } from '../categories/getAll.categories.service.js';
 
 export async function getAllProductsDetails(categoriesName) {
-	const conn = await pool.connect();
+	// const conn = await pool.connect();
 
 	const allAvailableCategories = await getAllCategoriesDetails();
 	const allCategories = [];
@@ -15,7 +15,7 @@ export async function getAllProductsDetails(categoriesName) {
 		if (categoriesName !== undefined) {
 			if (allCategories.includes(categoriesName.toLowerCase())) {
 				// fix this lines
-				const result = await conn.query(`
+				const result = await pool.query(`
 					SELECT p.id AS product_id, p.name AS product_name, pv.id AS product_variant_id, pv.name AS product_variant_name, p.rating , c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
 					FROM tbl_products p
 					JOIN tbl_products_variants pv ON pv.products_id = p.id
@@ -28,7 +28,7 @@ export async function getAllProductsDetails(categoriesName) {
 				return result.rows;
 			}
 		} else {
-			const result = await conn.query(`
+			const result = await pool.query(`
 				SELECT p.id AS product_id, p.name AS product_name, pv.id AS product_variant_id, pv.name AS product_variant_name, p.rating, c.name AS companies_name, cg.name AS categories_name, cg.id AS categories_id, pv.price_retail, i.image_url
 				FROM tbl_products p
 				JOIN tbl_products_variants pv ON pv.products_id = p.id
@@ -43,7 +43,8 @@ export async function getAllProductsDetails(categoriesName) {
 	} catch (err) {
 		console.error('Error reading record:', err);
 		throw new NotFoundError('Error getting all products', { cause: err });
-	} finally {
-		conn.release();
-	}
+	} 
+	// finally {
+	// 	conn.release();
+	// }
 }

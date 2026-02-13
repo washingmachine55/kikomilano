@@ -4,10 +4,12 @@ import { loadEnvFile } from 'node:process';
 loadEnvFile();
 
 const pool = new Pool({
-	max: 20,
+	max: 200,
 	idleTimeoutMillis: 10000,
 	connectionTimeoutMillis: 2000,
 	maxLifetimeSeconds: 60,
 });
+
+
 
 export default pool;

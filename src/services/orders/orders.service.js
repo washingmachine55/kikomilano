@@ -1,6 +1,6 @@
 import pool from '../../config/db.js';
 import { RecordCheck } from '../../providers/recordChecks.providers.js';
-import { NotFoundError, ValidationError } from '../../utils/errors.js';
+import { NotFoundError, UnprocessableContentError } from '../../utils/errors.js';
 import format from 'pg-format';
 import { extractedUuidSchema, UUIDSchema } from '../../utils/schema.validations.js';
 import { isValidUUID } from '../../utils/validateUUID.js';
@@ -18,7 +18,7 @@ export async function saveOrder(data, userId) {
 		await conn.query('BEGIN');
 
 		if (Number(data.cart_total) > 9999 || Number(data.cart_total) < 1) {
-			throw new ValidationError(
+			throw new UnprocessableContentError(
 				`Applied cart total must be above 0 and less than 9999, currently ${data.cart_total}. Please retry after making the necessary changes.`
 			);
 		}
@@ -46,10 +46,10 @@ export async function saveOrder(data, userId) {
 		if (Object.hasOwn(data, 'products') && Object.values(data.products).length > 0) {
 			data.products.forEach((product_variant) => {
 				if (!Object.hasOwn(product_variant, 'qty')) {
-					throw new ValidationError(`Quantity must be provided!`);
+					throw new UnprocessableContentError(`Quantity must be provided!`);
 				}
 				if (product_variant.qty <= 0 || product_variant.qty >= 20) {
-					throw new ValidationError(
+					throw new UnprocessableContentError(
 						`Applied quantity value must be above 0 and less than 20, currently ${product_variant.qty}. Please retry after making the necessary changes.`
 					);
 				}
@@ -58,7 +58,7 @@ export async function saveOrder(data, userId) {
 			for (let w = 0; w < productsOfUserOrder.length; w++) {
 				const productCheck = new RecordCheck('id', 'tbl_products_variants', productsOfUserOrder[w][0]);
 				if ((await productCheck.getResult()) === false) {
-					throw new ValidationError('Invalid UUID, please retry again.');
+					throw new UnprocessableContentError('Invalid UUID, please retry again.');
 				}
 				await productCheck.getResult().catch((err) => {
 					throw new NotFoundError(`Error finding product ${productsOfUserOrder[w][0]} in database`, {
@@ -88,7 +88,7 @@ export async function saveOrder(data, userId) {
 		} else {
 			await conn.query('ROLLBACK');
 			conn.release();
-			throw new ValidationError(
+			throw new UnprocessableContentError(
 				'Order not created. You must enter at least one product variant id to create an order'
 			);
 		}
@@ -108,9 +108,9 @@ export async function saveOrder(data, userId) {
 }
 
 export const getOrderDetails = async (orderId, userId) => {
-	const conn = await pool.connect();
+	// const conn = await pool.connect();
 
-	const orderAuthorization = await conn.query(
+	const orderAuthorization = await pool.query(
 		`
 		SELECT CASE WHEN EXISTS(
 			SELECT id, status, users_id FROM tbl_orders WHERE id = $1 AND status = 1 AND users_id = $2
@@ -120,7 +120,7 @@ export const getOrderDetails = async (orderId, userId) => {
 	);
 
 	if (orderAuthorization.rows[0].existscheck === true) {
-		const result = await conn.query(
+		const result = await pool.query(
 			`
 		SELECT 
 		o.id AS orders_id, o.users_id, u.email, o.cart_total, o.order_status, o.created_by, o.created_at, o.updated_by, o.updated_at, o.status
@@ -131,7 +131,7 @@ export const getOrderDetails = async (orderId, userId) => {
 			[orderId]
 		);
 
-		conn.release();
+		// conn.release();
 		return result.rows[0];
 	} else {
 		throw new NotFoundError('Requested order does not exist for this user');

@@ -4,7 +4,7 @@
 	"editor.formatOnSave": true,
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"cSpell.words": ["MONTHNAME", "pactum", "stringbool", "uuidv", "VARCHAR", "venv"],
-	"cSpell.ignoreWords": ["Passw", "RDBMS", "existscheck", "lutbl"],
+	"cSpell.ignoreWords": ["GROBAR", "Passw", "RDBMS", "existscheck", "lutbl"],
 	"[sql]": {
 		"editor.defaultFormatter": "ms-ossdata.vscode-pgsql"
 	}

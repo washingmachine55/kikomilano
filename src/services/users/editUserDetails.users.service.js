@@ -5,14 +5,14 @@ import { nameSplitter } from '../../utils/nameSplitter.js';
 import saveNewUserPasswordToDB from '../auth/saveNewPassword.auth.service.js';
 
 export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
-	const conn = await pool.connect();
+	// const conn = await pool.connect();
 
 	if (fieldsToUpdate.hasOwnProperty('email')) {
 		// const [data, error] = await trialCapture(
 		// 	new RecordCheck("email", "tbl_users", fieldsToUpdate.email).getResult()
 		// )
 		const [data, error] = await trialCapture(
-			await conn.query(
+			await pool.query(
 				`
 				SELECT CASE WHEN EXISTS (
 					SELECT
@@ -27,7 +27,7 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 		}
 		if (data.rows[0].existscheck === false) {
 			const [emailUpdate, errorEmailUpdate] = await trialCapture(
-				await conn.query(
+				await pool.query(
 					`UPDATE tbl_users SET email = $1, updated_at = NOW(), updated_by = $2 WHERE id = $2 RETURNING id, email, phone_no, access_type, created_at, updated_at`,
 					[fieldsToUpdate.email, verifiedUserId]
 				)
@@ -36,7 +36,7 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 				throw new NotFoundError('Unable to find user in database');
 			}
 		} else {
-			const result = await conn.query(
+			const result = await pool.query(
 				`
 				SELECT CASE WHEN EXISTS (
 					SELECT
@@ -55,7 +55,7 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 		const nameArr = await nameSplitter(fieldsToUpdate.name);
 		const userDetailsToSave = [nameArr[0], nameArr[1], verifiedUserId];
 		const [nameCheck, errorNameCheck] = await trialCapture(
-			await conn.query(
+			await pool.query(
 				`
 			SELECT CASE WHEN EXISTS (SELECT  
 			FROM tbl_users u
@@ -71,7 +71,7 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 
 		if (nameCheck.rows[0].existscheck === false) {
 			const [nameUpdate, errorNameUpdate] = await trialCapture(
-				await conn.query(
+				await pool.query(
 					`UPDATE tbl_users_details SET first_name = $1, last_name = $2, updated_at = NOW(), updated_by = $3 WHERE users_id = $3 RETURNING users_id, first_name, last_name, created_at, updated_at`,
 					userDetailsToSave
 				)
@@ -100,7 +100,7 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 		}
 	}
 
-	const result = await conn.query(
+	const result = await pool.query(
 		`
 		SELECT u.id, u.email, u.phone_no, u.access_type, ud.first_name, ud.last_name, i.image_url 
 		FROM tbl_users u 
@@ -111,6 +111,6 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 		[verifiedUserId]
 	);
 
-	conn.release();
+	// conn.release();
 	return result.rows[0];
 };

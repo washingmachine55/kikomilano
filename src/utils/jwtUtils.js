@@ -1,4 +1,6 @@
+// import jwt, { JsonWebTokenError } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
+const { JsonWebTokenError } = jwt;
 
 /**
  *
@@ -12,6 +14,7 @@ export function signJwtAsync(payload, secret, options) {
 		jwt.sign(payload, secret, options, (err, token) => {
 			if (err) {
 				reject(err);
+				throw new JsonWebTokenError(err);
 			} else {
 				resolve(token);
 			}

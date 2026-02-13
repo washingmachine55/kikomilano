@@ -1,10 +1,10 @@
 import pool from '../../config/db.js';
 
 export async function getAllProductsFavorites(userId) {
-	const conn = await pool.connect();
+	// const conn = await pool.connect();
 
 	try {
-		const result = await conn.query(
+		const result = await pool.query(
 			`
 			SELECT 
 				p.id AS product_id, 
@@ -25,7 +25,8 @@ export async function getAllProductsFavorites(userId) {
 		return result.rows;
 	} catch (err) {
 		console.error('Error creating record:', err);
-	} finally {
-		conn.release();
-	}
+	} 
+	// finally {
+	// 	conn.release();
+	// }
 }

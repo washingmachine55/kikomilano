@@ -1,5 +1,5 @@
 import pool from '../config/db.js';
-import { ValidationError } from '../utils/errors.js';
+import { UnprocessableContentError } from '../utils/errors.js';
 
 const tableNamesWhitelist = [
 	'tbl_addresses',
@@ -105,10 +105,10 @@ export class RecordCheck {
 
 	async confirmFromWhitelist() {
 		if (!fieldNameWhitelist.includes(this.field)) {
-			throw new ValidationError('Field name does not exist in whitelist');
+			throw new UnprocessableContentError('Field name does not exist in whitelist');
 		}
 		if (!tableNamesWhitelist.includes(this.table)) {
-			throw new ValidationError('Table name does not exist in whitelist');
+			throw new UnprocessableContentError('Table name does not exist in whitelist');
 		}
 	}
 

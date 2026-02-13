@@ -2,15 +2,15 @@ import { TZDate } from '@date-fns/tz';
 import pool from '../../config/db.js';
 import { CASE_EMAIL_CHECK } from '../../providers/commonQueries.providers.js';
 export async function verifyOTPFromDB(userEmail, userOTP) {
-	const conn = await pool.connect();
+	// const conn = await pool.connect();
 
 	try {
-		const emailCheck = await conn.query(
+		const emailCheck = await pool.query(
 			CASE_EMAIL_CHECK,
 			[userEmail]
 		);
-		let emailCheckResult = emailCheck.rows[0].existscheck.toString();
-		if (emailCheckResult == 0) {
+		let emailCheckResult = emailCheck.rows[0].existscheck;
+		if (emailCheckResult === false) {
 			return false;
 		} else {
 			let currentTimestamp = new Date();
@@ -20,19 +20,19 @@ export async function verifyOTPFromDB(userEmail, userOTP) {
 				return true;
 			}
 
-			const otpCheck = await conn.query(
+			const otpCheck = await pool.query(
 				`
 				SELECT CASE WHEN EXISTS(
 				SELECT otp_value
 				FROM tbl_users_otp 
 				JOIN tbl_users t ON t.id = tbl_users_otp.users_id 
 				WHERE otp_value = $1 AND tbl_users_otp.date_expiration > NOW() AT TIME ZONE 'UTC'
-				)THEN 1 ELSE 0 END AS ExistsCheck
+				)THEN true ELSE false END AS ExistsCheck
 				;`,
 				[userOTP]
 			);
-			let otpCheckResult = otpCheck.rows[0].existscheck;
-			if (otpCheckResult == 1) {
+			const otpCheckResult = otpCheck.rows[0].existscheck;
+			if (otpCheckResult === true) {
 				return true;
 			} else {
 				return false;
@@ -40,7 +40,8 @@ export async function verifyOTPFromDB(userEmail, userOTP) {
 		}
 	} catch (err) {
 		console.error('Error checking otp:', err);
-	} finally {
-		conn.release();
-	}
+	} 
+	// finally {
+	// 	conn.release();
+	// }
 }

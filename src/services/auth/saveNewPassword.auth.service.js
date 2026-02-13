@@ -2,24 +2,24 @@ import pool from '../../config/db.js';
 import bcrypt from 'bcryptjs';
 
 export default async function saveNewUserPasswordToDB(userEmail = null, userPassword, userId = null) {
-	const conn = await pool.connect();
+	// const conn = await pool.connect();
 
 	try {
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(userPassword, salt);
 		if (userId !== null) {
-			await conn.query('UPDATE tbl_users SET password_hash = $1 WHERE id = $2 RETURNING id', [
+			await pool.query('UPDATE tbl_users SET password_hash = $1 WHERE id = $2 RETURNING id', [
 				hashedPassword,
 				userId,
 			]);
 		} else {
-			await conn.query('UPDATE tbl_users SET password_hash = $1 WHERE email = $2 RETURNING id', [
+			await pool.query('UPDATE tbl_users SET password_hash = $1 WHERE email = $2 RETURNING id', [
 				hashedPassword,
 				userEmail,
 			]);
 		}
 
-		const userDetails = await conn.query(
+		const userDetails = await pool.query(
 			`
 			SELECT u.id, u.email, u.access_type, u.created_at, ud.first_name, ud.last_name, i.image_url 
 			FROM tbl_users u 
@@ -32,7 +32,8 @@ export default async function saveNewUserPasswordToDB(userEmail = null, userPass
 		return userDetails.rows[0];
 	} catch (err) {
 		console.error('Error resetting password for the record in request', err);
-	} finally {
-		conn.release();
-	}
+	} 
+	// finally {
+	// 	conn.release();
+	// }
 }

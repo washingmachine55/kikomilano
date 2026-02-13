@@ -4,14 +4,14 @@ import { SOMETHING_WENT_WRONG_CREATE } from '../../utils/CONSTANTS.js';
 import { GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers.js';
 
 export default async function registerUserToDatabase(request) {
-	const conn = await pool.connect();
+	// const conn = await pool.connect();
 
 	try {
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(request[2], salt);
 
 		const detailsToSave = [request[1], hashedPassword];
-		const saveToDB = await conn.query(
+		const saveToDB = await pool.query(
 			'INSERT INTO tbl_users(email,password_hash) VALUES ($1, $2) RETURNING id',
 			detailsToSave
 		);
@@ -26,12 +26,12 @@ export default async function registerUserToDatabase(request) {
 			const lastName = filteredUsernameArray[filteredUsernameArray.length - 1];
 
 			const userDetailsToSave = [saveToDB.rows[0].id, firstName, lastName];
-			await conn.query(
+			await pool.query(
 				`INSERT INTO tbl_users_details(users_id,first_name,last_name) VALUES ($1, $2, $3) RETURNING id`,
 				userDetailsToSave
 			);
 
-			const credentialsCheck = await conn.query(
+			const credentialsCheck = await pool.query(
 				GET_ALL_USER_DETAILS_BY_EMAIL,
 				[request[1]]
 			);
@@ -40,7 +40,8 @@ export default async function registerUserToDatabase(request) {
 		}
 	} catch (err) {
 		console.error('Error creating record:', err);
-	} finally {
-		conn.release();
-	}
+	} 
+	// finally {
+	// 	conn.release();
+	// }
 }
