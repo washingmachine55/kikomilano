@@ -7,8 +7,6 @@ import { getRandomOTP } from '../../utils/getRandomOTP.js';
 import { GET_USER_ID_FROM_EMAIL } from '../../providers/commonQueries.providers.js';
 
 export async function createForgotPasswordEmail(userEmail) {
-	// const conn = await pool.connect();
-
 	const currentTimestamp = new Date();
 	let expirationTimestamp = new Date();
 	const expiration_time = Number(process.env.OTP_EXPIRATION_TIME);
@@ -21,7 +19,7 @@ export async function createForgotPasswordEmail(userEmail) {
 		includeSeconds: true,
 	});
 
-	const ConvertExpirationTimestampToLocal = TZDate.tz('Asia/Karachi', expirationTimestamp).toISOString();
+	const ConvertExpirationTimestampToLocal = TZDate.tz(process.env.CURRENT_TZ, expirationTimestamp).internal.toISOString();
 	const formattedExpirationTimestamp = formatDate(ConvertExpirationTimestampToLocal, 'PPPPpp').concat(' PKT');
 
 	const otp = getRandomOTP();
@@ -43,20 +41,19 @@ export async function createForgotPasswordEmail(userEmail) {
 	const otpCheckResult = otpCheck.rows[0].existscheck;
 
 	if (otpCheckResult === true) {
-		// return true
 		const getUnexpiredOTPEmailDetails = await pool.query(
 			'SELECT otp_value, date_sent, date_expiration from tbl_users_otp WHERE users_id = $1;',
 			[userId]
 		);
 		const unexpiredOTPDate = TZDate.tz(
-			'Asia/Karachi',
+			process.env.CURRENT_TZ,
 			getUnexpiredOTPEmailDetails.rows[0].date_expiration
 		).internal.toISOString();
 		const formattedUnexpiredTimestamp = formatDate(unexpiredOTPDate, 'PPPPpp').concat(' PKT');
 
 		const unexpiredTimeDifferenceForHumans = formatDistance(
-			unexpiredOTPDate.replace('T', ' ').replace('Z', ''),
-			currentTimestampISO,
+			unexpiredOTPDate,
+			TZDate.tz(process.env.CURRENT_TZ, currentTimestampISO).internal.toISOString(),
 			{
 				addSuffix: true,
 				includeSeconds: true,
@@ -79,6 +76,8 @@ export async function createForgotPasswordEmail(userEmail) {
 				</p>
 			<br/>
 			<p>The OTP expires <b>${unexpiredTimeDifferenceForHumans}</b> on ${formattedUnexpiredTimestamp}</p>`,
+		}).catch(err => {
+			throw new Error(err);
 		});
 	} else {
 		try {
@@ -103,14 +102,12 @@ export async function createForgotPasswordEmail(userEmail) {
 				</p>
 			<br/>
 			<p>The OTP expires <b>${timeDifferenceForHumans}</b> on ${formattedExpirationTimestamp}</p>`,
+			}).catch(err => {
+				throw new Error(err);
 			});
-
 			return emailResult;
 		} catch (error) {
 			console.debug(error);
 		} 
-		// finally {
-		// 	conn.release();
-		// }
 	}
 }

@@ -33,7 +33,7 @@ describe('Products APIs', () => {
 	});
 
 	describe('GET /products', () => {
-		it('should retrieve all products successfully with valid token', async () => {
+		it('should retrieve all products successfully with valid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -45,11 +45,11 @@ describe('Products APIs', () => {
 				});
 		});
 
-		it('should fail to retrieve products without authentication token', async () => {
+		it('should fail to retrieve products without authentication token', async function () {
 			await pactum.spec().withMethod('GET').withPath('/products').expectStatus(401);
 		});
 
-		it('should fail to retrieve products with invalid token', async () => {
+		it('should fail to retrieve products with invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -58,7 +58,7 @@ describe('Products APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should return products data in correct format', async () => {
+		it('should return products data in correct format', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -71,7 +71,7 @@ describe('Products APIs', () => {
 				});
 		});
 
-		it('should return products with required fields', async () => {
+		it('should return products with required fields', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -88,7 +88,7 @@ describe('Products APIs', () => {
 	});
 
 	describe('GET /products?category=categoryName', () => {
-		it('should retrieve products filtered by category', async () => {
+		it('should retrieve products filtered by category', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -101,7 +101,7 @@ describe('Products APIs', () => {
 				});
 		});
 
-		it('should return 404 for non-existent category', async () => {
+		it('should return 404 for non-existent category', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -114,7 +114,7 @@ describe('Products APIs', () => {
 				});
 		});
 
-		it('should fail category filter without authentication', async () => {
+		it('should fail category filter without authentication', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -123,7 +123,7 @@ describe('Products APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should return products with category filter in correct format', async () => {
+		it('should return products with category filter in correct format', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -141,7 +141,7 @@ describe('Products APIs', () => {
 	describe('GET /products/:productId/variants', () => {
 		// Note: This assumes a valid product ID exists in the database
 		// If no products exist, these tests may fail
-		before(async () => {
+		before(async function () {
 			const randomNum = randomInt(0, 25);
 			await pactum
 				.spec()
@@ -169,11 +169,11 @@ describe('Products APIs', () => {
 				.stores('productId', 'data.products_details[0].product_id');
 		});
 
-		it('should fail to retrieve variants without authentication token', async () => {
+		it('should fail to retrieve variants without authentication token', async function () {
 			await pactum.spec().withMethod('GET').withPath('/products/$S{productId}/variants').expectStatus(401);
 		});
 
-		it('should fail to retrieve variants with invalid token', async () => {
+		it('should fail to retrieve variants with invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -182,7 +182,7 @@ describe('Products APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should return 404 for non-existent product ID', async () => {
+		it('should return 404 for non-existent product ID', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -194,7 +194,7 @@ describe('Products APIs', () => {
 				});
 		});
 
-		it('should return variants data in correct format when found', async () => {
+		it('should return variants data in correct format when found', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -203,7 +203,7 @@ describe('Products APIs', () => {
 				.expectStatus(200);
 		});
 
-		it('should return error for invalid UUID format in path', async () => {
+		it('should return error for invalid UUID format in path', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -214,7 +214,7 @@ describe('Products APIs', () => {
 	});
 
 	describe('GET /products - Multiple Requests', () => {
-		it('should handle sequential product requests', async () => {
+		it('should handle sequential product requests', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -230,7 +230,7 @@ describe('Products APIs', () => {
 				.expectStatus(200);
 		});
 
-		it('should return consistent product data across requests', async () => {
+		it('should return consistent product data across requests', async function () {
 			const firstCall = await pactum
 				.spec()
 				.withMethod('GET')
@@ -253,7 +253,7 @@ describe('Products APIs', () => {
 			}
 		});
 
-		it('should handle mixed category and uncategorized requests', async () => {
+		it('should handle mixed category and uncategorized requests', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -272,7 +272,7 @@ describe('Products APIs', () => {
 	});
 
 	describe('GET /products - Error Handling', () => {
-		it('should reject requests with malformed headers', async () => {
+		it('should reject requests with malformed headers', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -281,7 +281,7 @@ describe('Products APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should reject requests with empty bearer token', async () => {
+		it('should reject requests with empty bearer token', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -290,7 +290,7 @@ describe('Products APIs', () => {
 				.expectStatus(401);
 		});
 
-		xit('should handle requests with extra whitespace in query', async () => {
+		xit('should handle requests with extra whitespace in query', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -302,7 +302,7 @@ describe('Products APIs', () => {
 	});
 
 	describe('GET /products/:productId/variants - Edge Cases', () => {
-		it('should validate UUID format strictly', async () => {
+		it('should validate UUID format strictly', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -311,7 +311,7 @@ describe('Products APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should handle all zeros UUID', async () => {
+		it('should handle all zeros UUID', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -320,7 +320,7 @@ describe('Products APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should handle max UUID value', async () => {
+		it('should handle max UUID value', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -329,7 +329,7 @@ describe('Products APIs', () => {
 				.expectStatus(400);
 		});
 
-		xit('should be case-insensitive for UUID in path', async () => {
+		xit('should be case-insensitive for UUID in path', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -340,7 +340,7 @@ describe('Products APIs', () => {
 	});
 
 	describe('Authorization and Security', () => {
-		it('should reject expired or tampered tokens', async () => {
+		it('should reject expired or tampered tokens', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -352,7 +352,7 @@ describe('Products APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should require exact Authorization header name', async () => {
+		it('should require exact Authorization header name', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')

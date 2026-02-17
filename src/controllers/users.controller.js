@@ -3,7 +3,6 @@ loadEnvFile();
 import { getSingleUserDetails } from '../services/users/getSingle.users.service.js';
 import { responseWithStatus } from '../utils/responses.js';
 import jwt from 'jsonwebtoken';
-import { getAllUsersDetails } from '../services/users/getAll.users.service.js';
 import { uploadUserProfilePictureToDB } from '../services/users/uploadPicture.users.service.js';
 import { verifyJwtAsync } from '../utils/jwtUtils.js';
 import { saveProductFavorite } from '../services/users/setFavorite.users.service.js';
@@ -16,15 +15,6 @@ import { saveAddress } from '../services/users/saveAddress.users.service.js';
 import { isValidUUID } from '../utils/validateUUID.js';
 import { getAllUserAddresses } from '../services/users/getAllAddresses.users.service.js';
 import { deleteUserAddresses } from '../services/users/unsetAddresses.users.service.js';
-
-export async function getAllUsers(req, res) {
-	const result = await getAllUsersDetails();
-	try {
-		return await responseWithStatus(res, 1, 200, 'Details of all available users', { users_details: result });
-	} catch (error) {
-		console.debug(error);
-	}
-}
 
 export async function uploadUserProfilePicture(req, res) {
 	if (!req.file) {

@@ -171,12 +171,11 @@ export async function refreshToken(req, res) {
 export const forgotPassword = await attempt(async (req, res) => {
 	const userEmail = Object.values(req.body.data).toString();
 
-	// try {
 	const existingEmailCheck = await checkExistingEmail_v2(userEmail);
 	if (existingEmailCheck === false) {
 		throw new UnauthorizedError("Email doesn't exist. Please sign up instead.");
 	} else {
-		async () => await createForgotPasswordEmail(userEmail);
+		await createForgotPasswordEmail(userEmail);
 		return responseWithStatus(
 			res,
 			1,
@@ -184,9 +183,6 @@ export const forgotPassword = await attempt(async (req, res) => {
 			'An OTP has been shared to your email address. Please use that to reset your password in the next screen.'
 		);
 	}
-	// } catch (error) {
-	// 	console.log(error);
-	// }
 });
 
 export async function verifyOTP(req, res) {

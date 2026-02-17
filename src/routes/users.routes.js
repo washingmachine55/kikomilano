@@ -2,7 +2,6 @@ import express from 'express';
 import {
     getSingleUser,
     editUserProfile,
-    getAllUsers,
     uploadUserProfilePicture,
     getFavorites,
     setFavorite,
@@ -54,13 +53,12 @@ router.get('/profile', getSingleUser);
  * /users/profile/edit:
  *   post:
  *     summary: Endpoint to edit user profile details.
- *     description: Allows a logged in user to update their profile information like name, email, and password.
+ *     description: Allows a logged in user to update their profile information like name, email, and password. Unable to add it to docs but **all fields are optional**, *except* if **password** is passed, then **confirmed_password** is also *required*.
  *     tags:
  *       - Users
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       required: true
  *       content:
  *         application/json:
  *           example:
@@ -89,21 +87,6 @@ router.get('/profile', getSingleUser);
  *                    created_at: '2026-02-16T14:39:04.573Z'
  */
 router.post('/profile/edit', editUserProfile);
-
-/**
- * @swagger
- * /users:
- *   get:
- *     summary: Endpoint to get details of all users.
- *     tags:
- *       - Users
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Details of all available users
- */
-router.get('/', getAllUsers);
 
 /**
  * @swagger
@@ -151,15 +134,46 @@ router.post('/profile-picture-upload', uploadImages.single('userProfilePicture')
  *         application/json:
  *           example:
  *             data:
- *               users_id: 'user-uuid'
  *               products_variants_id: 'product-variant-uuid'
  *     responses:
  *       200:
  *         description: Product added to favorites
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 200
+ *               type: 1
+ *               message: Product added to favorites
+ *               data:
+ *                  id: 019c6a3e-cc64-76e3-b126-77f7137f2a51
+ *                  users_id: 019c69ec-e0d1-7b19-abfd-7aa0acc96054
+ *                  products_variants_id: 019c69eb-0902-75da-b289-be02c76a8051
+ *                  created_by: 019c69ec-e0d1-7b19-abfd-7aa0acc96054
+ *                  created_at: '2026-02-17T06:17:06.404Z'
+ *                  deleted_by: null
+ *                  deleted_at: null
+ *                  status: 1
  *       409:
  *         description: Conflict in database records
- *       422:
- *         description: An error occurred with the provided data.
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 409
+ *               type: 0
+ *               message: Product already set as a favorite
+ *               data:
+ *                 error_type: Conflicting Record
+ *       404:
+ *         description: Unable to find the product
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 404
+ *               type: 0
+ *               message: Unable to find the product you are trying to favorite
+ *               data:
+ *                  error_type: Entity not found
+
  */
 router.post('/set-favorites', setFavorite);
 
@@ -168,7 +182,7 @@ router.post('/set-favorites', setFavorite);
  * /users/remove-favorites:
  *   post:
  *     summary: Endpoint to remove a product favorite of a user that is logged in.
- *     description: POST request to pass the user id and the product variant id to remove from user's favorites.
+ *     description: POST request to pass the product variant ids in an Array to remove from user's favorites.
  *     tags:
  *       - Users
  *     security:
@@ -179,11 +193,46 @@ router.post('/set-favorites', setFavorite);
  *         application/json:
  *           example:
  *             data:
- *               users_id: 'user-uuid'
- *               products_variants_id: 'product-variant-uuid'
+ *               products_variants_array:
+ *                   - 019c69eb-08e8-76a7-bd01-f06a73c96236
+ *                   - 019c69eb-0902-75da-b289-be02c76a8051
  *     responses:
  *       200:
- *         description: Product removed from favorites or already removed
+ *         description: Product removed from favorites
+ *         content:
+ *           application/json:
+ *             example:
+ *                status: 200
+ *                type: 1
+ *                message: Product(s) removed from favorites successfully!
+ *                data:
+ *                - id: 019c6a3e-8e2c-79d6-b83c-c7c018992b11
+ *                  users_id: 019c69ec-e0d1-7b19-abfd-7aa0acc96054
+ *                  products_variants_id: 019c69eb-08e8-76a7-bd01-f06a73c96236
+ *                  created_by: 019c69ec-e0d1-7b19-abfd-7aa0acc96054
+ *                  created_at: '2026-02-17T06:16:50.476Z'
+ *                  deleted_by: 019c69ec-e0d1-7b19-abfd-7aa0acc96054
+ *                  deleted_at: '2026-02-17T06:19:54.916Z'
+ *                  status: 0
+ *                - id: 019c6a3e-cc64-76e3-b126-77f7137f2a51
+ *                  users_id: 019c69ec-e0d1-7b19-abfd-7aa0acc96054
+ *                  products_variants_id: 019c69eb-0902-75da-b289-be02c76a8051
+ *                  created_by: 019c69ec-e0d1-7b19-abfd-7aa0acc96054
+ *                  created_at: '2026-02-17T06:17:06.404Z'
+ *                  deleted_by: 019c69ec-e0d1-7b19-abfd-7aa0acc96054
+ *                  deleted_at: '2026-02-17T06:19:54.922Z'
+ *                  status: 0
+ *       404:
+ *         description: Unable to find product
+ *         content:
+ *           application/json:
+ *             example:
+ *                status: 404
+ *                type: 0
+ *                message: 'Unable to reference product with id [019c69eb-08e8-76a7-bd01-f06a73c96236]'
+ *                data:
+ *                  error_type: Entity not found
+
  */
 router.post('/remove-favorites', unsetFavorite);
 
@@ -200,8 +249,35 @@ router.post('/remove-favorites', unsetFavorite);
  *     responses:
  *       200:
  *         description: User's favorite products
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 200
+ *               type: 1
+ *               message: User's favorite products
+ *               data:
+ *               - product_id: 019c69eb-08e6-7a19-851e-5d0f41b42dca
+ *                 product_name: Ergonomic Marble Mouse
+ *                 products_variants_id: 019c69eb-08e8-76a7-bd01-f06a73c96236
+ *                 product_variant_name: Ergonomic
+ *                 price_retail: '60.75'
+ *                 image_url: 'https://picsum.photos/seed/ebU6vd22/2256/1434'
+ *               - product_id: 019c69eb-0901-7d28-a0fc-ffba10fd6f7d
+ *                 product_name: Modern Plastic Mouse
+ *                 products_variants_id: 019c69eb-0902-75da-b289-be02c76a8051
+ *                 product_variant_name: Frozen
+ *                 price_retail: '61.69'
+ *                 image_url: 'https://picsum.photos/seed/TE9rC5/563/808'
  *       401:
  *         description: Unauthorized. Access Denied. Please login.
+ *         content:
+ *             application/json:
+ *                example:
+ *                  status: 404
+ *                  type: 0
+ *                  message: No products in user's favorites
+ *                  data:
+ *                     error_type: Entity not found
  */
 router.get('/favorites', getFavorites);
 
@@ -331,37 +407,20 @@ router.get('/addresses/', getUserAddresses)
  *             example:
  *               status: 200
  *               type: 1
- *               message: User address saved successfully!
+ *               message: User address removed successfully!
  *               data:
- *                 id: '019c5752-250c-7834-9263-8e6a602a4904'
- *                 email: samples@users.czom
- *                 phone_no: 
- *                 access_type: 0
- *                 first_name: Sample
- *                 last_name: Sample
- *                 image_url: images/uploads/userProfilePicture-1770994009070-625979629.png
- *                 address_name: 23ss3ss2
- *                 address_line: 231, 123 main St Apt 4B, New York, NY 10001
- *       409:
+ *               deleted_addresses_id:
+ *                   - 019c69c4-b64b-7939-93b5-418cbc51b384
+ *       404:
  *         description: A similar address already exists.
  *         content:
  *           application/json:
  *             example:
- *               status: 409
+ *               status: 404
  *               type: 0
- *               message: A similar address already exists. Please change values to create another one.
+ *               message: 'Address ID [019c69c4-b64b-7939-93b5-418cbc51b384] does not exist in database.'
  *               data:
- *                 error_type: Conflicting Record
- *       422:
- *         description: Can not create more than 2 addresses.
- *         content:
- *           application/json:
- *             example:
- *               status: 422
- *               type: 0
- *               message: User can not create more than 2 addresses. Please delete one to create another..
- *               data:
- *                 error_type: Unprocessable Content
+ *                 error_type: Entity not found
  */
 router.post('/addresses/delete', unsetUserAddresses)
 

@@ -7,7 +7,7 @@ pactum.request.setDefaultHeaders({ 'Content-Type': 'application/json' });
 
 describe('Authentication APIs', () => {
 	describe('POST /auth/register', () => {
-		it('should register a new user successfully', async () => {
+		it('should register a new user successfully', async function () {
 			const randomNum = randomInt(0, 99);
 			await pactum
 				.spec()
@@ -32,7 +32,7 @@ describe('Authentication APIs', () => {
 				.expectStatus(201);
 		});
 
-		it('should fail if required fields are missing', async () => {
+		it('should fail if required fields are missing', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -51,7 +51,7 @@ describe('Authentication APIs', () => {
 	});
 
 	describe('POST /auth/login', () => {
-		it('should login a user with valid credentials', async () => {
+		it('should login a user with valid credentials', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -72,7 +72,7 @@ describe('Authentication APIs', () => {
 				.expectStatus(200);
 		});
 
-		it('should fail with invalid credentials', async () => {
+		it('should fail with invalid credentials', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -95,7 +95,7 @@ describe('Authentication APIs', () => {
 	});
 
 	describe('GET /auth/refresh', () => {
-		it('should refresh access token', async () => {
+		it('should refresh access token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -125,7 +125,7 @@ describe('Authentication APIs', () => {
 	});
 
 	describe('GET /auth/verify-token', () => {
-		it('should verify a valid bearer token', async () => {
+		it('should verify a valid bearer token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -153,7 +153,7 @@ describe('Authentication APIs', () => {
 				});
 		});
 
-		it('should reject an invalid token', async () => {
+		it('should reject an invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -181,7 +181,7 @@ describe('Authentication APIs', () => {
 	});
 
 	describe('POST /auth/forgot-password', () => {
-		it('should initiate forgot password flow with valid email', async () => {
+		it('should initiate forgot password flow with valid email', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -202,7 +202,7 @@ describe('Authentication APIs', () => {
 				.expectStatus(200);
 		});
 
-		it('should fail forgot password with non-existent email', async () => {
+		it('should fail forgot password with non-existent email', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -222,7 +222,7 @@ describe('Authentication APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should fail forgot password with missing email field', async () => {
+		it('should fail forgot password with missing email field', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -239,7 +239,7 @@ describe('Authentication APIs', () => {
 	});
 
 	describe('POST /auth/verify-otp', () => {
-		it('should verify OTP and return temporary token', async () => {
+		it('should verify OTP and return temporary token', async function () {
 			// First request OTP
 			await pactum
 				.spec()
@@ -278,7 +278,7 @@ describe('Authentication APIs', () => {
 				.then(() => done());
 		});
 
-		it('should fail OTP verification with invalid OTP', async () => {
+		it('should fail OTP verification with invalid OTP', async function () {
 			return await pactum
 				.spec()
 				.withMethod('POST')
@@ -297,7 +297,7 @@ describe('Authentication APIs', () => {
 				.then(() => done());
 		});
 
-		it('should fail OTP verification with missing fields', async () => {
+		it('should fail OTP verification with missing fields', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -316,7 +316,7 @@ describe('Authentication APIs', () => {
 	});
 
 	describe('POST /auth/reset-password', () => {
-		it('should reset password with valid temporary token', async () => {
+		it('should reset password with valid temporary token', async function () {
 			// First get OTP verification to obtain temporary token
 			await pactum
 				.spec()
@@ -388,7 +388,7 @@ describe('Authentication APIs', () => {
 				);
 		});
 
-		it('should fail reset password without authorization header', async () => {
+		it('should fail reset password without authorization header', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -410,7 +410,7 @@ describe('Authentication APIs', () => {
 				});
 		});
 
-		it('should fail reset password with mismatched passwords', async () => {
+		it('should fail reset password with mismatched passwords', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -460,7 +460,7 @@ describe('Authentication APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should fail reset password with invalid temporary token', async () => {
+		it('should fail reset password with invalid temporary token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')

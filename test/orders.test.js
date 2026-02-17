@@ -43,8 +43,8 @@ describe('Orders APIs', () => {
 			.stores('altTestProductVariantId', `data.products_details[${randomNum}].product_variant_id`);
 	});
 
-	describe('POST /orders', () => {
-		it('should create order successfully with valid data', async () => {
+	describe('POST /orders', function () {
+		it('should create order successfully with valid data', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -77,7 +77,7 @@ describe('Orders APIs', () => {
 				});
 		});
 
-		it('should fail to create order without authentication token', async () => {
+		it('should fail to create order without authentication token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -102,7 +102,7 @@ describe('Orders APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should fail to create order with invalid token', async () => {
+		it('should fail to create order with invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -123,7 +123,7 @@ describe('Orders APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should fail to create order with invalid users_id format', async () => {
+		it('should fail to create order with invalid users_id format', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -149,7 +149,7 @@ describe('Orders APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should fail to create order with missing users_id', async () => {
+		it('should fail to create order with missing users_id', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -174,7 +174,7 @@ describe('Orders APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should fail to create order with empty order items', async () => {
+		it('should fail to create order with empty order items', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -195,7 +195,7 @@ describe('Orders APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should fail to create order with negative qty', async () => {
+		it('should fail to create order with negative qty', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -221,7 +221,7 @@ describe('Orders APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should fail to create order with invalid product variant ID', async () => {
+		it('should fail to create order with invalid product variant ID', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -249,7 +249,7 @@ describe('Orders APIs', () => {
 	});
 
 	describe('POST /orders - Edge Cases', () => {
-		xit('should handle order with multiple items', async () => {
+		it('should handle order with multiple items', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -267,8 +267,7 @@ describe('Orders APIs', () => {
 								},
 								{
 									"products_variants_id": "$S{altTestProductVariantId}",
-									"qty": 1,
-									"price": 49.99
+									"qty": 1
 								}
 							],
 							"cart_total": 249.97,
@@ -280,7 +279,7 @@ describe('Orders APIs', () => {
 				.expectStatus(200);
 		});
 
-		it('should handle order with large qty', async () => {
+		it('should handle order with large qty', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -306,7 +305,7 @@ describe('Orders APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should handle order with different status values', async () => {
+		it('should handle order with different status values', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')

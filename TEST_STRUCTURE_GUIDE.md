@@ -55,11 +55,6 @@ Orders APIs
 
 ```
 Users APIs
-├── GET /users (4 tests)
-│   ├── Retrieve all users
-│   ├── Fail without auth
-│   ├── Fail with invalid token
-│   └── Return correct format
 ├── GET /users/profile (5 tests)
 │   ├── Retrieve profile with auth
 │   ├── Fail without auth

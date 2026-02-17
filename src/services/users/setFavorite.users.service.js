@@ -1,5 +1,5 @@
 import pool from '../../config/db.js';
-import { ConflictError } from '../../utils/errors.js';
+import { ConflictError, NotFoundError } from '../../utils/errors.js';
 
 export const saveProductFavorite = async (userId, productVariantId) => {
 	// const conn = await pool.connect();
@@ -24,7 +24,7 @@ export const saveProductFavorite = async (userId, productVariantId) => {
 				[userId, productVariantId]
 			)
 			.catch((err) => {
-				throw new ConflictError('Unable to find the product you are trying to favorite', err.detail);
+				throw new NotFoundError('Unable to find the product you are trying to favorite');
 			});
 
 		// conn.release();

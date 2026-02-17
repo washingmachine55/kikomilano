@@ -33,48 +33,8 @@ describe('Users APIs', () => {
 			.stores('userId', 'data.user_details.id');
 	});
 
-	describe('GET /users', () => {
-		it('should retrieve all users successfully with valid token', async () => {
-			await pactum
-				.spec()
-				.withMethod('GET')
-				.withPath('/users')
-				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
-				.expectStatus(200)
-				.expectJsonLike({
-					message: 'Details of all available users',
-				});
-		});
-
-		it('should fail to retrieve users without authentication token', async () => {
-			await pactum.spec().withMethod('GET').withPath('/users').expectStatus(401);
-		});
-
-		it('should fail to retrieve users with invalid token', async () => {
-			await pactum
-				.spec()
-				.withMethod('GET')
-				.withPath('/users')
-				.withHeaders('Authorization', 'Bearer invalid_token_here')
-				.expectStatus(401);
-		});
-
-		it('should return users data in correct format', async () => {
-			await pactum
-				.spec()
-				.withMethod('GET')
-				.withPath('/users')
-				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
-				.expectStatus(200)
-				.expectJsonMatch({
-					type: 1,
-					status: 200,
-				});
-		});
-	});
-
 	describe('GET /users/profile', () => {
-		it('should retrieve logged-in user profile successfully with valid token', async () => {
+		it('should retrieve logged-in user profile successfully with valid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -86,11 +46,11 @@ describe('Users APIs', () => {
 				});
 		});
 
-		it('should fail to retrieve profile without authentication token', async () => {
+		it('should fail to retrieve profile without authentication token', async function () {
 			await pactum.spec().withMethod('GET').withPath('/users/profile').expectStatus(401);
 		});
 
-		it('should fail to retrieve profile with invalid token', async () => {
+		it('should fail to retrieve profile with invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -99,7 +59,7 @@ describe('Users APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should return user profile data in correct format', async () => {
+		it('should return user profile data in correct format', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -115,7 +75,7 @@ describe('Users APIs', () => {
 				});
 		});
 
-		it('should return user details with id and email', async () => {
+		it('should return user details with id and email', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -134,7 +94,7 @@ describe('Users APIs', () => {
 	});
 
 	describe('POST /users/profile/edit', () => {
-		it('should edit user profile with valid data', async () => {
+		it('should edit user profile with valid data', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -155,7 +115,7 @@ describe('Users APIs', () => {
 				.expectStatus(200);
 		});
 
-		it('should fail to edit profile without authentication token', async () => {
+		it('should fail to edit profile without authentication token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -172,7 +132,7 @@ describe('Users APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should fail to edit profile with invalid token', async () => {
+		it('should fail to edit profile with invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -190,7 +150,7 @@ describe('Users APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should update user email successfully', async () => {
+		it('should update user email successfully', async function () {
 			const randomNum = randomInt(0, 15);
 			await pactum
 				.spec()
@@ -212,7 +172,7 @@ describe('Users APIs', () => {
 				.expectStatus(200);
 		});
 
-		it('should update user password successfully', async () => {
+		it('should update user password successfully', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -234,7 +194,7 @@ describe('Users APIs', () => {
 				.expectStatus(200);
 		});
 
-		it('should fail password update with mismatched passwords', async () => {
+		it('should fail password update with mismatched passwords', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -253,7 +213,7 @@ describe('Users APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should update multiple user fields at once', async () => {
+		it('should update multiple user fields at once', async function () {
 			const randomNum = randomInt(0, 15);
 			await pactum
 				.spec()
@@ -276,7 +236,7 @@ describe('Users APIs', () => {
 				.expectStatus(200);
 		});
 
-		it('should ignore invalid fields in profile edit request', async () => {
+		it('should ignore invalid fields in profile edit request', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -299,7 +259,7 @@ describe('Users APIs', () => {
 				.expectStatus(400);
 		});
 
-		it('should handle empty profile edit request', async () => {
+		it('should handle empty profile edit request', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -317,11 +277,11 @@ describe('Users APIs', () => {
 	});
 
 	describe('POST /users/profile-picture-upload', () => {
-		it('should fail to upload profile picture without authentication token', async () => {
+		it('should fail to upload profile picture without authentication token', async function () {
 			await pactum.spec().withMethod('POST').withPath('/users/profile-picture-upload').expectStatus(401);
 		});
 
-		it('should fail to upload profile picture without file', async () => {
+		it('should fail to upload profile picture without file', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -333,7 +293,7 @@ describe('Users APIs', () => {
 				});
 		});
 
-		it('should reject upload with invalid token', async () => {
+		it('should reject upload with invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -342,7 +302,7 @@ describe('Users APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should upload user profile picture successfully with valid file', async () => {
+		it('should upload user profile picture successfully with valid file', async function () {
 			// Create a minimal valid PNG file for testing (1x1 transparent PNG)
 			const minimalPNG = Buffer.from([
 				0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0x00,
@@ -364,7 +324,7 @@ describe('Users APIs', () => {
 				});
 		});
 
-		it('should handle image upload with different file types', async () => {
+		it('should handle image upload with different file types', async function () {
 			// Create a minimal valid JPEG file for testing
 			const minimalJPEG = Buffer.from([
 				0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00,
@@ -402,7 +362,7 @@ describe('Users APIs', () => {
 				});
 		});
 
-		it('should return error when field name is incorrect', async () => {
+		it('should return error when field name is incorrect', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -422,7 +382,7 @@ describe('Users APIs', () => {
 	});
 
 	describe('GET /users/favorites', () => {
-		before(async () => {
+		before(async function () {
 			const randomProductNum = randomInt(0, 25);
 			await pactum
 				.spec()
@@ -443,7 +403,7 @@ describe('Users APIs', () => {
 					},
 				})
 		});
-		it('should retrieve user favorites successfully with valid token', async () => {
+		it('should retrieve user favorites successfully with valid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -455,11 +415,11 @@ describe('Users APIs', () => {
 				});
 		});
 
-		it('should fail to retrieve favorites without authentication token', async () => {
+		it('should fail to retrieve favorites without authentication token', async function () {
 			await pactum.spec().withMethod('GET').withPath('/users/favorites').expectStatus(401);
 		});
 
-		it('should fail to retrieve favorites with invalid token', async () => {
+		it('should fail to retrieve favorites with invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -468,7 +428,7 @@ describe('Users APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should return favorites data in correct format', async () => {
+		it('should return favorites data in correct format', async function () {
 			await pactum
 				.spec()
 				.withMethod('GET')
@@ -483,7 +443,7 @@ describe('Users APIs', () => {
 	});
 
 	describe('POST /users/set-favorites', () => {
-		before(async () => {
+		before(async function () {
 			const randomProductNum = randomInt(0, 25);
 			await pactum
 				.spec()
@@ -504,7 +464,7 @@ describe('Users APIs', () => {
 					},
 				})
 		});
-		it('should set favorite successfully with valid token and product id', async () => {
+		it('should set favorite successfully with valid token and product id', async function () {
 			const randomProductNum = randomInt(0, 25);
 			await pactum
 				.spec()
@@ -531,7 +491,7 @@ describe('Users APIs', () => {
 				});
 		});
 
-		it('should fail to set favorite without authentication token', async () => {
+		it('should fail to set favorite without authentication token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -545,7 +505,7 @@ describe('Users APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should fail to set favorite with invalid token', async () => {
+		it('should fail to set favorite with invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -560,7 +520,7 @@ describe('Users APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should fail to set favorite without product id', async () => {
+		it('should fail to set favorite without product id', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -574,7 +534,7 @@ describe('Users APIs', () => {
 	});
 
 	describe('POST /users/remove-favorites', () => {
-		before(async () => {
+		before(async function () {
 			const randomProductNum = randomInt(0, 25);
 			await pactum
 				.spec()
@@ -595,7 +555,7 @@ describe('Users APIs', () => {
 					},
 				})
 		});
-		it('should remove favorite successfully with valid token and product id', async () => {
+		it('should remove favorite successfully with valid token and product id', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -614,7 +574,7 @@ describe('Users APIs', () => {
 				});
 		});
 
-		it('should fail to remove favorite without authentication token', async () => {
+		it('should fail to remove favorite without authentication token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -629,7 +589,7 @@ describe('Users APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should fail to remove favorite with invalid token', async () => {
+		it('should fail to remove favorite with invalid token', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -645,7 +605,7 @@ describe('Users APIs', () => {
 				.expectStatus(401);
 		});
 
-		it('should fail to remove favorite without product id', async () => {
+		it('should fail to remove favorite without product id', async function () {
 			await pactum
 				.spec()
 				.withMethod('POST')
@@ -657,40 +617,6 @@ describe('Users APIs', () => {
 					},
 				})
 				.expectStatus(400);
-		});
-	});
-
-	describe('GET /users - Edge Cases', () => {
-		it('should handle multiple requests to get all users', async () => {
-			await pactum
-				.spec()
-				.withMethod('GET')
-				.withPath('/users')
-				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
-				.expectStatus(200);
-		});
-
-		it('should consistently return same user data', async () => {
-			const firstCall = await pactum
-				.spec()
-				.withMethod('GET')
-				.withPath('/users')
-				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
-				.expectStatus(200);
-
-			const secondCall = await pactum
-				.spec()
-				.withMethod('GET')
-				.withPath('/users')
-				.withHeaders('Authorization', `Bearer $S{userAccessToken}`)
-				.expectStatus(200);
-
-			if (!firstCall.body.data.users_details.length) {
-				throw new Error('users_details not found in first call');
-			}
-			if (!secondCall.body.data.users_details.length) {
-				throw new Error('users_details not found in second call');
-			}
 		});
 	});
 });
