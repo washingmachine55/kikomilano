@@ -47,6 +47,15 @@ async function insert(client, sql, params) {
 	const client = await pool.connect();
 
 	try {
+		const isSeededAlready = await pool.query('SELECT COUNT(id) FROM tbl_categories').catch(err => {
+			console.log(err);
+			throw new Error("Unable to seed", { cause: err });
+		})
+
+		if (isSeededAlready.rows[0].count > 0) {
+			throw new Error("Seed not required", { cause: 'not-required' });
+		}
+
 		await client.query('BEGIN');
 
 		await client.query("INSERT INTO tbl_categories(name) VALUES('FACE'), ('HAIR'), ('SKIN'), ('BODY')");
@@ -391,7 +400,11 @@ async function insert(client, sql, params) {
 		console.log('✅ Seeding completed successfully');
 	} catch (err) {
 		await client.query('ROLLBACK');
-		console.error('❌ Seeding failed:', err);
+		if (err.cause === 'not-required') {
+			console.log('❌ Seeding failed:', err.message);
+		} else {
+			console.error('❌ Seeding failed:', err);
+		}
 	} finally {
 		client.release();
 		process.exit();

@@ -5,4 +5,4 @@ COPY package*.json /app/
 RUN npm install
 COPY . /app/
 
-CMD [ "npm", "run", "dev-nm-server" ]
+CMD [ "node", "--env-file=.env", "src/server.js" ]

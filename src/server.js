@@ -22,5 +22,12 @@ if (process.env.NODE_ENV === 'dev') {
 	}
 } 
 
+process.on('SIGTERM', () => {
+	console.debug('SIGTERM signal received: closing HTTP server')
+	server.close(() => {
+		console.debug('HTTP server closed')
+	})
+});
+
 server.keepAliveTimeout = Number(env.APP_KEEP_ALIVE_TIMEOUT);
 server.headersTimeout = Number(env.APP_HEADERS_TIMEOUT);

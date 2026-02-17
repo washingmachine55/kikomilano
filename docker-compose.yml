@@ -3,15 +3,18 @@ services:
   mailpit:
       image: axllent/mailpit
       container_name: mailpit
+      restart: unless-stopped
       ports:
           - 8025:8025
       environment:
           MP_MAX_MESSAGES: 5000
           MP_API_CORS: "localhost,*"
+          MP_MAX_AGE: 7d
+          MP_QUIET: true
 
   db:
     image: postgres:18
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
@@ -35,7 +38,8 @@ services:
         restart: true
       mailpit:
         condition: service_started
-    restart: on-failure
+    # restart: on-failure
+    restart: unless-stopped
     ports:
     - 3000:3000
     env_file:
