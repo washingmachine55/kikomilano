@@ -5,7 +5,7 @@ import { env, loadEnvFile } from 'process';
 loadEnvFile();
 
 const outputFile = '../../swagger_output.json';
-const endpointsFiles = ['../server.js']; // Point to your main application file or specific route files
+const endpointsFiles = ['../app.js']; // Point to your main application file or specific route files
 
 /* const doc = {
 	failOnErrors: true,
@@ -77,17 +77,19 @@ const options = {
 			title: `${env.APP_NAME} - API Documentation`,
 			description: 'Documentation for the available API endpoints',
 		},
-		// servers: [
-		// 	{
-		// 		url: "http://localhost:3000/"
-		// 	},
-		// 	{
-		// 		url: "https://kikomilano.devmindsstudio.co/"
-		// 	}
-		// ],
+		servers: [
+			{
+				url: "https://kikomilano.devmindsstudio.co",
+				description: "Staging server"
+			},
+			{
+				url: "http://localhost:3000",
+				description: "Local server"
+			}
+		],
 		host: env.BASE_URL,
 		basePath: '/',
-		schemes: ['http'],
+		schemes: ['http', 'https'],
 		consumes: ['application/json'],
 		produces: ['application/json'],
 		components: {
@@ -123,7 +125,8 @@ const options = {
 			},
 		],
 	},
-	apis: ['./src/routes/**.js'],
+	apis: ['./src/routes/**.js', '../app.js'],
+	// apis: ['./src/routes/**.js'],
 };
 
 export const openapiSpecification = swaggerJsdoc(options);

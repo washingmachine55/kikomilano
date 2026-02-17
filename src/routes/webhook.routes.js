@@ -26,6 +26,14 @@ router.post('/', express.raw({ type: 'application/json' }), (request, response) 
 	}
 
 	switch (event.type) {
+		case 'charge.succeeded':
+			const chargeSucceededInfo = event.data.object
+			console.log("case 'charge.succeeded': ", chargeSucceededInfo);
+			break;
+		case 'charge.updated':
+			const chargeUpdatedInfo = event.data.object
+			console.log("case 'charge.updated': ", chargeUpdatedInfo);
+			break;
 		case 'payment_intent.succeeded':
 			const paymentIntent = event.data.object;
 			console.log(`PaymentIntent for ${paymentIntent.amount} was successful!`);

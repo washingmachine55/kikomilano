@@ -1,12 +1,12 @@
 import express from 'express';
 import {
-	forgotPassword,
-	loginUser,
-	refreshToken,
-	registerUser,
-	resetPassword,
-	verifyOTP,
-	verifyUserToken,
+    forgotPassword,
+    loginUser,
+    refreshToken,
+    registerUser,
+    resetPassword,
+    verifyOTP,
+    verifyUserToken,
 } from '../controllers/auth.controller.js';
 const router = express.Router();
 
@@ -184,12 +184,41 @@ router.get('/refresh', refreshToken);
  *               password: 'password123'
  *               confirmed_password: 'password123'
  *     responses:
- *       201:
+ *       200:
  *         description: Password Reset successful!
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 201
+ *               type: 1
+ *               message: Password Reset successful!
+ *               data:
+ *                 user_details:
+ *                      id: 019c6bcf-9add-7866-ba73-81d96e8dc0c6
+ *                      email: samples@users.com
+ *                      access_type: 0
+ *                      created_at: '2026-02-17T13:34:53.661Z'
+ *                      first_name: Sample
+ *                      last_name: Sample
+ *                      image_url: null
+ *                 access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOWM2YmNmLTlhZGQtNzg2Ni1iYTczLTgxZDk2ZThkYzBjNiIsImlhdCI6MTc3MTMzNjA2NiwiZXhwIjoxNzcxOTQwODY2fQ.YNDjtnXMM9eVU8Ju70jHgXHSjKZ32J34j7_LsTnwCcE
+ *                 refresh_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOWM2YmNmLTlhZGQtNzg2Ni1iYTczLTgxZDk2ZThkYzBjNiIsImlhdCI6MTc3MTMzNjA2NiwiZXhwIjoxNzcxOTQwODY2fQ.rfxz0f2_liM-8doHmsTA4Owt0Fgh9HtBjE0g-J1tP_M
  *       400:
- *         description: Passwords don't match. Please try again instead.
- *       401:
- *         description: Unauthorized. Access Denied. Please request another OTP. or Invalid Token. Please request another OTP.
+ *         description: Passwords don't match.
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 400
+ *               type: 0
+ *               message: Validation Error. Please try again.
+ *               data:
+ *                 errors:
+ *                   confirmed_password:
+ *                     - Passwords do not match
+ *                 paths:
+ *                   - confirmed_password
+ *                 extra_info:
+ *                   message: Passwords do not match
  */
 router.post('/reset-password', resetPassword);
 

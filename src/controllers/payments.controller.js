@@ -37,6 +37,7 @@ export const createPayment = await attempt(async (req, res, next) => {
 export const handlePaymentIntentSucceeded = await attempt(async (paymentIntent) => {
 	// WIP
 	// some logic that processes the confirmed paymentIntent
+	console.log("handlePaymentIntentSucceeded was triggered!")
 	console.log(paymentIntent)
 });
 
