@@ -147,6 +147,7 @@ app.use((err, req, res, next) => {
 				break;
 		}
 	}
+	console.debug(err)
 	next(err);
 });
 

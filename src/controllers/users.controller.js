@@ -60,7 +60,7 @@ export const getUserAddresses = await attempt(async (req, res, next) => {
 
 export const unsetUserAddresses = await attempt(async (req, res, next) => {
 	const result = await deleteUserAddresses(req.body.data.addresses_array, req.user.id);
-	return responseWithStatus(res, 1, 200, "User address fetched successfully!", result)
+	return responseWithStatus(res, 1, 200, "User address removed successfully!", result)
 });
 
 export const editUserProfile = await attempt(async (req, res) => {

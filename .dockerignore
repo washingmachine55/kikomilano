@@ -1,0 +1,11 @@
+node_modules/
+public/images/uploads/*
+.vscode/
+.prettierignore
+.gitignore
+.prettierrc
+.eslint.config.js
+README.md
+swagger_output.json
+TEST_STRUCTURE_GUIDE.md
+testFile.png

@@ -28,6 +28,22 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: User profile details.
+ *         content:
+ *           application/json:
+ *              example:
+ *                 status: 200
+ *                 type: 1
+ *                 message: User profile details
+ *                 data:
+ *                 user_details:
+ *                     users_id: 019c66e4-017d-7330-be72-04f480b2f32d
+ *                     first_name: Sample
+ *                     last_name: Sample
+ *                     email: samples@users.com
+ *                     phone_no: null
+ *                     access_type: 0
+ *                     image_url: null
+ *                     created_at: '2026-02-16T14:39:04.573Z'
  *       401:
  *         description: Unauthorized. Access Denied. Please login.
  */
@@ -56,6 +72,21 @@ router.get('/profile', getSingleUser);
  *     responses:
  *       200:
  *         description: User profile edited successfully.
+ *         content:
+ *            application/json:
+ *              example:
+ *                  status: 200
+ *                  type: 1
+ *                  message: User profile edited successfully
+ *                  data:
+ *                    users_id: 019c66e4-017d-7330-be72-04f480b2f32d
+ *                    first_name: ww
+ *                    last_name: aa
+ *                    email: sample@users.com
+ *                    phone_no: null
+ *                    access_type: 0
+ *                    image_url: null
+ *                    created_at: '2026-02-16T14:39:04.573Z'
  */
 router.post('/profile/edit', editUserProfile);
 
@@ -274,6 +305,64 @@ router.post('/addresses/', saveUserAddress)
  */
 router.get('/addresses/', getUserAddresses)
 
+/**
+ * @swagger
+ * /users/addresses/delete:
+ *   post:
+ *     summary: Endpoint to a delete/remove an address.
+ *     description: Allows a logged in user to remove a created address.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             data:
+ *               addresses_array: 
+ *                  - "019c58f1-2228-7758-9c96-6cf4800da4be"
+ *     responses:
+ *       200:
+ *         description: A similar address already exists.
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 200
+ *               type: 1
+ *               message: User address saved successfully!
+ *               data:
+ *                 id: '019c5752-250c-7834-9263-8e6a602a4904'
+ *                 email: samples@users.czom
+ *                 phone_no: 
+ *                 access_type: 0
+ *                 first_name: Sample
+ *                 last_name: Sample
+ *                 image_url: images/uploads/userProfilePicture-1770994009070-625979629.png
+ *                 address_name: 23ss3ss2
+ *                 address_line: 231, 123 main St Apt 4B, New York, NY 10001
+ *       409:
+ *         description: A similar address already exists.
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 409
+ *               type: 0
+ *               message: A similar address already exists. Please change values to create another one.
+ *               data:
+ *                 error_type: Conflicting Record
+ *       422:
+ *         description: Can not create more than 2 addresses.
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 422
+ *               type: 0
+ *               message: User can not create more than 2 addresses. Please delete one to create another..
+ *               data:
+ *                 error_type: Unprocessable Content
+ */
 router.post('/addresses/delete', unsetUserAddresses)
 
 export default router;

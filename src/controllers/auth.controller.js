@@ -47,23 +47,17 @@ export const registerUser = await attempt(async (req, res, next) => {
 });
 
 export const loginUser = await attempt(async (req, res) => {
-	const request = Object.values(req.body.data);
-	const userEmail = request[0];
-	const userPassword = request[1];
-
+	const userEmail = req.body.data.email;
+	const userPassword = req.body.data.password;
 	// --------------------------------------------------------------------------- //
 	// Check if email doesn't exist in database already
 	// --------------------------------------------------------------------------- //
 	const existingEmailCheck = await checkExistingEmail_v2(userEmail);
-
-	if (existingEmailCheck === false) {
-		throw new UnauthorizedError("Email doesn't exist. Please sign up instead.");
-	} else if (existingEmailCheck === true) {
+	if (existingEmailCheck === true) {
 		// --------------------------------------------------------------------------- //
 		// Email and Password Combination Check
 		// --------------------------------------------------------------------------- //
 		const credentialMatchingResult = await isCredentialsMatching(userEmail, userPassword);
-
 		if (credentialMatchingResult == true) {
 			const userDetails = await getUserIdAndAllDetails(userEmail, userPassword);
 			const accessToken = await signJwtAsync({ id: userDetails.id }, env.ACCESS_TOKEN_SECRET_KEY, {
@@ -75,12 +69,14 @@ export const loginUser = await attempt(async (req, res) => {
 
 			return await responseWithStatus(res, 1, 200, 'Sign in successful!', {
 				user_details: userDetails,
-				access_token: `${accessToken}`,
-				refresh_token: `${refreshToken}`,
+				access_token: accessToken,
+				refresh_token: refreshToken,
 			});
 		} else {
-			return await responseWithStatus(res, 0, 401, "Credentials Don't match. Please try again.", null);
+			throw new UnauthorizedError("Credentials Don't match. Please try again.");
 		}
+	} else {
+		throw new UnauthorizedError("Email doesn't exist. Please sign up instead.");
 	}
 });
 

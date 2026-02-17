@@ -5,5 +5,5 @@ venv
 backend/security/localhost+2-key.pem
 backend/security/localhost+2.pem
 src/config/swagger_output.json
-public/*
+public/images/uploads/*
 swagger_output.json

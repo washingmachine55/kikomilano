@@ -38,8 +38,7 @@ export async function checkExistingEmail_v2(request) {
 		CASE_EMAIL_CHECK,
 		[request]
 	);
-	const result = emailCheck.rows[0].existscheck;
-	if (result === true) {
+	if (emailCheck.rows[0].existscheck === true) {
 		return true
 	} else {
 		return false
