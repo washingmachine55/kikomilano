@@ -5,4 +5,4 @@ COPY package*.json /app/
 RUN npm install
 COPY . /app/
 
-CMD [ "node", "--env-file=.env", "src/server.js" ]
+CMD [ "node", "--env-file=.env", "--no-deprecation", "src/server.js" ]
