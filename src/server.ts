@@ -7,13 +7,13 @@ loadEnvFile();
 // ======================================================================
 // ======================  App Initialization  ==========================
 // ======================================================================
-export const server = app.listen(env.APP_PORT, () => {
-	if (env.NODE_ENV == 'dev') {
-		console.log(`${env.APP_NAME} listening on port ${env.APP_PORT}`);
+export const server = app.listen(env['APP_PORT'], () => {
+	if (env['NODE_ENV'] === 'dev') {
+		console.log(`${env['APP_NAME']} listening on port ${env['APP_PORT']}`);
 	}
 });
 
-if (process.env.NODE_ENV === 'dev') {
+if (env['NODE_ENV'] === 'dev') {
 	try {
 		await transporter.verify();
 		console.log("Server is ready to take our mail messages");
@@ -29,5 +29,5 @@ process.on('SIGTERM', () => {
 	})
 });
 
-server.keepAliveTimeout = Number(env.APP_KEEP_ALIVE_TIMEOUT);
-server.headersTimeout = Number(env.APP_HEADERS_TIMEOUT);
+server.keepAliveTimeout = Number(env['APP_KEEP_ALIVE_TIMEOUT']);
+server.headersTimeout = Number(env['APP_HEADERS_TIMEOUT']);
