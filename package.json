@@ -5,7 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.ts",
+    "start": "node dist/server.js",
     "dev-ts": "tsx watch src/server.ts",
     "dev-nm-server": "nodemon server.ts",
     "dev-nm-debug": "DEBUG=3-week-plan:* nodemon server.ts",

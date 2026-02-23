@@ -1,4 +1,4 @@
-import pool from '../../config/db.ts';
+import pool from '../../config/db';
 
 (async () => {
 	const client = await pool.connect();

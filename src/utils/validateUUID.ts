@@ -1,5 +1,5 @@
-import { UnprocessableContentError } from './errors.ts';
-import { UUIDSchema } from './schema.validations.ts';
+import { UnprocessableContentError } from './errors';
+import { UUIDSchema } from './schema.validations';
 
 export async function isValidUUID(inputToValidate: string) {
 	const validationResult = await UUIDSchema.safeParseAsync(inputToValidate);

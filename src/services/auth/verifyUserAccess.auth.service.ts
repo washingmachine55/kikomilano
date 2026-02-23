@@ -1,4 +1,4 @@
-import pool from '../config/db.ts';
+import pool from '../config/db';
 
 export default async function verifyUserAccessFromDatabase(userId) {
 	const conn = await pool.getConnection();

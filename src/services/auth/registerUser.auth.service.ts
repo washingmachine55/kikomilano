@@ -1,14 +1,13 @@
-import pool from '../../config/db.ts';
+import pool from '../../config/db';
 import bcrypt from 'bcryptjs';
-import { SOMETHING_WENT_WRONG_CREATE } from '../../utils/CONSTANTS.ts';
-import { GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers.ts';
+import { GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers';
 
-export default async function registerUserToDatabase(request) {
+export default async function registerUserToDatabase(request: string[]) {
 	// const conn = await pool.connect();
 
 	try {
 		const salt = await bcrypt.genSalt(10);
-		const hashedPassword = await bcrypt.hash(request[2], salt);
+		const hashedPassword = await bcrypt.hash(request[2]!, salt);
 
 		const detailsToSave = [request[1], hashedPassword];
 		const saveToDB = await pool.query(
@@ -17,9 +16,9 @@ export default async function registerUserToDatabase(request) {
 		);
 
 		if (!saveToDB) {
-			return Error(SOMETHING_WENT_WRONG_CREATE);
+			throw new Error('Something went wrong while trying to register the user.');
 		} else {
-			const usernameArray = request[0].split(' ');
+			const usernameArray = request[0]!.split(' ');
 			const filteredUsernameArray = usernameArray.filter((word) => word.length >= 1);
 
 			const firstName = filteredUsernameArray[0];
@@ -31,16 +30,14 @@ export default async function registerUserToDatabase(request) {
 				userDetailsToSave
 			);
 
-			const credentialsCheck = await pool.query(
-				GET_ALL_USER_DETAILS_BY_EMAIL,
-				[request[1]]
-			);
+			const credentialsCheck = await pool.query(GET_ALL_USER_DETAILS_BY_EMAIL, [request[1]]);
 
 			return credentialsCheck.rows[0];
 		}
 	} catch (err) {
 		console.error('Error creating record:', err);
-	} 
+		throw new Error('Error creating record', { cause: err });
+	}
 	// finally {
 	// 	conn.release();
 	// }

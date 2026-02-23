@@ -1,14 +1,11 @@
-import pool from '../../config/db.ts';
-import { CASE_EMAIL_CHECK } from '../../providers/commonQueries.providers.ts';
+import pool from '../../config/db';
+import { CASE_EMAIL_CHECK } from '../../providers/commonQueries.providers';
 
 export async function checkExistingEmail(request) {
 	// const conn = await pool.connect();
 
 	try {
-		const emailCheck = await pool.query(
-			CASE_EMAIL_CHECK,
-			[request]
-		);
+		const emailCheck = await pool.query(CASE_EMAIL_CHECK, [request]);
 		const result = emailCheck.rows[0].existscheck;
 
 		if (getUserId === false) {
@@ -27,20 +24,17 @@ export async function checkExistingEmail(request) {
 		}
 	} catch (err) {
 		console.error('Error creating record:', err);
-	} 
+	}
 	// finally {
 	// 	conn.release();
 	// }
 }
 
 export async function checkExistingEmail_v2(request) {
-	const emailCheck = await pool.query(
-		CASE_EMAIL_CHECK,
-		[request]
-	);
+	const emailCheck = await pool.query(CASE_EMAIL_CHECK, [request]);
 	if (emailCheck.rows[0].existscheck === true) {
-		return true
+		return true;
 	} else {
-		return false
+		return false;
 	}
 }

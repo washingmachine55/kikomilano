@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
-import pool from '../config/db.ts';
+import pool from '../config/db';
 
 /* =========================
 	CONFIG

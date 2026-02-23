@@ -1,10 +1,10 @@
-import pool from '../../config/db.ts';
+import pool from '../../config/db';
 
 import { TZDate } from '@date-fns/tz';
 import { formatDate, formatDistance } from 'date-fns';
 import transporter from '../../config/mailTransporter.ts';
 import { getRandomOTP } from '../../utils/getRandomOTP.ts';
-import { GET_USER_ID_FROM_EMAIL } from '../../providers/commonQueries.providers.ts';
+import { GET_USER_ID_FROM_EMAIL } from '../../providers/commonQueries.providers';
 
 export async function createForgotPasswordEmail(userEmail) {
 	const currentTimestamp = new Date();
@@ -19,13 +19,16 @@ export async function createForgotPasswordEmail(userEmail) {
 		includeSeconds: true,
 	});
 
-	const ConvertExpirationTimestampToLocal = TZDate.tz(process.env.CURRENT_TZ, expirationTimestamp).internal.toISOString();
+	const ConvertExpirationTimestampToLocal = TZDate.tz(
+		process.env.CURRENT_TZ,
+		expirationTimestamp
+	).internal.toISOString();
 	const formattedExpirationTimestamp = formatDate(ConvertExpirationTimestampToLocal, 'PPPPpp').concat(' PKT');
 
 	const otp = getRandomOTP();
 
-	const getUserIdFromEmail = await pool.query(GET_USER_ID_FROM_EMAIL, [userEmail])
-	const userId = getUserIdFromEmail.rows[0].id
+	const getUserIdFromEmail = await pool.query(GET_USER_ID_FROM_EMAIL, [userEmail]);
+	const userId = getUserIdFromEmail.rows[0].id;
 
 	const otpCheck = await pool.query(
 		`
@@ -60,33 +63,8 @@ export async function createForgotPasswordEmail(userEmail) {
 			}
 		);
 
-		await transporter.sendMail({
-			from: '"Admin Sender" <test@example.com>',
-			// to: process.env.NODE_ENV === 'dev' ? process.env.SMTP_USER : userEmail,
-			to: userEmail,
-			// to: process.env.SMTP_USER,
-			subject: `Verify your Email: User ${userId}`,
-			text: 'This is a test email sent via Nodemailer',
-			html: `
-			<p>This is a <b>test verification email</b> sent via Nodemailer!</p>
-			<br/>
-				<p>
-					Please enter the following OTP in the App to reset your password: 
-					<b>${getUnexpiredOTPEmailDetails.rows[0].otp_value}</b>
-				</p>
-			<br/>
-			<p>The OTP expires <b>${unexpiredTimeDifferenceForHumans}</b> on ${formattedUnexpiredTimestamp}</p>`,
-		}).catch(err => {
-			throw new Error(err);
-		});
-	} else {
-		try {
-			const emailResult = await pool.query(
-				'INSERT INTO tbl_users_otp(users_id,otp_value,date_sent,date_expiration) VALUES ($1,$2,$3,$4);',
-				[userId, otp, currentTimestampISO, expirationTimestampISO]
-			);
-
-			await transporter.sendMail({
+		await transporter
+			.sendMail({
 				from: '"Admin Sender" <test@example.com>',
 				// to: process.env.NODE_ENV === 'dev' ? process.env.SMTP_USER : userEmail,
 				to: userEmail,
@@ -98,16 +76,45 @@ export async function createForgotPasswordEmail(userEmail) {
 			<br/>
 				<p>
 					Please enter the following OTP in the App to reset your password: 
+					<b>${getUnexpiredOTPEmailDetails.rows[0].otp_value}</b>
+				</p>
+			<br/>
+			<p>The OTP expires <b>${unexpiredTimeDifferenceForHumans}</b> on ${formattedUnexpiredTimestamp}</p>`,
+			})
+			.catch((err) => {
+				throw new Error(err);
+			});
+	} else {
+		try {
+			const emailResult = await pool.query(
+				'INSERT INTO tbl_users_otp(users_id,otp_value,date_sent,date_expiration) VALUES ($1,$2,$3,$4);',
+				[userId, otp, currentTimestampISO, expirationTimestampISO]
+			);
+
+			await transporter
+				.sendMail({
+					from: '"Admin Sender" <test@example.com>',
+					// to: process.env.NODE_ENV === 'dev' ? process.env.SMTP_USER : userEmail,
+					to: userEmail,
+					// to: process.env.SMTP_USER,
+					subject: `Verify your Email: User ${userId}`,
+					text: 'This is a test email sent via Nodemailer',
+					html: `
+			<p>This is a <b>test verification email</b> sent via Nodemailer!</p>
+			<br/>
+				<p>
+					Please enter the following OTP in the App to reset your password: 
 					<b>${otp}</b>
 				</p>
 			<br/>
 			<p>The OTP expires <b>${timeDifferenceForHumans}</b> on ${formattedExpirationTimestamp}</p>`,
-			}).catch(err => {
-				throw new Error(err);
-			});
+				})
+				.catch((err) => {
+					throw new Error(err);
+				});
 			return emailResult;
 		} catch (error) {
 			console.debug(error);
-		} 
+		}
 	}
 }

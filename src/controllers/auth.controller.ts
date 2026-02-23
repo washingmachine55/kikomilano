@@ -1,24 +1,24 @@
 import {
 	getUserId as getUserIdAndAllDetails,
 	isCredentialsMatching,
-} from '../services/auth/authenticateUser.auth.service.ts';
-import { checkExistingEmail_v2 } from '../services/auth/checkExistingEmail.auth.service.ts';
-import registerUserToDatabase from '../services/auth/registerUser.auth.service.ts';
-import { responseWithStatus } from '../utils/responses.ts';
-import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service.ts';
-import { verifyOTPFromDB } from '../services/auth/verifyOTP.auth.service.ts';
-import saveNewUserPasswordToDB from '../services/auth/saveNewPassword.auth.service.ts';
-import { signJwtAsync, verifyJwtAsync } from '../utils/jwtUtils.ts';
-import { attempt, BadRequestError, ForbiddenError, trialCapture, UnauthorizedError } from '../utils/errors.ts';
+} from '../services/auth/authenticateUser.auth.service';
+import { checkExistingEmail_v2 } from '../services/auth/checkExistingEmail.auth.service';
+import registerUserToDatabase from '../services/auth/registerUser.auth.service';
+import { responseWithStatus } from '../utils/responses';
+import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service';
+import { verifyOTPFromDB } from '../services/auth/verifyOTP.auth.service';
+import saveNewUserPasswordToDB from '../services/auth/saveNewPassword.auth.service';
+import { signJwtAsync, verifyJwtAsync } from '../utils/jwtUtils';
+import { attempt, BadRequestError, ForbiddenError, trialCapture, UnauthorizedError } from '../utils/errors';
 import type { NextFunction, Request, Response } from 'express';
-import { 
+import {
 	ACCESS_TOKEN_SECRET_KEY,
 	ACCESS_TOKEN_EXPIRATION_TIME,
 	REFRESH_TOKEN_SECRET_KEY,
 	REFRESH_TOKEN_EXPIRATION_TIME,
 	TEMPORARY_TOKEN_SECRET_KEY,
-	TEMPORARY_TOKEN_EXPIRATION_TIME 
-} from '../config/env-config.ts';
+	TEMPORARY_TOKEN_EXPIRATION_TIME,
+} from '../config/env-config';
 
 export const registerUser = await attempt(async (req: Request, res: Response, next: NextFunction) => {
 	const request = Object.values(req.body.data);
@@ -31,7 +31,10 @@ export const registerUser = await attempt(async (req: Request, res: Response, ne
 	// --------------------------------------------------------------------------- //
 	const existingEmailCheck = await checkExistingEmail_v2(userEmail);
 	if (existingEmailCheck === true) {
-		throw new ForbiddenError('Cant register user as user email already exists. Please sign in instead', "unable to wables");
+		throw new ForbiddenError(
+			'Cant register user as user email already exists. Please sign in instead',
+			'unable to wables'
+		);
 	} else {
 		// --------------------------------------------------------------------------- //
 		// Save User details to Database if all checks are cleared
@@ -53,7 +56,7 @@ export const registerUser = await attempt(async (req: Request, res: Response, ne
 	}
 });
 
-export const loginUser = await attempt(async (req: Request, res: Response,) => {
+export const loginUser = await attempt(async (req: Request, res: Response) => {
 	const userEmail = req.body.data.email;
 	const userPassword = req.body.data.password;
 	// --------------------------------------------------------------------------- //
@@ -102,7 +105,7 @@ export async function verifyUserToken(req: Request, res: Response) {
 	}
 }
 
-export async function refreshToken(req: Request, res: Response,) {
+export async function refreshToken(req: Request, res: Response) {
 	if (req.header('Authorization')) {
 		const refreshToken: string | undefined = req.header('Authorization')!.split(' ')[1];
 		// await verifyJwtAsync(refreshToken, REFRESH_TOKEN_SECRET_KEY, (err, decoded) => {
@@ -139,7 +142,7 @@ export async function refreshToken(req: Request, res: Response,) {
 	}
 }
 
-export const forgotPassword = await attempt(async (req: Request, res: Response,) => {
+export const forgotPassword = await attempt(async (req: Request, res: Response) => {
 	const userEmail = Object.values(req.body.data).toString();
 
 	const existingEmailCheck = await checkExistingEmail_v2(userEmail);
@@ -156,7 +159,7 @@ export const forgotPassword = await attempt(async (req: Request, res: Response,)
 	}
 });
 
-export async function verifyOTP(req: Request, res: Response,) {
+export async function verifyOTP(req: Request, res: Response) {
 	const userEmail = req.body.data.email;
 	const userOTP = req.body.data.otp;
 

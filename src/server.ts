@@ -1,17 +1,18 @@
 import app from './app.js';
-import * as envVars from './config/env-config.js';
-import transporter from './config/mailTransporter.js';
+import pool from './config/db';
+import { APP_HEADERS_TIMEOUT, APP_KEEP_ALIVE_TIMEOUT, APP_NAME, APP_PORT, NODE_ENV } from './config/env-config';
+import transporter from './config/mailTransporter';
 
 // ======================================================================
 // ======================  App Initialization  ==========================
 // ======================================================================
-export const server = app.listen(envVars['APP_PORT'], () => {
-	if (envVars['NODE_ENV'] === 'dev') {
-		console.log(`${envVars['APP_NAME']} listening on port ${envVars['APP_PORT']}`);
+export const server = app.listen(APP_PORT, () => {
+	if (NODE_ENV === 'dev') {
+		console.log(`${APP_NAME} listening on port ${APP_PORT}`);
 	}
 });
 
-if (envVars['NODE_ENV'] === 'dev') {
+if (NODE_ENV === 'dev') {
 	try {
 		await transporter.verify();
 		console.log('Server is ready to take our mail messages');
@@ -20,6 +21,9 @@ if (envVars['NODE_ENV'] === 'dev') {
 	}
 }
 
+const dbConectionStatus = await pool.query('SELECT NOW()');
+console.log(dbConectionStatus.rows[0]);
+
 process.on('SIGTERM', () => {
 	console.debug('SIGTERM signal received: closing HTTP server');
 	server.close(() => {
@@ -27,5 +31,5 @@ process.on('SIGTERM', () => {
 	});
 });
 
-server.keepAliveTimeout = Number(envVars['APP_KEEP_ALIVE_TIMEOUT']);
-server.headersTimeout = Number(envVars['APP_HEADERS_TIMEOUT']);
+server.keepAliveTimeout = Number(APP_KEEP_ALIVE_TIMEOUT);
+server.headersTimeout = Number(APP_HEADERS_TIMEOUT);

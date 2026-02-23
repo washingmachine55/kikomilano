@@ -6,7 +6,7 @@ import compression from 'compression';
 const app: Application = express();
 
 // Running Stripe's webhook before any of the other middlewares and routes, to ensure that no parsing/modification is done of the received data as Stripe requires payload to be provided as a string or a Buffer
-import webhookRoutes from './routes/webhook.routes.js';
+import webhookRoutes from './routes/webhook.routes';
 app.use('/webhook', webhookRoutes);
 
 app.set('query parser', 'simple');
@@ -22,32 +22,32 @@ app.use(
 // ======================================================================
 // ================  All da Routes for da flutes  =======================
 // ======================================================================
-import staticRoutes from './routes/static.routes.js';
+import staticRoutes from './routes/static.routes';
 app.use('/static', staticRoutes);
 
 import SwaggerUI from 'swagger-ui-express';
 app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(openapiSpecification));
 
-import verifyToken from './middlewares/verifyToken.auth.js';
+import verifyToken from './middlewares/verifyToken.auth';
 app.use(verifyToken); // Further validation is done inside the middleware to bypass certain routes for token verification
 
 // dis would make sure that all POST requests from the routes below have a validation which is powered by Zod.
-import { globallyVerifyInputFields } from './middlewares/globalInputVerification.js';
+import { globallyVerifyInputFields } from './middlewares/globalInputVerification';
 app.use(globallyVerifyInputFields);
 
-import authRoutes from './routes/auth.routes.js';
+import authRoutes from './routes/auth.routes';
 app.use('/auth', authRoutes);
 
-import usersRoutes from './routes/users.routes.js';
+import usersRoutes from './routes/users.routes';
 app.use('/users', usersRoutes);
 
-import productsRoutes from './routes/products.routes.js';
+import productsRoutes from './routes/products.routes';
 app.use('/products', productsRoutes);
 
-import ordersRoutes from './routes/orders.routes.js';
+import ordersRoutes from './routes/orders.routes';
 app.use('/orders', ordersRoutes);
 
-import paymentsRoutes from './routes/payments.routes.js';
+import paymentsRoutes from './routes/payments.routes';
 app.use('/payments', paymentsRoutes);
 
 // ======================================================================
@@ -56,9 +56,16 @@ app.use('/payments', paymentsRoutes);
 
 import multer from 'multer';
 import { ZodError } from 'zod';
-import { responseWithStatus } from './utils/responses.js';
-import { BadRequestError, ConflictError, ForbiddenError, NotFoundError, UnauthorizedError, UnprocessableContentError } from './utils/errors.js';
-import { openapiSpecification } from './config/swagger.js';
+import { responseWithStatus } from './utils/responses';
+import {
+	BadRequestError,
+	ConflictError,
+	ForbiddenError,
+	NotFoundError,
+	UnauthorizedError,
+	UnprocessableContentError,
+} from './utils/errors';
+import { openapiSpecification } from './config/swagger';
 
 import jwt from 'jsonwebtoken';
 import Stripe from 'stripe';

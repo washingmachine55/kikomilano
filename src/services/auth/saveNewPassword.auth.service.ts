@@ -1,4 +1,4 @@
-import pool from '../../config/db.ts';
+import pool from '../../config/db';
 import bcrypt from 'bcryptjs';
 
 export default async function saveNewUserPasswordToDB(userEmail = null, userPassword, userId = null) {
@@ -32,7 +32,7 @@ export default async function saveNewUserPasswordToDB(userEmail = null, userPass
 		return userDetails.rows[0];
 	} catch (err) {
 		console.error('Error resetting password for the record in request', err);
-	} 
+	}
 	// finally {
 	// 	conn.release();
 	// }

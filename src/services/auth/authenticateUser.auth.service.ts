@@ -1,27 +1,27 @@
-import pool from '../../config/db.js';
+import pool from '../../config/db';
 import bcrypt from 'bcryptjs';
-import { CASE_EMAIL_CHECK, GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers.js';
+import { CASE_EMAIL_CHECK, GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers';
+import type { QueryResult } from 'pg';
 
-export async function isCredentialsMatching(userEmail, userPassword) {
+export async function isCredentialsMatching(userEmail: string, userPassword: string) {
 	// const conn = await pool.connect();
 
 	try {
-		const credentialsCheck = await pool.query(
-			CASE_EMAIL_CHECK,
-			[userEmail]
-		);
+		const credentialsCheck = await pool.query(CASE_EMAIL_CHECK, [userEmail]);
 
 		let result = credentialsCheck.rows[0].existscheck;
 
 		try {
 			if (result === true) {
-				const getHashedPasswordFromDB = await pool.query(
+				const getHashedPasswordFromDB: QueryResult<any> = await pool.query(
 					'SELECT password_hash FROM tbl_users WHERE email = $1;',
 					[userEmail]
 				);
 
 				const hashedPasswordFromDB = Object.values(getHashedPasswordFromDB.rows[0])[0];
-				const bcryptResult = await bcrypt.compare(userPassword, hashedPasswordFromDB);
+				const bcryptResult = await bcrypt.compare(userPassword, hashedPasswordFromDB).catch((err) => {
+					throw new Error("Error occurred while trying to encrypt user's password", { cause: err });
+				});
 
 				if (bcryptResult === true) {
 					return true;
@@ -33,23 +33,22 @@ export async function isCredentialsMatching(userEmail, userPassword) {
 			}
 		} catch (error) {
 			console.debug('An error occurred', error);
+			throw new Error('An error occurred', { cause: error });
 		}
 	} catch (err) {
 		console.debug('Error reading record:', err);
-	} 
+		throw new Error('An error occurred', { cause: err });
+	}
 	// finally {
 	// 	// conn.release();
 	// }
 }
 
-export async function getUserId(userEmail, userPassword) {
+export async function getUserId(userEmail: string, userPassword: string) {
 	// const conn = await pool.connect();
 
 	try {
-		const credentialsCheck = await pool.query(
-			CASE_EMAIL_CHECK,
-			[userEmail]
-		);
+		const credentialsCheck = await pool.query(CASE_EMAIL_CHECK, [userEmail]);
 
 		let result = credentialsCheck.rows[0].existscheck;
 
@@ -63,10 +62,7 @@ export async function getUserId(userEmail, userPassword) {
 				const bcryptResult = await bcrypt.compare(userPassword, hashedPasswordFromDB);
 
 				if (bcryptResult == true) {
-					const credentialsCheck = await pool.query(
-						GET_ALL_USER_DETAILS_BY_EMAIL,
-						[userEmail]
-					);
+					const credentialsCheck = await pool.query(GET_ALL_USER_DETAILS_BY_EMAIL, [userEmail]);
 					let result = credentialsCheck.rows[0];
 					return result;
 				} else {
@@ -80,7 +76,7 @@ export async function getUserId(userEmail, userPassword) {
 		}
 	} catch (err) {
 		console.debug('Error reading record:', err);
-	} 
+	}
 	// finally {
 	// 	conn.release();
 	// }

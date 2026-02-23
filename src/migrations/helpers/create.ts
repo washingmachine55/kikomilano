@@ -1,4 +1,4 @@
-import pool from '../../config/db.ts';
+import pool from '../../config/db';
 import { CREATE_DATABASE_FILE_PATH } from '../../config/env-config.ts';
 import { readTextFile } from '../../utils/readFile.ts';
 

@@ -1,20 +1,17 @@
-import { TZDate } from '@date-fns/tz';
-import pool from '../../config/db.ts';
-import { CASE_EMAIL_CHECK } from '../../providers/commonQueries.providers.ts';
-export async function verifyOTPFromDB(userEmail, userOTP) {
+// import { TZDate } from '@date-fns/tz';
+import pool from '../../config/db';
+import { CASE_EMAIL_CHECK } from '../../providers/commonQueries.providers';
+export async function verifyOTPFromDB(userEmail: string, userOTP: number) {
 	// const conn = await pool.connect();
 
 	try {
-		const emailCheck = await pool.query(
-			CASE_EMAIL_CHECK,
-			[userEmail]
-		);
+		const emailCheck = await pool.query(CASE_EMAIL_CHECK, [userEmail]);
 		let emailCheckResult = emailCheck.rows[0].existscheck;
 		if (emailCheckResult === false) {
 			return false;
 		} else {
-			let currentTimestamp = new Date();
-			const currentTimestampISO = currentTimestamp.toISOString().replace('T', ' ').replace('Z', '');
+			// let currentTimestamp = new Date();
+			// const currentTimestampISO = currentTimestamp.toISOString().replace('T', ' ').replace('Z', '');
 			// FOR TESTING, REMOVE LATER
 			if (userOTP == 112233) {
 				return true;
@@ -40,7 +37,8 @@ export async function verifyOTPFromDB(userEmail, userOTP) {
 		}
 	} catch (err) {
 		console.error('Error checking otp:', err);
-	} 
+		throw new Error('Error checking otp', { cause: err });
+	}
 	// finally {
 	// 	conn.release();
 	// }
