@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-// import { PGDATABASE, PGHOST, PGPASSWORD, PGPORT, PGUSER } from './env-config.ts';
+// import { PGDATABASE, PGHOST, PGPASSWORD, PGPORT, PGUSER } from './env-config.js';
 
 const pool = new Pool({
 	// host: PGHOST, // The service name, not 'localhost'

@@ -1,13 +1,13 @@
-import pool from '../../config/db.js';
+import pool from '@config/db.js';
 import { NotFoundError } from '../../utils/errors.js';
 import { getAllCategoriesDetails } from '../categories/getAll.categories.service.js';
 
-export async function getAllProductsDetails(categoriesName) {
+export async function getAllProductsDetails(categoriesName: string | undefined = undefined) {
 	// const conn = await pool.connect();
 
-	const allAvailableCategories = await getAllCategoriesDetails();
-	const allCategories = [];
-	allAvailableCategories.forEach((element) => {
+	const allAvailableCategories: Array<string> = await getAllCategoriesDetails();
+	const allCategories: string[] = [];
+	allAvailableCategories.forEach((element: any) => {
 		allCategories.push(element.name.toLowerCase());
 	});
 
@@ -25,7 +25,7 @@ export async function getAllProductsDetails(categoriesName) {
 					WHERE pv.main = TRUE AND lower(cg.name) = lower('${categoriesName.toLowerCase()}')
 					ORDER BY p.id ASC
 				;`);
-				return result.rows;
+				result.rows;
 			}
 		} else {
 			const result = await pool.query(`
@@ -38,13 +38,10 @@ export async function getAllProductsDetails(categoriesName) {
 				WHERE pv.main = TRUE
 				ORDER BY p.id ASC
 			;`);
-			return result.rows;
+			result.rows;
 		}
 	} catch (err) {
 		console.error('Error reading record:', err);
 		throw new NotFoundError('Error getting all products', { cause: err });
-	} 
-	// finally {
-	// 	conn.release();
-	// }
+	}
 }

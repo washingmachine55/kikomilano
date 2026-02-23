@@ -1,7 +1,11 @@
 import express from 'express';
 const router = express.Router();
 
-import { createPayment, handlePaymentIntentSucceeded, handlePaymentMethodAttached } from '../controllers/payments.controller.js';
+import {
+	createPayment,
+	handlePaymentIntentSucceeded,
+	handlePaymentMethodAttached,
+} from '@controllers/payments.controller';
 
 router.post('/new', createPayment);
 router.post('/confirm', handlePaymentIntentSucceeded);

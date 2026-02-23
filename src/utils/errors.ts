@@ -5,9 +5,9 @@ import type { NextFunction, Response, Request } from 'express';
  *  @param {Function} func - Async function which passes errors to the GEH middleware
  *  @returns null
  */
-export const attempt = async (func: Function) => {
+export const attempt = (func: (req: Request, res: Response, next: NextFunction) => Promise<void>) => {
 	return (req: Request, res: Response, next: NextFunction) => {
-		func(res, req, next).catch((err: Error) => next(err));
+		func(req, res, next).catch((err: Error) => next(err));
 	};
 };
 
@@ -16,11 +16,11 @@ export const attempt = async (func: Function) => {
  * @param {Async} promise } promise
  * @returns Array of either a resolved promise, or an error
  */
-export const trialCapture = async (promise: Promise<Function>) => {
+export const trialCapture = async (promise: Promise<any>) => {
 	try {
-		const result = await promise
+		const result: Promise<void> = await promise;
 		return [result, null];
-	} catch (error) {
+	} catch (error: Error<any>) {
 		console.log(error);
 		return [null, error];
 	}

@@ -1,9 +1,9 @@
-import pool from '../../config/db';
+import pool from '@config/db';
 
 import { TZDate } from '@date-fns/tz';
 import { formatDate, formatDistance } from 'date-fns';
-import transporter from '../../config/mailTransporter.ts';
-import { getRandomOTP } from '../../utils/getRandomOTP.ts';
+import transporter from '@config/mailTransporter.js';
+import { getRandomOTP } from '../../utils/getRandomOTP.js';
 import { GET_USER_ID_FROM_EMAIL } from '../../providers/commonQueries.providers';
 
 export async function createForgotPasswordEmail(userEmail) {

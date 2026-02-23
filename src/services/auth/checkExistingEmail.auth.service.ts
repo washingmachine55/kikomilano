@@ -1,4 +1,4 @@
-import pool from '../../config/db';
+import pool from '@config/db';
 import { CASE_EMAIL_CHECK } from '../../providers/commonQueries.providers';
 
 export async function checkExistingEmail(request) {

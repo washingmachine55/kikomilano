@@ -1,4 +1,4 @@
-import pool from '../../config/db.js';
+import pool from '@config/db.js';
 import { GET_ALL_USER_DETAILS_BY_ID } from '../../providers/commonQueries.providers.js';
 import { RecordCheck } from '../../providers/recordChecks.providers.js';
 import { BadRequestError, NotFoundError, trialCapture } from '../../utils/errors.js';
@@ -101,10 +101,7 @@ export const editUserDetails = async (fieldsToUpdate, verifiedUserId) => {
 		}
 	}
 
-	const result = await pool.query(
-		GET_ALL_USER_DETAILS_BY_ID,
-		[verifiedUserId]
-	);
+	const result = await pool.query(GET_ALL_USER_DETAILS_BY_ID, [verifiedUserId]);
 
 	// conn.release();
 	return result.rows[0];

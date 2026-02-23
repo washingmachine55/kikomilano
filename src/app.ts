@@ -6,7 +6,7 @@ import compression from 'compression';
 const app: Application = express();
 
 // Running Stripe's webhook before any of the other middlewares and routes, to ensure that no parsing/modification is done of the received data as Stripe requires payload to be provided as a string or a Buffer
-import webhookRoutes from './routes/webhook.routes';
+import webhookRoutes from '@routes/webhook.routes';
 app.use('/webhook', webhookRoutes);
 
 app.set('query parser', 'simple');
@@ -22,32 +22,32 @@ app.use(
 // ======================================================================
 // ================  All da Routes for da flutes  =======================
 // ======================================================================
-import staticRoutes from './routes/static.routes';
+import staticRoutes from '@routes/static.routes';
 app.use('/static', staticRoutes);
 
 import SwaggerUI from 'swagger-ui-express';
 app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(openapiSpecification));
 
-import verifyToken from './middlewares/verifyToken.auth';
+import verifyToken from '@middlewares/verifyToken.auth';
 app.use(verifyToken); // Further validation is done inside the middleware to bypass certain routes for token verification
 
 // dis would make sure that all POST requests from the routes below have a validation which is powered by Zod.
-import { globallyVerifyInputFields } from './middlewares/globalInputVerification';
+import { globallyVerifyInputFields } from '@middlewares/globalInputVerification';
 app.use(globallyVerifyInputFields);
 
-import authRoutes from './routes/auth.routes';
+import authRoutes from '@routes/auth.routes';
 app.use('/auth', authRoutes);
 
-import usersRoutes from './routes/users.routes';
+import usersRoutes from '@routes/users.routes';
 app.use('/users', usersRoutes);
 
-import productsRoutes from './routes/products.routes';
+import productsRoutes from '@routes/products.routes';
 app.use('/products', productsRoutes);
 
-import ordersRoutes from './routes/orders.routes';
+import ordersRoutes from '@routes/orders.routes';
 app.use('/orders', ordersRoutes);
 
-import paymentsRoutes from './routes/payments.routes';
+import paymentsRoutes from '@routes/payments.routes';
 app.use('/payments', paymentsRoutes);
 
 // ======================================================================
@@ -71,7 +71,7 @@ import jwt from 'jsonwebtoken';
 import Stripe from 'stripe';
 const { JsonWebTokenError } = jwt;
 
-app.use((err: multer.MulterError | Error, _req: Request, res: Response, next: NextFunction) => {
+app.use((err: multer.MulterError | Error, req: Request, res: Response, next: NextFunction) => {
 	if (err instanceof multer.MulterError) {
 		if (err.code === 'LIMIT_FILE_SIZE') {
 			return responseWithStatus(

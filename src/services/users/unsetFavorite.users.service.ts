@@ -1,4 +1,4 @@
-import pool from '../../config/db.js';
+import pool from '@config/db.js';
 import { NotFoundError } from '../../utils/errors.js';
 
 export async function deleteProductFavorite(userId, productsVariantsArray) {
@@ -16,7 +16,7 @@ export async function deleteProductFavorite(userId, productsVariantsArray) {
 		}
 	}
 
-	const resultArr = []
+	const resultArr = [];
 	for (let i = 0; i < productsVariantsArray.length; i++) {
 		const element = productsVariantsArray[i];
 		const checkIfPreviouslyFavourited = await pool.query(
@@ -32,9 +32,9 @@ export async function deleteProductFavorite(userId, productsVariantsArray) {
 				'UPDATE tbl_users_products_favorites SET deleted_by = $1, deleted_at = NOW(), status = 0 WHERE users_id = $1 AND products_variants_id = $2 RETURNING *',
 				[userId, element]
 			);
-			resultArr.push(result.rows[0])
+			resultArr.push(result.rows[0]);
 		}
 	}
 
-	return resultArr
+	return resultArr;
 }

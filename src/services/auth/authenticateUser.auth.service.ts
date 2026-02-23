@@ -1,4 +1,4 @@
-import pool from '../../config/db';
+import pool from '@config/db';
 import bcrypt from 'bcryptjs';
 import { CASE_EMAIL_CHECK, GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers';
 import type { QueryResult } from 'pg';

@@ -1,17 +1,16 @@
 import express from 'express';
 import {
-    getSingleUser,
-    editUserProfile,
-    uploadUserProfilePicture,
-    getFavorites,
-    setFavorite,
-    unsetFavorite,
-    getUserAddresses,
-    saveUserAddress,
-    unsetUserAddresses,
-} from '../controllers/users.controller.js';
-import { } from '../controllers/users.controller.js';
-import { uploadImages } from '../config/multer.js';
+	getSingleUser,
+	editUserProfile,
+	uploadUserProfilePicture,
+	getFavorites,
+	setFavorite,
+	unsetFavorite,
+	getUserAddresses,
+	saveUserAddress,
+	unsetUserAddresses,
+} from '@controllers/users.controller';
+import { uploadImages } from '@config/multer';
 const router = express.Router();
 
 /**

@@ -1,5 +1,5 @@
 // import jwt, { type JwtPayload } from 'jsonwebtoken';
-// import { ACCESS_TOKEN_SECRET_KEY } from '../config/env-config.ts';
+// import { ACCESS_TOKEN_SECRET_KEY } from '../config/env-config.js';
 
 // export function verifyUserToken(req, res) {
 // 	const token = req.header('Authorization');

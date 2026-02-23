@@ -1,15 +1,16 @@
-import { getAllProductsDetails } from '../services/products/getAll.products.service.js';
-import { getAllProductsVariants } from '../services/products/getAllVariants.products.service.js';
-import { attempt, NotFoundError } from '../utils/errors.js';
-import { responseWithStatus } from '../utils/responses.js';
+import { getAllProductsDetails } from '@services/products/getAll.products.service.js';
+import { getAllProductsVariants } from '@services/products/getAllVariants.products.service.js';
+import { attempt, NotFoundError } from '@utils/errors.js';
+import { responseWithStatus } from '@utils/responses.js';
+import type { NextFunction, Response, Request } from 'express';
 
-export const getAllProducts = await attempt(async (req, res, next) => {
+export const getAllProducts = attempt(async (req: Request, res: Response, _next: NextFunction) => {
 	if (req.query.category !== undefined) {
-		const result = await getAllProductsDetails(req.query.category);
+		const result = await getAllProductsDetails(req.query['category']);
 		if (!result) {
-			return await responseWithStatus(res, 1, 404, 'That category does not exist.');
+			await responseWithStatus(res, 1, 404, 'That category does not exist.');
 		} else {
-			return await responseWithStatus(
+			await responseWithStatus(
 				res,
 				1,
 				200,
@@ -19,13 +20,13 @@ export const getAllProducts = await attempt(async (req, res, next) => {
 		}
 	} else {
 		const result = await getAllProductsDetails();
-		return await responseWithStatus(res, 1, 200, 'Details of all available products.', {
+		await responseWithStatus(res, 1, 200, 'Details of all available products.', {
 			products_details: result,
 		});
 	}
 });
 
-export const getAllProductVariants = await attempt(async (req, res, next) => {
+export const getAllProductVariants = attempt(async (req: Request, res: Response, _next: NextFunction) => {
 	// const parsedParam = req.params.productId.trim()
 
 	const result = await getAllProductsVariants(req.params.productId);
@@ -35,6 +36,6 @@ export const getAllProductVariants = await attempt(async (req, res, next) => {
 			'It is likely that the product id does not exist, please recheck the Product ID from the /products endpoint'
 		);
 	} else {
-		return await responseWithStatus(res, 1, 200, 'Details of all available product variants.', result);
+		await responseWithStatus(res, 1, 200, 'Details of all available product variants.', result);
 	}
 });

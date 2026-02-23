@@ -1,6 +1,6 @@
-import pool from '../../config/db';
-import { TRUNCATE_DATABASE_FILE_PATH } from '../../config/env-config.ts';
-import { readTextFile } from '../../utils/readFile.ts';
+import pool from '@config/db.js';
+import { TRUNCATE_DATABASE_FILE_PATH } from '@config/env-config.js';
+import { readTextFile } from '../../utils/readFile.js';
 
 (async () => {
 	const client = await pool.connect();

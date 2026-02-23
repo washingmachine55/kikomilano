@@ -1,4 +1,4 @@
-import pool from '../../config/db.js';
+import pool from '@config/db.js';
 import { RecordCheck } from '../../providers/recordChecks.providers.js';
 import { NotFoundError, UnprocessableContentError } from '../../utils/errors.js';
 import format from 'pg-format';

@@ -1,30 +1,13 @@
 {
 	// Visit https://aka.ms/tsconfig to read more about this file
 	"compilerOptions": {
-		// File Layout
 		"rootDir": "./src",
 		"outDir": "./dist",
-
-		// Environment Settings
-		// See also https://aka.ms/tsconfig/module
-		"module": "nodenext",
-		"target": "es2024",
-		// "types": [],
-		// For nodejs:
-		// "lib": ["esnext"],
-		// "types": ["node"],
-		// and npm install -D @types/node
-
-		// Other Outputs
 		"sourceMap": true,
 		"declaration": true,
 		"declarationMap": true,
-
-		// Stricter Typechecking Options
 		"noUncheckedIndexedAccess": true,
 		"exactOptionalPropertyTypes": true,
-
-		// Style Options
 		"noImplicitReturns": true,
 		"noImplicitOverride": true,
 		"noUnusedLocals": true,
@@ -34,19 +17,30 @@
 		"noEmit": false,
 		"emitDeclarationOnly": false,
 		"allowImportingTsExtensions": false,
-
-		// Recommended Options
 		"allowJs": true,
 		"strict": true,
 		"verbatimModuleSyntax": true,
 		"isolatedModules": true,
 		"noUncheckedSideEffectImports": true,
 		"esModuleInterop": true,
-		"moduleDetection": "auto",
-		"moduleResolution": "nodenext",
+		"moduleDetection": "force",
+		"target": "ES2023",
+		"module": "es2022",
+		"moduleResolution": "node",
 		"skipLibCheck": true,
-		"typeRoots": ["./src/types", "./node_modules/@types"]
+		"typeRoots": ["./src/types", "./node_modules/@types"],
+		"baseUrl": ".",
+		"paths": {
+			"@config/*": ["src/config/*"],
+			"@controllers/*": ["src/controllers/*"],
+			"@routes/*": ["src/routes/*"],
+			"@services/*": ["src/services/*"],
+			"@middlewares/*": ["src/middlewares/*"],
+			"@utils/*": ["src/utils/*"],
+			"@providers/*": ["src/providers/*"],
+			"@migrations/*": ["src/migrations/*"]
+		}
 	},
-	"include": ["src/**/*"],
+	"include": ["src/**/*", "src/*"],
 	"exclude": ["node_modules", "dist", "test"]
 }

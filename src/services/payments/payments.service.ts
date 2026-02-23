@@ -1,4 +1,4 @@
-import pool from '../../config/db.js';
+import pool from '@config/db.js';
 
 export const savePaymentInfo = async (paymentIntent, orderDetails) => {
 	// const conn = await pool.connect();

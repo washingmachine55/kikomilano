@@ -7,7 +7,7 @@ import {
 	resetPassword,
 	verifyOTP,
 	verifyUserToken,
-} from '../controllers/auth.controller';
+} from '@controllers/auth.controller';
 const router = express.Router();
 
 /**

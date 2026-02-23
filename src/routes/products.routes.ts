@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllProducts, getAllProductVariants } from '../controllers/products.controller.js';
+import { getAllProducts, getAllProductVariants } from '@controllers/products.controller';
 import { validateUuidUrlParam } from '../middlewares/parseUUIDs.js';
 const router = express.Router();
 

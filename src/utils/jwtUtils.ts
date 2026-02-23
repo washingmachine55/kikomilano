@@ -14,7 +14,7 @@ export function signJwtAsync(payload: JwtPayload, secret: string, options: SignO
 		jwt.sign(payload, secret, options, (err, token) => {
 			if (err) {
 				reject(err);
-				throw new JsonWebTokenError('Unable to sign JWTl', err);
+				throw new JsonWebTokenError('Unable to sign JWT', err);
 			} else {
 				resolve(token);
 			}

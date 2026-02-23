@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import express from 'express';
 import { env, loadEnvFile } from 'node:process';
-import { handlePaymentIntentSucceeded, handlePaymentMethodAttached } from '../controllers/payments.controller.js';
+import { handlePaymentIntentSucceeded, handlePaymentMethodAttached } from '@controllers/payments.controller';
 loadEnvFile();
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);

@@ -1,6 +1,6 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import packageJson from '../../package.json' with { type: 'json' };
-import { APP_NAME, BASE_URL } from './env-config.ts';
+import { APP_NAME, BASE_URL } from './env-config.js';
 
 const options = {
 	definition: {
@@ -12,13 +12,13 @@ const options = {
 		},
 		servers: [
 			{
-				url: "https://kikomilano.devmindsstudio.co",
-				description: "Staging server"
+				url: 'https://kikomilano.devmindsstudio.co',
+				description: 'Staging server',
 			},
 			{
-				url: "http://localhost:3000",
-				description: "Local server"
-			}
+				url: 'http://localhost:3000',
+				description: 'Local server',
+			},
 		],
 		host: BASE_URL,
 		basePath: '/',
@@ -58,7 +58,7 @@ const options = {
 			},
 		],
 	},
-	apis: ['./src/routes/**.ts', '../app.ts'],
+	apis: ['./src/routes/**.js', '../app.js'],
 };
 
 export const openapiSpecification = swaggerJsdoc(options);
