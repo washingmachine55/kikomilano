@@ -1,19 +1,26 @@
 import {
 	getUserId as getUserIdAndAllDetails,
 	isCredentialsMatching,
-} from '../services/auth/authenticateUser.auth.service.js';
-import { checkExistingEmail, checkExistingEmail_v2 } from '../services/auth/checkExistingEmail.auth.service.js';
-import registerUserToDatabase from '../services/auth/registerUser.auth.service.js';
-import { responseWithStatus } from '../utils/responses.js';
-import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service.js';
-import { verifyOTPFromDB } from '../services/auth/verifyOTP.auth.service.js';
-import saveNewUserPasswordToDB from '../services/auth/saveNewPassword.auth.service.js';
-import { signJwtAsync, verifyJwtAsync } from '../utils/jwtUtils.js';
-import { attempt, BadRequestError, ForbiddenError, trialCapture, UnauthorizedError } from '../utils/errors.js';
-import { env, loadEnvFile } from 'node:process';
-loadEnvFile();
+} from '../services/auth/authenticateUser.auth.service.ts';
+import { checkExistingEmail_v2 } from '../services/auth/checkExistingEmail.auth.service.ts';
+import registerUserToDatabase from '../services/auth/registerUser.auth.service.ts';
+import { responseWithStatus } from '../utils/responses.ts';
+import { createForgotPasswordEmail } from '../services/auth/createForgotPasswordEmail.auth.service.ts';
+import { verifyOTPFromDB } from '../services/auth/verifyOTP.auth.service.ts';
+import saveNewUserPasswordToDB from '../services/auth/saveNewPassword.auth.service.ts';
+import { signJwtAsync, verifyJwtAsync } from '../utils/jwtUtils.ts';
+import { attempt, BadRequestError, ForbiddenError, trialCapture, UnauthorizedError } from '../utils/errors.ts';
+import type { NextFunction, Request, Response } from 'express';
+import { 
+	ACCESS_TOKEN_SECRET_KEY,
+	ACCESS_TOKEN_EXPIRATION_TIME,
+	REFRESH_TOKEN_SECRET_KEY,
+	REFRESH_TOKEN_EXPIRATION_TIME,
+	TEMPORARY_TOKEN_SECRET_KEY,
+	TEMPORARY_TOKEN_EXPIRATION_TIME 
+} from '../config/env-config.ts';
 
-export const registerUser = await attempt(async (req, res, next) => {
+export const registerUser = await attempt(async (req: Request, res: Response, next: NextFunction) => {
 	const request = Object.values(req.body.data);
 	const userName = request[0];
 	const userEmail = request[1];
@@ -24,18 +31,18 @@ export const registerUser = await attempt(async (req, res, next) => {
 	// --------------------------------------------------------------------------- //
 	const existingEmailCheck = await checkExistingEmail_v2(userEmail);
 	if (existingEmailCheck === true) {
-		throw new ForbiddenError('Cant register user as user email already exists. Please sign in instead');
+		throw new ForbiddenError('Cant register user as user email already exists. Please sign in instead', "unable to wables");
 	} else {
 		// --------------------------------------------------------------------------- //
 		// Save User details to Database if all checks are cleared
 		// --------------------------------------------------------------------------- //
 		const entryArray = [userName, userEmail, userPassword];
 		const userRegistrationResult = await registerUserToDatabase(entryArray);
-		const accessToken = await signJwtAsync({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
-			expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
+		const accessToken = await signJwtAsync({ id: userRegistrationResult.id }, ACCESS_TOKEN_SECRET_KEY, {
+			expiresIn: `${Number(ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
 		});
-		const refreshToken = await signJwtAsync({ id: userRegistrationResult.id }, env.REFRESH_TOKEN_SECRET_KEY, {
-			expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
+		const refreshToken = await signJwtAsync({ id: userRegistrationResult.id }, REFRESH_TOKEN_SECRET_KEY, {
+			expiresIn: `${Number(REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 		});
 
 		return await responseWithStatus(res, 1, 201, 'Sign Up successful!', {
@@ -46,7 +53,7 @@ export const registerUser = await attempt(async (req, res, next) => {
 	}
 });
 
-export const loginUser = await attempt(async (req, res) => {
+export const loginUser = await attempt(async (req: Request, res: Response,) => {
 	const userEmail = req.body.data.email;
 	const userPassword = req.body.data.password;
 	// --------------------------------------------------------------------------- //
@@ -60,11 +67,11 @@ export const loginUser = await attempt(async (req, res) => {
 		const credentialMatchingResult = await isCredentialsMatching(userEmail, userPassword);
 		if (credentialMatchingResult == true) {
 			const userDetails = await getUserIdAndAllDetails(userEmail, userPassword);
-			const accessToken = await signJwtAsync({ id: userDetails.id }, env.ACCESS_TOKEN_SECRET_KEY, {
-				expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
+			const accessToken = await signJwtAsync({ id: userDetails.id }, ACCESS_TOKEN_SECRET_KEY, {
+				expiresIn: `${Number(ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
 			});
-			const refreshToken = await signJwtAsync({ id: userDetails.id }, env.REFRESH_TOKEN_SECRET_KEY, {
-				expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
+			const refreshToken = await signJwtAsync({ id: userDetails.id }, REFRESH_TOKEN_SECRET_KEY, {
+				expiresIn: `${Number(REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 			});
 
 			return await responseWithStatus(res, 1, 200, 'Sign in successful!', {
@@ -80,13 +87,13 @@ export const loginUser = await attempt(async (req, res) => {
 	}
 });
 
-export async function verifyUserToken(req, res) {
+export async function verifyUserToken(req: Request, res: Response) {
 	if (!req.header('Authorization')) {
 		return responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please login.');
 	} else {
-		const token = req.header('Authorization').split(' ')[1];
+		const token: string = req.header('Authorization')!.split(' ')[1];
 		try {
-			const verified = await verifyJwtAsync(token, env.ACCESS_TOKEN_SECRET_KEY);
+			const verified: Promise<Function> = await verifyJwtAsync(token, ACCESS_TOKEN_SECRET_KEY);
 			const userId = verified.id;
 			return await responseWithStatus(res, 1, 200, 'Token Verified Successfully', { user_id: `${userId}` });
 		} catch (err) {
@@ -95,30 +102,31 @@ export async function verifyUserToken(req, res) {
 	}
 }
 
-export async function refreshToken(req, res) {
+export async function refreshToken(req: Request, res: Response,) {
 	if (req.header('Authorization')) {
-		const refreshToken = req.header('Authorization').split(' ')[1];
-		// await verifyJwtAsync(refreshToken, env.REFRESH_TOKEN_SECRET_KEY, (err, decoded) => {
-		const [token, err] = await trialCapture(await verifyJwtAsync(refreshToken, env.REFRESH_TOKEN_SECRET_KEY));
+		const refreshToken: string | undefined = req.header('Authorization')!.split(' ')[1];
+		// await verifyJwtAsync(refreshToken, REFRESH_TOKEN_SECRET_KEY, (err, decoded) => {
+		const [token, err] = await trialCapture(await verifyJwtAsync(refreshToken, REFRESH_TOKEN_SECRET_KEY));
 		if (err) {
-			return responseWithStatus(res, 0, 401, 'Unauthorized. Invalid refresh token.', { error: err });
+			// return responseWithStatus(res, 0, 401, 'Unauthorized. Invalid refresh token.', { error: err });
+			return responseWithStatus(res, 0, 401, 'Unauthorized. Invalid refresh token.');
 		} else {
 			const accessToken = await signJwtAsync(
 				{
 					id: token.id,
 				},
-				env.ACCESS_TOKEN_SECRET_KEY,
+				ACCESS_TOKEN_SECRET_KEY,
 				{
-					expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
+					expiresIn: `${Number(ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
 				}
 			);
 			const refreshToken = await signJwtAsync(
 				{
 					id: token.id,
 				},
-				env.REFRESH_TOKEN_SECRET_KEY,
+				REFRESH_TOKEN_SECRET_KEY,
 				{
-					expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
+					expiresIn: `${Number(REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 				}
 			);
 			return responseWithStatus(res, 1, 201, 'Tokens refreshed successfully', {
@@ -131,44 +139,7 @@ export async function refreshToken(req, res) {
 	}
 }
 
-// async function verifyUserAccess(req, res) {
-// 	const token = req.header('Authorization');
-// 	if (!token) return res.status(401).send('Access Denied');
-
-// 	try {
-// 		const verified = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
-// 		const userId = verified.id;
-
-// 		const isVerified = await verifyUserAccessFromDatabase(userId)
-
-// 		if (isVerified == true) {
-// 			return res.status(200).json([
-// 				{
-// 					type: 'success',
-// 					message: 'Verified Token',
-// 					is_verified: 'true',
-// 				},
-// 				{ user_id: userId },
-// 				{ Authorization: token },
-// 			]);
-// 		} else {
-// 			return res.status(200).json([
-// 				{
-// 					type: 'error',
-// 					message: 'You have not verified your account. Please verify your account before trying again.',
-// 					is_verified: 'false',
-// 				},
-// 				{ user_id: userId },
-// 				{ Authorization: token },
-// 			]);
-// 		}
-// 	} catch (err) {
-// 		res.status(400).send('Invalid Token. Please login.' + err);
-// 	}
-
-// }
-
-export const forgotPassword = await attempt(async (req, res) => {
+export const forgotPassword = await attempt(async (req: Request, res: Response,) => {
 	const userEmail = Object.values(req.body.data).toString();
 
 	const existingEmailCheck = await checkExistingEmail_v2(userEmail);
@@ -185,7 +156,7 @@ export const forgotPassword = await attempt(async (req, res) => {
 	}
 });
 
-export async function verifyOTP(req, res) {
+export async function verifyOTP(req: Request, res: Response,) {
 	const userEmail = req.body.data.email;
 	const userOTP = req.body.data.otp;
 
@@ -193,8 +164,8 @@ export async function verifyOTP(req, res) {
 	try {
 		if (result === true) {
 			const [tempToken, err] = await trialCapture(
-				await signJwtAsync({ id: userEmail }, env.TEMPORARY_TOKEN_SECRET_KEY, {
-					expiresIn: `${Number(env.TEMPORARY_TOKEN_EXPIRATION_TIME)}MINS`,
+				await signJwtAsync({ id: userEmail }, TEMPORARY_TOKEN_SECRET_KEY, {
+					expiresIn: `${Number(TEMPORARY_TOKEN_EXPIRATION_TIME)}MINS`,
 				})
 			);
 			if (err) {
@@ -213,17 +184,16 @@ export async function verifyOTP(req, res) {
 	}
 }
 
-export const resetPassword = await attempt(async (req, res, next) => {
+export const resetPassword = await attempt(async (req: Request, res: Response) => {
 	if (!req.header('Authorization')) {
 		return responseWithStatus(res, 0, 401, 'Unauthorized. Access Denied. Please request another OTP.');
 	} else {
 		const token = req.header('Authorization').split(' ')[1];
 		const userEmail = req.body.data.email;
 		const userPassword = req.body.data.password;
-		const userConfirmedPassword = req.body.data.confirmed_password;
 
 		const [tempTokenResult, tempTokenError] = await trialCapture(
-			await verifyJwtAsync(token, env.TEMPORARY_TOKEN_SECRET_KEY)
+			await verifyJwtAsync(token, TEMPORARY_TOKEN_SECRET_KEY)
 		);
 		if (tempTokenResult.id !== userEmail) {
 			throw new BadRequestError('Nice try lol');
@@ -236,14 +206,14 @@ export const resetPassword = await attempt(async (req, res, next) => {
 			await saveNewUserPasswordToDB(userEmail, userPassword)
 		);
 		if (userRegistrationError) {
-			return BadRequestError('Request failed, Email must be faulty');
+			throw new BadRequestError('Request failed, Email must be faulty');
 		}
 
-		const accessToken = await signJwtAsync({ id: userRegistrationResult.id }, env.ACCESS_TOKEN_SECRET_KEY, {
-			expiresIn: `${Number(env.ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
+		const accessToken = await signJwtAsync({ id: userRegistrationResult.id }, ACCESS_TOKEN_SECRET_KEY, {
+			expiresIn: `${Number(ACCESS_TOKEN_EXPIRATION_TIME)}MINS`,
 		});
-		const refreshToken = await signJwtAsync({ id: userRegistrationResult.id }, env.REFRESH_TOKEN_SECRET_KEY, {
-			expiresIn: `${Number(env.REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
+		const refreshToken = await signJwtAsync({ id: userRegistrationResult.id }, REFRESH_TOKEN_SECRET_KEY, {
+			expiresIn: `${Number(REFRESH_TOKEN_EXPIRATION_TIME)}MINS`,
 		});
 		return await responseWithStatus(res, 1, 201, 'Password Reset successful!', {
 			user_details: userRegistrationResult,

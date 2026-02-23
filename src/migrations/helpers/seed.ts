@@ -1,6 +1,9 @@
+// Version 4
+
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
-import pool from '../../config/db.js';
+import pool from '../../config/db.ts';
+import type { PoolClient, QueryConfig } from 'pg';
 
 /* =========================
 	CONFIG
@@ -13,7 +16,7 @@ const SCALE = {
 	ORDERS_PER_USER: { min: 0, max: 5 },
 };
 
-const SOFT_DELETE_RATE = 0.05; // 5%
+// const SOFT_DELETE_RATE = 0.05; // 5%
 const SALT_ROUNDS = 10;
 
 // Optional determinism (you can remove this line if you want pure randomness)
@@ -22,18 +25,18 @@ faker.seed(42);
 /* =========================
 	HELPERS
 ========================= */
-const maybeSoftDelete = () =>
-	Math.random() < SOFT_DELETE_RATE
-		? {
-				deleted_at: faker.date.past(),
-				deleted_by: null,
-				status: 1,
-			}
-		: { deleted_at: null, deleted_by: null, status: 0 };
+// const maybeSoftDelete = () =>
+// 	Math.random() < SOFT_DELETE_RATE
+// 		? {
+// 				deleted_at: faker.date.past(),
+// 				deleted_by: null,
+// 				status: 1,
+// 			}
+// 		: { deleted_at: null, deleted_by: null, status: 0 };
 
-const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const pick = (arr: Array<any>) => arr[Math.floor(Math.random() * arr.length)];
 
-async function insert(client, sql, params) {
+async function insert(client: PoolClient, sql: QueryConfig<String> | string, params: QueryConfig<Array<any>> | any) {
 	const { rows } = await client.query(sql, params);
 	return rows[0];
 }
@@ -45,6 +48,15 @@ async function insert(client, sql, params) {
 	const client = await pool.connect();
 
 	try {
+		const isSeededAlready = await pool.query('SELECT COUNT(id) FROM tbl_categories').catch(err => {
+			console.log(err);
+			throw new Error("Unable to seed", { cause: err });
+		})
+
+		if (isSeededAlready.rows[0].count > 0) {
+			throw new Error("Seed not required", { cause: 'not-required' });
+		}
+
 		await client.query('BEGIN');
 
 		await client.query("INSERT INTO tbl_categories(name) VALUES('FACE'), ('HAIR'), ('SKIN'), ('BODY')");
@@ -63,18 +75,15 @@ async function insert(client, sql, params) {
 		const avArray = [];
 		for (let i = 0; i < 7; i++) {
 			avArray.push(faker.color.rgb({ format: 'hex', casing: 'lower' }));
-			const a = await insert(
+			await insert(
 				client,
-				`
-				INSERT INTO tbl_attributes_values(attributes_id, name) VALUES ($1, $2)
-				RETURNING *
-				`,
+				'INSERT INTO tbl_attributes_values(attributes_id, name) VALUES ($1, $2) RETURNING *',
 				[attributesStaticQuery.rows[0].id, avArray[i]]
 			);
 		}
 
 		/* ========= USERS ========= */
-		const users = [];
+		const users: Array<any> = [];
 		const passwordHash = await bcrypt.hash('Password123!', SALT_ROUNDS);
 
 		for (let i = 0; i < SCALE.USERS; i++) {
@@ -100,7 +109,7 @@ async function insert(client, sql, params) {
 		}
 
 		/* ========= ADDRESSES ========= */
-		const addresses = [];
+		const addresses: Array<any> = [];
 		const allowedAddressNames = ['Work', 'Home', 'Office'];
 		for (let i = 0; i < SCALE.USERS; i++) {
 			const a = await insert(
@@ -135,7 +144,7 @@ async function insert(client, sql, params) {
 					VALUES ($1,$2)
 					RETURNING *
 					`,
-					[faker.image.url({ category: 'product' }), pick(users).id]
+					[faker.image.urlPicsumPhotos({ width: 500, height: 500 }), pick(users).id]
 				)
 			);
 		}
@@ -145,16 +154,26 @@ async function insert(client, sql, params) {
 			await client.query(
 				`
 				INSERT INTO tbl_users_details
-				(users_id, first_name, last_name, images_id, addresses_id, created_by)
-				VALUES ($1,$2,$3,$4,$5,$6)
+				(users_id, first_name, last_name, images_id, created_by)
+				VALUES ($1,$2,$3,$4,$5)
 				`,
 				[
 					user.id,
 					faker.person.firstName(),
 					faker.person.lastName(),
 					pick(images).id,
-					pick(addresses).id,
 					user.id,
+				]
+			);
+			await client.query(
+				`
+				INSERT INTO tbl_users_addresses
+				(users_id, addresses_id)
+				VALUES ($1,$2)
+				`,
+				[
+					user.id,
+					pick(addresses).id,
 				]
 			);
 		}
@@ -326,7 +345,7 @@ async function insert(client, sql, params) {
 					RETURNING *
 					`,
 					[
-						faker.company.buzzVerb().padEnd('10', Math.random(Math.floor())),
+						faker.company.buzzVerb().padEnd(10, Math.random().toString()),
 						faker.string.alphanumeric(6).toUpperCase(),
 						faker.number.int({ min: 5, max: 30 }),
 						pick(users).id,
@@ -377,9 +396,13 @@ async function insert(client, sql, params) {
 
 		await client.query('COMMIT');
 		console.log('✅ Seeding completed successfully');
-	} catch (err) {
+	} catch (err: any) {
 		await client.query('ROLLBACK');
-		console.error('❌ Seeding failed:', err);
+		if (err.cause === 'not-required') {
+			console.log('❌ Seeding failed:', err.message);
+		} else {
+			console.error('❌ Seeding failed:', err);
+		}
 	} finally {
 		client.release();
 		process.exit();

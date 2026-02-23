@@ -1,24 +1,24 @@
+import type { NextFunction, Response, Request } from 'express';
 /**
  *  Async wrapper to pass errors to the Global Error Handling (GEH) Middleware
  *  
  *  @param {Function} func - Async function which passes errors to the GEH middleware
  *  @returns null
  */
-export const attempt = async (func) => {
-	return (res, req, next) => {
-		func(res, req, next).catch((err) => next(err));
+export const attempt = async (func: Function) => {
+	return (req: Request, res: Response, next: NextFunction) => {
+		func(res, req, next).catch((err: Error) => next(err));
 	};
 };
 
 /**
- *  TryCatch alternative, inspired by Go
- *  
- *  @param {Async Function} promise
- *  @returns Array of either a resolved promise, or an error
+ * TryCatch alternative, inspired by Go
+ * @param {Async} promise } promise
+ * @returns Array of either a resolved promise, or an error
  */
-export const trialCapture = async (promise) => {
+export const trialCapture = async (promise: Promise<Function>) => {
 	try {
-		const result = await promise;
+		const result = await promise
 		return [result, null];
 	} catch (error) {
 		console.log(error);
@@ -34,9 +34,10 @@ export const trialCapture = async (promise) => {
  *  Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/422
  */
 export class UnprocessableContentError extends Error {
-	constructor(message) {
+	constructor(message: string, details: Error | object | string | undefined = undefined) {
 		super(message); // Call the parent Error constructor
 		this.name = 'Unprocessable Content'; // Set a custom name
+		this.cause = details;
 		this.message = message;
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, UnprocessableContentError);
@@ -53,9 +54,10 @@ export class UnprocessableContentError extends Error {
  *  Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400
  */
 export class BadRequestError extends Error {
-	constructor(message) {
+	constructor(message: string, details: Error | object | string | undefined = undefined) {
 		super(message); // Call the parent Error constructor
 		this.name = 'Bad Request Error'; // Set a custom name
+		this.cause = details;
 		this.message = message;
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, UnprocessableContentError);
@@ -72,7 +74,7 @@ export class BadRequestError extends Error {
  *  Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/409
  */
 export class ConflictError extends Error {
-	constructor(message, details) {
+	constructor(message: string, details: Error | object | string | undefined = undefined) {
 		super(message); // Call the parent Error constructor
 		this.name = 'Conflicting Record'; // Set a custom name
 		this.message = message;
@@ -92,7 +94,7 @@ export class ConflictError extends Error {
  *  Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404
  */
 export class NotFoundError extends Error {
-	constructor(message, details) {
+	constructor(message: string, details: Error | object | string | undefined = undefined)  {
 		super(message); // Call the parent Error constructor
 		this.name = 'Entity not found'; // Set a custom name
 		this.message = message;
@@ -112,7 +114,7 @@ export class NotFoundError extends Error {
  *  Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/403
 */
 export class ForbiddenError extends Error {
-	constructor(message, details) {
+	constructor(message: string, details: Error | object | string | undefined = undefined)  {
 		super(message); // Call the parent Error constructor
 		this.name = 'Forbidden Request'; // Set a custom name
 		this.message = message;
@@ -132,7 +134,7 @@ export class ForbiddenError extends Error {
  *  Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401
  */
 export class UnauthorizedError extends Error {
-	constructor(message, details) {
+	constructor(message: string, details: Error | object | string | undefined = undefined)  {
 		super(message); // Call the parent Error constructor
 		this.name = 'Unauthorized Request'; // Set a custom name
 		this.message = message;

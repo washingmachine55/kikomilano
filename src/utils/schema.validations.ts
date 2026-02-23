@@ -70,7 +70,7 @@ export const UUIDSchema = z.uuidv7({
 	error: (iss) => (iss.input === undefined ? 'Field is required.' : 'Incorrect format, please enter a valid UUID'),
 });
 
-const extractUuidFromString = (input) => {
+const extractUuidFromString = (input: string) => {
 	const match = input.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
 	return match?.[0];
 };
@@ -132,7 +132,7 @@ export const userProfileEditJsonSchema = z
 				data.confirmed_password === ''
 			) {
 				ctx.addIssue({
-					code: 'fields_together_stronger',
+					code: 'custom',
 					path: ['confirmed_password'], // Target the specific field
 					message: 'confirmed_password is required when password is provided.',
 				});

@@ -14,9 +14,9 @@ export async function responseWithStatus(
 	type: number,
 	statusCode: number,
 	message: string,
-	data: Object | undefined
+	data: Object | undefined | null = null
 ) {
-	const resultData: Object | null = !data ? [] : data;
+	const resultData: Object | null | undefined = !data ? [] : data;
 	return res.status(statusCode).type('json').json({
 		status: statusCode,
 		type: type,

@@ -1,6 +1,6 @@
 import { TZDate } from '@date-fns/tz';
-import pool from '../../config/db.js';
-import { CASE_EMAIL_CHECK } from '../../providers/commonQueries.providers.js';
+import pool from '../../config/db.ts';
+import { CASE_EMAIL_CHECK } from '../../providers/commonQueries.providers.ts';
 export async function verifyOTPFromDB(userEmail, userOTP) {
 	// const conn = await pool.connect();
 

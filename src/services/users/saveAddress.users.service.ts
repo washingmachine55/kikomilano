@@ -1,7 +1,7 @@
 import pool from "../../config/db.js"
 import { ConflictError, trialCapture, UnprocessableContentError } from "../../utils/errors.js";
 
-export const saveAddress = async (addressName, addressInfo, userId) => {
+export const saveAddress = async (addressName: string, addressInfo: string, userId: string) => {
 	const conn = await pool.connect()
 
 	const userAddressesCountCheckQuery = await pool.query('SELeCT COUNT(users_id) FROM tbl_users_addresses WHERE users_id = $1', [userId])
@@ -35,7 +35,6 @@ export const saveAddress = async (addressName, addressInfo, userId) => {
 		// }))
 		const [queryUsers, queryUsersError] = await trialCapture(await conn.query('INSERT INTO tbl_users_addresses (addresses_id, users_id) VALUES ($1,$2) RETURNING *', [queryAddress.rows[0].id, userId]).catch(err => {
 			console.debug(err);
-
 			throw new UnprocessableContentError(err.message);
 		}))
 

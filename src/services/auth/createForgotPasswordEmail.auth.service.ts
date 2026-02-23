@@ -1,10 +1,10 @@
-import pool from '../../config/db.js';
+import pool from '../../config/db.ts';
 
 import { TZDate } from '@date-fns/tz';
 import { formatDate, formatDistance } from 'date-fns';
-import transporter from '../../config/mailTransporter.js';
-import { getRandomOTP } from '../../utils/getRandomOTP.js';
-import { GET_USER_ID_FROM_EMAIL } from '../../providers/commonQueries.providers.js';
+import transporter from '../../config/mailTransporter.ts';
+import { getRandomOTP } from '../../utils/getRandomOTP.ts';
+import { GET_USER_ID_FROM_EMAIL } from '../../providers/commonQueries.providers.ts';
 
 export async function createForgotPasswordEmail(userEmail) {
 	const currentTimestamp = new Date();

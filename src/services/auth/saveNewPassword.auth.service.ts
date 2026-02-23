@@ -1,4 +1,4 @@
-import pool from '../../config/db.js';
+import pool from '../../config/db.ts';
 import bcrypt from 'bcryptjs';
 
 export default async function saveNewUserPasswordToDB(userEmail = null, userPassword, userId = null) {

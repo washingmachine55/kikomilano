@@ -1,4 +1,4 @@
-export const nameSplitter = async (nameField) => {
+export const nameSplitter = async (nameField: string) => {
 	const usernameArray = nameField.split(' ');
 	const filteredUsernameArray = usernameArray.filter((word) => word.length >= 1);
 

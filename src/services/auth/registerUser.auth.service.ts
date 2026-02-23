@@ -1,7 +1,7 @@
-import pool from '../../config/db.js';
+import pool from '../../config/db.ts';
 import bcrypt from 'bcryptjs';
-import { SOMETHING_WENT_WRONG_CREATE } from '../../utils/CONSTANTS.js';
-import { GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers.js';
+import { SOMETHING_WENT_WRONG_CREATE } from '../../utils/CONSTANTS.ts';
+import { GET_ALL_USER_DETAILS_BY_EMAIL } from '../../providers/commonQueries.providers.ts';
 
 export default async function registerUserToDatabase(request) {
 	// const conn = await pool.connect();

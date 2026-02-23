@@ -5,7 +5,8 @@ const extraSpacesReGex = RegExp(/\s+/g);
 const trimAndLowerCaseSchema = z.string().trim().toLowerCase();
 
 export class TextModification {
-	constructor(input) {
+	input: string | object | string[];
+	constructor(input: string | object | Array<string>) {
 		this.input = input;
 	}
 

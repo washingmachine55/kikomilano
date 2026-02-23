@@ -53,8 +53,8 @@ const stateWhiteList = [
 	"Wyoming", "WY"
 ]
 
-export const parseSingleAddressLine = async (addressInfo) => {
-	const modifiedAddressInfo = []
+export const parseSingleAddressLine = async (addressInfo: string) => {
+	const modifiedAddressInfo: Array<string> = []
 
 	addressInfo.split(",").forEach(element => {
 		modifiedAddressInfo.push(element.trim())
@@ -62,15 +62,15 @@ export const parseSingleAddressLine = async (addressInfo) => {
 
 	if (!Number(modifiedAddressInfo[0])) {
 		throw new BadRequestError("Address must start with a number (street number)")
-	} else if (modifiedAddressInfo[0].length >= 8) {
+	} else if (modifiedAddressInfo[0]!.length >= 8) {
 		throw new BadRequestError("Street No.  must be less than 8 characters in total")
-	} else if (!stateWhiteList.includes(modifiedAddressInfo[2])) {
+	} else if (!stateWhiteList.includes(modifiedAddressInfo[2]!)) {
 		throw new BadRequestError("Address State after 2nd comma is not a valid state")
 	} 
-	else if (!Number(modifiedAddressInfo[3].split(" ")[1])) {
+	else if (!Number(modifiedAddressInfo[3]!.split(" ")[1])) {
 		throw new BadRequestError("Address Postal/Zip code must be a number")
 	}
-	else if (modifiedAddressInfo[3].split(" ")[1].length !== 5) {
+	else if (modifiedAddressInfo[3]!.split(" ")[1]!.length !== 5) {
 		throw new BadRequestError("Address Postal/Zip code must exactly be 5 numeric characters")
 	}
 	

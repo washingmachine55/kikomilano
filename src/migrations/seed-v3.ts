@@ -1,8 +1,6 @@
-// Version 4
-
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
-import pool from '../../config/db.js';
+import pool from '../config/db.ts';
 
 /* =========================
 	CONFIG
@@ -33,7 +31,7 @@ const maybeSoftDelete = () =>
 			}
 		: { deleted_at: null, deleted_by: null, status: 0 };
 
-const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const pick = (arr: Array<string>) => arr[Math.floor(Math.random() * arr.length)];
 
 async function insert(client, sql, params) {
 	const { rows } = await client.query(sql, params);
@@ -47,15 +45,6 @@ async function insert(client, sql, params) {
 	const client = await pool.connect();
 
 	try {
-		const isSeededAlready = await pool.query('SELECT COUNT(id) FROM tbl_categories').catch(err => {
-			console.log(err);
-			throw new Error("Unable to seed", { cause: err });
-		})
-
-		if (isSeededAlready.rows[0].count > 0) {
-			throw new Error("Seed not required", { cause: 'not-required' });
-		}
-
 		await client.query('BEGIN');
 
 		await client.query("INSERT INTO tbl_categories(name) VALUES('FACE'), ('HAIR'), ('SKIN'), ('BODY')");
@@ -156,26 +145,16 @@ async function insert(client, sql, params) {
 			await client.query(
 				`
 				INSERT INTO tbl_users_details
-				(users_id, first_name, last_name, images_id, created_by)
-				VALUES ($1,$2,$3,$4,$5)
+				(users_id, first_name, last_name, images_id, addresses_id, created_by)
+				VALUES ($1,$2,$3,$4,$5,$6)
 				`,
 				[
 					user.id,
 					faker.person.firstName(),
 					faker.person.lastName(),
 					pick(images).id,
-					user.id,
-				]
-			);
-			await client.query(
-				`
-				INSERT INTO tbl_users_addresses
-				(users_id, addresses_id)
-				VALUES ($1,$2)
-				`,
-				[
-					user.id,
 					pick(addresses).id,
+					user.id,
 				]
 			);
 		}
@@ -400,11 +379,7 @@ async function insert(client, sql, params) {
 		console.log('✅ Seeding completed successfully');
 	} catch (err) {
 		await client.query('ROLLBACK');
-		if (err.cause === 'not-required') {
-			console.log('❌ Seeding failed:', err.message);
-		} else {
-			console.error('❌ Seeding failed:', err);
-		}
+		console.error('❌ Seeding failed:', err);
 	} finally {
 		client.release();
 		process.exit();

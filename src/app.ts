@@ -2,9 +2,7 @@ import { type Application, type NextFunction, type Request, type Response } from
 import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
-import { env, loadEnvFile } from 'node:process';
 
-loadEnvFile();
 const app: Application = express();
 
 // Running Stripe's webhook before any of the other middlewares and routes, to ensure that no parsing/modification is done of the received data as Stripe requires payload to be provided as a string or a Buffer
@@ -64,10 +62,9 @@ import { openapiSpecification } from './config/swagger.js';
 
 import jwt from 'jsonwebtoken';
 import Stripe from 'stripe';
-import stripe from 'stripe';
 const { JsonWebTokenError } = jwt;
 
-app.use((err: multer.MulterError | Error, _req: Request, res: Response) => {
+app.use((err: multer.MulterError | Error, _req: Request, res: Response, next: NextFunction) => {
 	if (err instanceof multer.MulterError) {
 		if (err.code === 'LIMIT_FILE_SIZE') {
 			return responseWithStatus(
@@ -115,8 +112,8 @@ app.use((err: multer.MulterError | Error, _req: Request, res: Response) => {
 		return responseWithStatus(res, 0, 400, err.name, { cause: err });
 	} else {
 		if (err instanceof Stripe.errors.StripeError) {
-			switch (Stripe.errors) {
-				case StripeCardError typeof StripeError:
+			switch (err.type) {
+				case 'StripeCardError':
 					// A declined card error
 					return responseWithStatus(res, 0, 500, err.name, err.message);
 				case 'StripeRateLimitError':

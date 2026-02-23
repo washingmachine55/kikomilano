@@ -7,3 +7,5 @@ backend/security/localhost+2.pem
 src/config/swagger_output.json
 public/images/uploads/*
 swagger_output.json
+.idea
+dist

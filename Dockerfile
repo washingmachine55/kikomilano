@@ -5,4 +5,5 @@ COPY package*.json /app/
 RUN npm install
 COPY . /app/
 
-CMD [ "node", "--env-file=.env", "--no-deprecation", "src/server.js" ]
+# CMD [ "tsx", "--env-file=.env", "--no-deprecation", "watch", "src/server.ts" ]
+CMD [ "npx", "tsx", "watch", "src/server.ts" ]
