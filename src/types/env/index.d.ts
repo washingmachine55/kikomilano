@@ -19,7 +19,7 @@ declare namespace NodeJS {
 		SMTP_USER: string;
 		SMTP_PASS: string;
 		SMTP_HOST: string;
-		SMTP_PORT: string;
+		SMTP_PORT: number;
 		SMTP_SECURE: string;
 		OTP_EXPIRATION_TIME: number;
 		PGUSER: string;
@@ -36,6 +36,11 @@ declare namespace NodeJS {
 		CREATE_DATABASE_FILE_PATH: string;
 		TRUNCATE_DATABASE_FILE_PATH: string;
 		CURRENT_TZ: string;
+		REDIS_USER: string;
+		REDIS_PASSWORD: string;
+		REDIS_DB: string;
+		REDIS_HOST: string;
+		REDIS_PORT: number;
 		// Add other variables here
 	}
 }
